@@ -1,0 +1,23 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+.env
+
+# Django
+staticfiles/
+media/
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
