@@ -7,7 +7,7 @@ import {
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { api } from '../services/api';
+import { api, setAuthToken } from '../services/api';
 import {
   AuthTokens,
   LoginData,
@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await api.post<AuthTokens>('/auth/token/', data);
 
     setTokens(response.data);
+    setAuthToken(response.data.access);
     await AsyncStorage.setItem('tokens', JSON.stringify(response.data));
   }
 
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function logout() {
     setTokens(null);
+    setAuthToken(null);
     await AsyncStorage.removeItem('tokens');
   }
 
