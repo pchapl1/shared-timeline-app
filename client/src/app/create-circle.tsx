@@ -21,7 +21,6 @@ export default function CreateCircleScreen() {
         name,
         circle_type: circleType,
         start_date: startDate,
-        created_by: 1,
       });
 
       router.replace('/circles');
