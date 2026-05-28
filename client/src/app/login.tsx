@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 import {
   View,
@@ -24,7 +25,7 @@ export default function LoginScreen() {
         username,
         password,
       });
-      setMessage('Logged in successfully!');
+      router.replace('/circles');
 
     } catch (error) {
       setMessage('Invalid credentials');
