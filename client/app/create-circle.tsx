@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { router } from 'expo-router';
-import { api } from '../services/api';
+import { api } from '../src/services/api';
 
 export default function CreateCircleScreen() {
   const [name, setName] = useState('');

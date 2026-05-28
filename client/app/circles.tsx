@@ -6,9 +6,12 @@ import {
   StyleSheet,
   FlatList,
 } from 'react-native';
+
 import { Link } from 'expo-router';
 
-import { api } from '../services/api';
+import { api } from '../src/services/api';
+
+import { useAuth } from '../src/context/AuthContext';
 
 type Circle = {
   id: number;
@@ -19,13 +22,18 @@ type Circle = {
 export default function CirclesScreen() {
   const [circles, setCircles] = useState<Circle[]>([]);
 
+  const { tokens, isLoading } = useAuth();
+
   useEffect(() => {
-    fetchCircles();
-  }, []);
+    if (!isLoading && tokens) {
+      fetchCircles();
+    }
+  }, [isLoading, tokens]);
 
   async function fetchCircles() {
     try {
       const response = await api.get('/circles/');
+
       setCircles(response.data);
     } catch (error) {
       console.error(error);
@@ -37,9 +45,13 @@ export default function CirclesScreen() {
       <Text style={styles.title}>
         Your Circles
       </Text>
-        <Link href="/create-circle" style={styles.createLink}>
-          Create Circle
-        </Link>
+
+      <Link
+        href="/create-circle"
+        style={styles.createLink}
+      >
+        Create Circle
+      </Link>
 
       <FlatList
         data={circles}
@@ -80,6 +92,12 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
+  createLink: {
+    color: '#60a5fa',
+    fontSize: 16,
+    marginBottom: 24,
+  },
+
   card: {
     backgroundColor: '#1e293b',
     padding: 20,
@@ -104,9 +122,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
   },
-  createLink: {
-  color: '#60a5fa',
-  fontSize: 16,
-  marginBottom: 24,
-},
 });
