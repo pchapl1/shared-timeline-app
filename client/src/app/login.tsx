@@ -16,6 +16,7 @@ export default function LoginScreen() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
   async function handleLogin() {
     try {
@@ -23,10 +24,10 @@ export default function LoginScreen() {
         username,
         password,
       });
+      setMessage('Logged in successfully!');
 
-      Alert.alert('Success', 'Logged in!');
     } catch (error) {
-      Alert.alert('Error', 'Invalid credentials');
+      setMessage('Invalid credentials');
     }
   }
 
@@ -61,6 +62,11 @@ export default function LoginScreen() {
           Login
         </Text>
       </TouchableOpacity>
+            {message ? (
+        <Text style={styles.message}>
+          {message}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -99,5 +105,11 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  message: {
+    color: '#f97316',
+    marginTop: 12,
+    textAlign: 'center',
   },
 });
