@@ -9,7 +9,7 @@ import {
 
 import { useLocalSearchParams, router } from 'expo-router';
 
-import { api } from '../../src/services/api';
+import { api } from '../../../src/services/api';
 
 type Circle = {
   id: number;
@@ -79,7 +79,10 @@ export default function CircleDetailScreen() {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push(`/circles/${id}/add-memory`)}
+      >
         <Text style={styles.buttonText}>
           Add Memory
         </Text>
