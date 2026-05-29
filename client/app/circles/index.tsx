@@ -5,13 +5,13 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
-import { api } from '../src/services/api';
-
-import { useAuth } from '../src/context/AuthContext';
+import { api } from '../../src/services/api';
+import { useAuth } from '../../src/context/AuthContext';
 
 type Circle = {
   id: number;
@@ -33,7 +33,6 @@ export default function CirclesScreen() {
   async function fetchCircles() {
     try {
       const response = await api.get('/circles/');
-
       setCircles(response.data);
     } catch (error) {
       console.error(error);
@@ -42,14 +41,9 @@ export default function CirclesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        Your Circles
-      </Text>
+      <Text style={styles.title}>Your Circles</Text>
 
-      <Link
-        href="/create-circle"
-        style={styles.createLink}
-      >
+      <Link href="/create-circle" style={styles.createLink}>
         Create Circle
       </Link>
 
@@ -57,7 +51,10 @@ export default function CirclesScreen() {
         data={circles}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push(`/circles/${item.id}`)}
+          >
             <Text style={styles.cardTitle}>
               {item.name}
             </Text>
@@ -65,7 +62,7 @@ export default function CirclesScreen() {
             <Text style={styles.cardSubtitle}>
               {item.circle_type}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
