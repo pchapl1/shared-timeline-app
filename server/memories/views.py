@@ -11,7 +11,7 @@ class MemoryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Memory.objects.filter(
-            circle__members=self.request.user
+            circle__created_by=self.request.user
         ).order_by('-memory_date', '-created_at')
 
     def perform_create(self, serializer):
