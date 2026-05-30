@@ -18,14 +18,25 @@ type Circle = {
   start_date: string;
 };
 
+type Memory = {
+  id: number;
+  title: string;
+  description: string;
+  memory_date: string;
+  location_name: string;
+};
+
 export default function CircleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [circle, setCircle] = useState<Circle | null>(null);
 
+  const [memories, setMemories] = useState<Memory[]>([]);
+
   useEffect(() => {
     if (id) {
       fetchCircle();
+      fetchMemories();
     }
   }, [id]);
 
@@ -48,6 +59,20 @@ export default function CircleDetailScreen() {
       </View>
     );
   }
+
+  async function fetchMemories() {
+  try {
+    const response = await api.get('/memories/');
+
+    const circleMemories = response.data.filter(
+      (memory: Memory & { circle: number }) => memory.circle === Number(id)
+    );
+
+    setMemories(circleMemories);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
   return (
     <View style={styles.container}>
@@ -74,9 +99,19 @@ export default function CircleDetailScreen() {
           Timeline
         </Text>
 
-        <Text style={styles.emptyText}>
-          Memories will appear here.
-        </Text>
+      {memories.length === 0 ? (
+        <Text style={styles.emptyText}>Memories will appear here.</Text>
+      ) : (
+        memories.map((memory) => (
+          <View key={memory.id} style={styles.memoryCard}>
+            <Text style={styles.memoryTitle}>{memory.title}</Text>
+            <Text style={styles.memoryDate}>{memory.memory_date}</Text>
+            {!!memory.description && (
+              <Text style={styles.memoryDescription}>{memory.description}</Text>
+            )}
+          </View>
+        ))
+      )}
       </View>
 
       <TouchableOpacity
@@ -160,4 +195,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+memoryCard: {
+  backgroundColor: '#0f172a',
+  padding: 14,
+  borderRadius: 12,
+  marginBottom: 12,
+},
+
+memoryTitle: {
+  color: '#ffffff',
+  fontSize: 17,
+  fontWeight: '600',
+  marginBottom: 4,
+},
+
+memoryDate: {
+  color: '#94a3b8',
+  fontSize: 13,
+  marginBottom: 8,
+},
+
+memoryDescription: {
+  color: '#cbd5e1',
+  fontSize: 14,
+},
 });
