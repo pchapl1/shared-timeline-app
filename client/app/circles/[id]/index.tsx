@@ -1,15 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   View,
- Text,
+  Text,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
-import { useLocalSearchParams, router } from 'expo-router';
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  router,
+} from 'expo-router';
 
 import { api } from '../../../src/services/api';
+import { useAuth } from '../../../src/context/AuthContext';
+import { MemoryCard } from '../../../src/components/memories/MemoryCard';
 
 type Circle = {
   id: number;
@@ -20,6 +27,7 @@ type Circle = {
 
 type Memory = {
   id: number;
+  circle: number;
   title: string;
   description: string;
   memory_date: string;
@@ -29,109 +37,114 @@ type Memory = {
 export default function CircleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [circle, setCircle] = useState<Circle | null>(null);
+  const { isLoading: authLoading, tokens } = useAuth();
 
+  const [circle, setCircle] = useState<Circle | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
 
   useEffect(() => {
-    if (id) {
+    if (id && !authLoading && tokens) {
       fetchCircle();
       fetchMemories();
     }
-  }, [id]);
+  }, [id, authLoading, tokens]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (id && !authLoading && tokens) {
+        fetchCircle();
+        fetchMemories();
+      }
+    }, [id, authLoading, tokens])
+  );
 
   async function fetchCircle() {
     try {
       const response = await api.get(`/circles/${id}/`);
-
       setCircle(response.data);
     } catch (error) {
       console.error(error);
     }
   }
 
-  if (!circle) {
+  async function fetchMemories() {
+    try {
+      const response = await api.get('/memories/');
+
+      const circleMemories = response.data.filter(
+        (memory: Memory) => memory.circle === Number(id)
+      );
+
+      setMemories(circleMemories);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  if (authLoading || !circle) {
     return (
       <View style={styles.container}>
-        <Text style={styles.loading}>
-          Loading circle...
-        </Text>
+        <Text style={styles.loading}>Loading circle...</Text>
       </View>
     );
   }
-
-  async function fetchMemories() {
-  try {
-    const response = await api.get('/memories/');
-
-    const circleMemories = response.data.filter(
-      (memory: Memory & { circle: number }) => memory.circle === Number(id)
-    );
-
-    setMemories(circleMemories);
-  } catch (error) {
-    console.error(error);
-  }
-}
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.backLink}>
-          ← Back
-        </Text>
-      </TouchableOpacity>
+    <View style={styles.screen}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.backLink}>← Back</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.title}>
-        {circle.name}
-      </Text>
+        <Text style={styles.title}>{circle.name}</Text>
 
-      <Text style={styles.subtitle}>
-        {circle.circle_type}
-      </Text>
+        <Text style={styles.subtitle}>{circle.circle_type}</Text>
 
-      <Text style={styles.date}>
-        Started: {circle.start_date}
-      </Text>
+        <Text style={styles.date}>Started: {circle.start_date}</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          Timeline
-        </Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Timeline</Text>
 
-      {memories.length === 0 ? (
-        <Text style={styles.emptyText}>Memories will appear here.</Text>
-      ) : (
-        memories.map((memory) => (
-          <View key={memory.id} style={styles.memoryCard}>
-            <Text style={styles.memoryTitle}>{memory.title}</Text>
-            <Text style={styles.memoryDate}>{memory.memory_date}</Text>
-            {!!memory.description && (
-              <Text style={styles.memoryDescription}>{memory.description}</Text>
-            )}
-          </View>
-        ))
-      )}
-      </View>
+          {memories.length === 0 ? (
+            <Text style={styles.emptyText}>
+              Memories will appear here.
+            </Text>
+          ) : (
+            memories.map((memory) => (
+              <MemoryCard key={memory.id} memory={memory} />
+            ))
+          )}
+        </View>
+      </ScrollView>
 
       <TouchableOpacity
-        style={styles.button}
+        style={styles.floatingButton}
         onPress={() => router.push(`/circles/${id}/add-memory`)}
       >
-        <Text style={styles.buttonText}>
-          Add Memory
-        </Text>
+        <Text style={styles.floatingButtonText}>＋</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#0f172a',
     paddingTop: 80,
     paddingHorizontal: 24,
+  },
+
+  contentContainer: {
+    paddingBottom: 120,
   },
 
   loading: {
@@ -165,9 +178,6 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    backgroundColor: '#1e293b',
-    padding: 20,
-    borderRadius: 16,
     marginBottom: 24,
   },
 
@@ -175,7 +185,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 22,
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: 16,
   },
 
   emptyText: {
@@ -183,40 +193,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
-  button: {
+  floatingButton: {
+    position: 'absolute',
+    right: 24,
+    bottom: 32,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#2563eb',
-    padding: 16,
-    borderRadius: 12,
+    justifyContent: 'center',
     alignItems: 'center',
   },
 
-  buttonText: {
+  floatingButtonText: {
     color: '#ffffff',
+    fontSize: 34,
+    lineHeight: 38,
     fontWeight: '600',
-    fontSize: 16,
   },
-memoryCard: {
-  backgroundColor: '#0f172a',
-  padding: 14,
-  borderRadius: 12,
-  marginBottom: 12,
-},
-
-memoryTitle: {
-  color: '#ffffff',
-  fontSize: 17,
-  fontWeight: '600',
-  marginBottom: 4,
-},
-
-memoryDate: {
-  color: '#94a3b8',
-  fontSize: 13,
-  marginBottom: 8,
-},
-
-memoryDescription: {
-  color: '#cbd5e1',
-  fontSize: 14,
-},
 });
