@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   View,
   Text,
@@ -7,9 +8,17 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+
+import {
+  router,
+  useLocalSearchParams,
+} from 'expo-router';
+
+import * as ImagePicker from 'expo-image-picker';
 
 import { api } from '../../../src/services/api';
+
+import { createMemory } from '../../../src/services/memories';
 
 export default function AddMemoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,19 +26,33 @@ export default function AddMemoryScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState('');
+  const [image, setImage] = useState<string | null>(null);
+
+  async function pickImage() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  }
 
   async function handleCreateMemory() {
     try {
-      await api.post('/memories/', {
-        circle: Number(id),
+      await createMemory({
+        circleId: String(id),
         title,
         description,
-        memory_date: memoryDate,
+        memoryDate,
+        imageUri: image,
       });
 
       router.back();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error('Create memory error:', error.response?.data || error);
       Alert.alert('Error', 'Could not create memory.');
     }
   }
@@ -67,8 +90,22 @@ export default function AddMemoryScreen() {
         onChangeText={setMemoryDate}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleCreateMemory}>
-        <Text style={styles.buttonText}>Save Memory</Text>
+      <TouchableOpacity
+        style={styles.imageButton}
+        onPress={pickImage}
+      >
+        <Text style={styles.imageButtonText}>
+          {image ? 'Photo Selected ✓' : 'Select Photo'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleCreateMemory}
+      >
+        <Text style={styles.buttonText}>
+          Save Memory
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -81,17 +118,20 @@ const styles = StyleSheet.create({
     paddingTop: 80,
     paddingHorizontal: 24,
   },
+
   backLink: {
     color: '#60a5fa',
     fontSize: 16,
     marginBottom: 24,
   },
+
   title: {
     color: '#ffffff',
     fontSize: 34,
     fontWeight: '700',
     marginBottom: 24,
   },
+
   input: {
     backgroundColor: '#1e293b',
     color: '#ffffff',
@@ -100,10 +140,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
+
   textArea: {
     height: 120,
     textAlignVertical: 'top',
   },
+
+  imageButton: {
+    backgroundColor: '#334155',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
+  imageButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
   button: {
     backgroundColor: '#2563eb',
     padding: 16,
@@ -111,6 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
+
   buttonText: {
     color: '#ffffff',
     fontWeight: '600',

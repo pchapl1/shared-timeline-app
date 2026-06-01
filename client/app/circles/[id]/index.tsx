@@ -32,6 +32,7 @@ type Memory = {
   description: string;
   memory_date: string;
   location_name: string;
+  photo?: string | null;
 };
 
 export default function CircleDetailScreen() {
@@ -71,6 +72,7 @@ export default function CircleDetailScreen() {
     try {
       const response = await api.get('/memories/');
 
+      console.log("Memories: ", response.data);
       const circleMemories = response.data.filter(
         (memory: Memory) => memory.circle === Number(id)
       );

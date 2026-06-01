@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Memory
 from .serializers import MemorySerializer
@@ -8,7 +9,8 @@ from .serializers import MemorySerializer
 class MemoryViewSet(viewsets.ModelViewSet):
     serializer_class = MemorySerializer
     permission_classes = [IsAuthenticated]
-
+    parser_classes = [MultiPartParser, FormParser]
+    
     def get_queryset(self):
         return Memory.objects.filter(
             circle__created_by=self.request.user

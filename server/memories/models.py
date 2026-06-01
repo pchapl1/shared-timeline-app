@@ -21,6 +21,11 @@ class Memory(models.Model):
         blank=True
     )
 
+    photo = models.ImageField(
+        upload_to='memories/photos/',
+        null=True,
+        blank=True)
+
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,

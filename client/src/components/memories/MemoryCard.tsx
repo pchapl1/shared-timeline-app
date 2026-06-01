@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
+
+const API_HOST = 'http://127.0.0.1:8000';
 
 type Memory = {
   id: number;
@@ -6,6 +8,7 @@ type Memory = {
   description: string;
   memory_date: string;
   location_name?: string;
+  photo?: string | null;
 };
 
 type Props = {
@@ -13,11 +16,29 @@ type Props = {
 };
 
 export function MemoryCard({ memory }: Props) {
+  const photoUri = memory.photo
+    ? memory.photo.startsWith('http')
+      ? memory.photo
+      : `${API_HOST}${memory.photo}`
+    : null;
+
   return (
     <View style={styles.card}>
-      <View style={styles.imagePlaceholder}>
-        <Text style={styles.placeholderText}>Photo Coming Soon</Text>
-      </View>
+      {memory.photo ? (
+        <Image
+          source={{
+            uri: memory.photo,
+          }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={styles.imagePlaceholder}>
+          <Text style={styles.placeholderText}>
+            Photo Coming Soon
+          </Text>
+        </View>
+      )}
 
       <View style={styles.content}>
         <Text style={styles.title}>{memory.title}</Text>
@@ -45,6 +66,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 20,
   },
+  image: {
+  width: '100%',
+  height: 220,
+},
   imagePlaceholder: {
     height: 180,
     backgroundColor: '#334155',
