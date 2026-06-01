@@ -1,18 +1,73 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
-export const api = axios.create( { 
-    baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-})
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 export const setAuthToken = (token: string | null) => {
-    if (token) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-        delete api.defaults.headers.common['Authorization'];
-    }
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
 };
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const storedTokens = await AsyncStorage.getItem('tokens');
+
+        if (!storedTokens) {
+          return Promise.reject(error);
+        }
+
+        const parsedTokens = JSON.parse(storedTokens);
+
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/auth/token/refresh/`,
+          {
+            refresh: parsedTokens.refresh,
+          }
+        );
+
+        const newTokens = {
+          ...parsedTokens,
+          access: refreshResponse.data.access,
+        };
+
+        await AsyncStorage.setItem(
+          'tokens',
+          JSON.stringify(newTokens)
+        );
+
+        setAuthToken(newTokens.access);
+
+        originalRequest.headers.Authorization = `Bearer ${newTokens.access}`;
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        await AsyncStorage.removeItem('tokens');
+        setAuthToken(null);
+
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);

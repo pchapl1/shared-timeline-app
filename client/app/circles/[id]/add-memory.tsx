@@ -7,6 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Pressable,
+  Platform,
 } from 'react-native';
 
 import {
@@ -14,9 +16,9 @@ import {
   useLocalSearchParams,
 } from 'expo-router';
 
-import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { api } from '../../../src/services/api';
+import * as ImagePicker from 'expo-image-picker';
 
 import { createMemory } from '../../../src/services/memories';
 
@@ -25,7 +27,8 @@ export default function AddMemoryScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [memoryDate, setMemoryDate] = useState('');
+  const [memoryDate, setMemoryDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [image, setImage] = useState<string | null>(null);
 
   async function pickImage() {
@@ -46,11 +49,11 @@ export default function AddMemoryScreen() {
         circleId: String(id),
         title,
         description,
-        memoryDate,
+        memoryDate: memoryDate.toISOString().split('T')[0],
         imageUri: image,
       });
 
-      router.back();
+      router.replace(`/circles/${id}`);
     } catch (error: any) {
       console.error('Create memory error:', error.response?.data || error);
       Alert.alert('Error', 'Could not create memory.');
@@ -82,13 +85,43 @@ export default function AddMemoryScreen() {
         multiline
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Date: YYYY-MM-DD"
-        placeholderTextColor="#64748b"
-        value={memoryDate}
-        onChangeText={setMemoryDate}
-      />
+      {Platform.OS === 'web' ? (
+        <TextInput
+          style={styles.input}
+          value={memoryDate.toISOString().split('T')[0]}
+          onChangeText={(text) => {
+            setMemoryDate(new Date(text));
+          }}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor="#64748b"
+        />
+      ) : (
+        <>
+          <Pressable
+            style={styles.dateInput}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.dateText}>
+              {memoryDate.toDateString()}
+            </Text>
+          </Pressable>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={memoryDate}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+
+                if (selectedDate) {
+                  setMemoryDate(selectedDate);
+                }
+              }}
+            />
+          )}
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.imageButton}
@@ -138,6 +171,18 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+    fontSize: 16,
+  },
+
+  dateInput: {
+    backgroundColor: '#1e293b',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+
+  dateText: {
+    color: '#ffffff',
     fontSize: 16,
   },
 

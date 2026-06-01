@@ -72,7 +72,6 @@ export default function CircleDetailScreen() {
     try {
       const response = await api.get('/memories/');
 
-      console.log("Memories: ", response.data);
       const circleMemories = response.data.filter(
         (memory: Memory) => memory.circle === Number(id)
       );
