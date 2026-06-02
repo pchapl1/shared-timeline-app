@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
+import MapView, { Marker } from 'react-native-maps';
 
 import {
   useFocusEffect,
@@ -28,6 +29,12 @@ type Circle = {
   start_date: string;
 };
 
+type MemoryPhoto = {
+  id: number;
+  image: string;
+  created_at: string;
+};
+
 type Memory = {
   id: number;
   circle: number;
@@ -35,14 +42,11 @@ type Memory = {
   description: string;
   memory_date: string;
   location_name: string;
+  latitude?: string | null;
+  longitude?: string | null;
   photo?: string | null;
-  photos?: {
-    id: number;
-    image: string;
-    created_at: string;
-  }[];
+  photos?: MemoryPhoto[];
 };
-  
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -65,7 +69,6 @@ function groupMemoriesByMonth(memories: Memory[]) {
   return grouped;
 }
 
-
 export default function CircleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -74,6 +77,8 @@ export default function CircleDetailScreen() {
   const [circle, setCircle] = useState<Circle | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+
+  const groupedMemories = groupMemoriesByMonth(memories);
 
   useEffect(() => {
     if (id && !authLoading && tokens) {
@@ -122,8 +127,6 @@ export default function CircleDetailScreen() {
     );
   }
 
-  const groupedMemories = groupMemoriesByMonth(memories);
-
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -141,19 +144,44 @@ export default function CircleDetailScreen() {
         <Text style={styles.date}>Started: {circle.start_date}</Text>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Map</Text>
+
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: 47.6062,
+              longitude: -122.3321,
+              latitudeDelta: 15,
+              longitudeDelta: 15,
+            }}
+          >
+            {memories
+              .filter((memory) => memory.latitude && memory.longitude)
+              .map((memory) => (
+                <Marker
+                  key={memory.id}
+                  coordinate={{
+                    latitude: Number(memory.latitude),
+                    longitude: Number(memory.longitude),
+                  }}
+                  title={memory.title}
+                  description={memory.location_name}
+                />
+              ))}
+          </MapView>
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Timeline</Text>
 
           {memories.length === 0 ? (
             <Text style={styles.emptyText}>
               Memories will appear here.
             </Text>
-            ) : (
+          ) : (
             Object.entries(groupedMemories).map(
               ([groupTitle, groupMemories]) => (
-                <View
-                  key={groupTitle}
-                  style={styles.timelineGroup}
-                >
+                <View key={groupTitle} style={styles.timelineGroup}>
                   <Text style={styles.timelineGroupTitle}>
                     {groupTitle}
                   </Text>
@@ -167,10 +195,10 @@ export default function CircleDetailScreen() {
                       }
                     />
                   ))}
-      </View>
-    )
-  )
-)}
+                </View>
+              )
+            )
+          )}
         </View>
       </ScrollView>
 
@@ -266,6 +294,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  map: {
+    width: '100%',
+    height: 300,
+    borderRadius: 20,
+    marginBottom: 32,
+  },
+
+  timelineGroup: {
+    marginBottom: 32,
+  },
+
+  timelineGroupTitle: {
+    color: '#94a3b8',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+
   emptyText: {
     color: '#94a3b8',
     fontSize: 15,
@@ -319,17 +367,5 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 24,
     fontWeight: '700',
-  },
-  timelineGroup: {
-  marginBottom: 32,
-},
-
-  timelineGroupTitle: {
-    color: '#94a3b8',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 16,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
   },
 });

@@ -57,7 +57,10 @@ api.interceptors.response.use(
 
         setAuthToken(newTokens.access);
 
-        originalRequest.headers.Authorization = `Bearer ${newTokens.access}`;
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${newTokens.access}`,
+};
 
         return api(originalRequest);
       } catch (refreshError) {
