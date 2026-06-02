@@ -44,6 +44,27 @@ type Memory = {
 };
   
 
+function groupMemoriesByMonth(memories: Memory[]) {
+  const grouped: Record<string, Memory[]> = {};
+
+  memories.forEach((memory) => {
+    const date = new Date(memory.memory_date);
+
+    const groupKey = date.toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = [];
+    }
+
+    grouped[groupKey].push(memory);
+  });
+
+  return grouped;
+}
+
 
 export default function CircleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -101,6 +122,8 @@ export default function CircleDetailScreen() {
     );
   }
 
+  const groupedMemories = groupMemoriesByMonth(memories);
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -124,15 +147,30 @@ export default function CircleDetailScreen() {
             <Text style={styles.emptyText}>
               Memories will appear here.
             </Text>
-          ) : (
-            memories.map((memory) => (
-              <MemoryCard
-                key={memory.id}
-                memory={memory}
-                onPhotoPress={(photoUrl) => setSelectedPhoto(photoUrl)}
-              />
-            ))
-          )}
+            ) : (
+            Object.entries(groupedMemories).map(
+              ([groupTitle, groupMemories]) => (
+                <View
+                  key={groupTitle}
+                  style={styles.timelineGroup}
+                >
+                  <Text style={styles.timelineGroupTitle}>
+                    {groupTitle}
+                  </Text>
+
+                  {groupMemories.map((memory) => (
+                    <MemoryCard
+                      key={memory.id}
+                      memory={memory}
+                      onPhotoPress={(photoUrl) =>
+                        setSelectedPhoto(photoUrl)
+                      }
+                    />
+                  ))}
+      </View>
+    )
+  )
+)}
         </View>
       </ScrollView>
 
@@ -281,5 +319,17 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 24,
     fontWeight: '700',
+  },
+  timelineGroup: {
+  marginBottom: 32,
+},
+
+  timelineGroupTitle: {
+    color: '#94a3b8',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 });
