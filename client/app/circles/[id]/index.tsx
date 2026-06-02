@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-import MapView, { Marker } from 'react-native-maps';
+// import MapView, { Marker } from 'react-native-maps';
 
 import {
   useFocusEffect,
@@ -143,10 +143,21 @@ export default function CircleDetailScreen() {
 
         <Text style={styles.date}>Started: {circle.start_date}</Text>
 
+        <TouchableOpacity
+          style={styles.inviteButton}
+          onPress={() =>
+            router.push(`/circles/${id}/invite`)
+          }
+        >
+          <Text style={styles.inviteButtonText}>
+            Invite Member
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Map</Text>
 
-          <MapView
+          {/* <MapView
             style={styles.map}
             initialRegion={{
               latitude: 47.6062,
@@ -168,7 +179,7 @@ export default function CircleDetailScreen() {
                   description={memory.location_name}
                 />
               ))}
-          </MapView>
+          </MapView> */}
         </View>
 
         <View style={styles.section}>
@@ -368,4 +379,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
   },
+  inviteButton: {
+  backgroundColor: '#2563eb',
+  paddingVertical: 14,
+  borderRadius: 12,
+  alignItems: 'center',
+  marginTop: 20,
+  marginBottom: 24,
+},
+
+inviteButtonText: {
+  color: '#ffffff',
+  fontSize: 16,
+  fontWeight: '600',
+},
 });

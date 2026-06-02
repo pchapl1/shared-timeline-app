@@ -74,3 +74,33 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const createCircleInvite = async (
+  circleId: number,
+  invitedUserId: number
+) => {
+  const response = await api.post('/circle-invites/', {
+    circle: circleId,
+    invited_user: invitedUserId,
+  });
+
+  return response.data;
+};
+
+export const getPendingCircleInvites = async () => {
+  const response = await api.get('/circle-invites/');
+
+  return response.data;
+};
+
+export const acceptCircleInvite = async (inviteId: number) => {
+  const response = await api.post(`/circle-invites/${inviteId}/accept/`);
+
+  return response.data;
+};
+
+export const declineCircleInvite = async (inviteId: number) => {
+  const response = await api.post(`/circle-invites/${inviteId}/decline/`);
+
+  return response.data;
+};
