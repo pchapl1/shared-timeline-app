@@ -20,7 +20,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 import * as ImagePicker from 'expo-image-picker';
 
-import { createMemory } from '../../../src/services/memories';
+import { createMemory } from '../../../../src/services/memories';
 
 export default function AddMemoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

@@ -86,19 +86,35 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        invite, created = CircleInvite.objects.get_or_create(
+        existing_invite = CircleInvite.objects.filter(
+            circle=circle,
+            invited_user=invited_user
+        ).first()
+
+        if existing_invite:
+            if existing_invite.status == 'pending':
+                return Response(
+                    {'error': 'Invite already exists'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            existing_invite.status = 'pending'
+            existing_invite.invited_by = request.user
+            existing_invite.save()
+
+            serializer = self.get_serializer(existing_invite)
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        invite = CircleInvite.objects.create(
             circle=circle,
             invited_user=invited_user,
-            defaults={
-                'invited_by': request.user
-            }
+            invited_by=request.user,
+            status='pending'
         )
-
-        if not created:
-            return Response(
-                {'error': 'Invite already exists'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
         serializer = self.get_serializer(invite)
 
@@ -106,6 +122,7 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
             serializer.data,
             status=status.HTTP_201_CREATED
         )
+    
 
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
@@ -123,15 +140,17 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        CircleMember.objects.get_or_create(
+            circle=invite.circle,
+            user=request.user,
+            defaults={
+                'role': 'member'
+            }
+        )
+
         invite.status = 'accepted'
         invite.responded_at = timezone.now()
         invite.save()
-
-        CircleMember.objects.create(
-            circle=invite.circle,
-            user=request.user,
-            role='member'
-        )
 
         return Response({
             'message': 'Invite accepted'

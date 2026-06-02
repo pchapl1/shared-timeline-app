@@ -12,7 +12,7 @@ import {
 
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { createCircleInvite, searchUsers } from '../../../src/services/api';
+import { createCircleInvite, searchUsers } from '../../../../src/services/api';
 
 
 type UserSearchResult = {

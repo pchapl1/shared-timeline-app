@@ -18,9 +18,9 @@ import {
   router,
 } from 'expo-router';
 
-import { api } from '../../../src/services/api';
-import { useAuth } from '../../../src/context/AuthContext';
-import { MemoryCard } from '../../../src/components/memories/MemoryCard';
+import { api } from '../../../../src/services/api';
+import { useAuth } from '../../../../src/context/AuthContext';
+import { MemoryCard } from '../../../../src/components/memories/MemoryCard';
 
 type Circle = {
   id: number;
@@ -51,7 +51,13 @@ type Memory = {
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
 
-  memories.forEach((memory) => {
+  const sortedMemories = [...memories].sort(
+    (a, b) =>
+      new Date(b.memory_date).getTime() -
+      new Date(a.memory_date).getTime()
+  );
+
+  sortedMemories.forEach((memory) => {
     const date = new Date(memory.memory_date);
 
     const groupKey = date.toLocaleDateString('en-US', {
@@ -80,12 +86,12 @@ export default function CircleDetailScreen() {
 
   const groupedMemories = groupMemoriesByMonth(memories);
 
-  useEffect(() => {
-    if (id && !authLoading && tokens) {
-      fetchCircle();
-      fetchMemories();
-    }
-  }, [id, authLoading, tokens]);
+  // useEffect(() => {
+  //   if (id && !authLoading && tokens) {
+  //     fetchCircle();
+  //     fetchMemories();
+  //   }
+  // }, [id, authLoading, tokens]);
 
   useFocusEffect(
     useCallback(() => {

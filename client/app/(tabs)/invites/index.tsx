@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useState } from 'react';
+
+import { router, useFocusEffect } from 'expo-router';
+
 import {
   View,
   Text,
@@ -13,7 +15,7 @@ import {
   getPendingCircleInvites,
   acceptCircleInvite,
   declineCircleInvite,
-} from '../../src/services/api';
+} from '../../../src/services/api';
 
 type Invite = {
   id: number;
@@ -26,21 +28,26 @@ export default function InvitesScreen() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchInvites();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchInvites();
+    }, [])
+  );
 
   async function fetchInvites() {
     try {
+      setLoading(true);
+
       const data = await getPendingCircleInvites();
 
       const pendingInvites = data.filter(
-        (invite: Invite) => invite.status === 'pending'
+        (invite: Invite) =>
+          invite.status?.toLowerCase() === 'pending'
       );
 
       setInvites(pendingInvites);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -55,9 +62,8 @@ export default function InvitesScreen() {
       await fetchInvites();
 
       router.replace('/(tabs)/circles');
-
     } catch (error) {
-      console.error(error);
+      console.log(error);
 
       Alert.alert('Error', 'Could not accept invite.');
     }
@@ -69,9 +75,9 @@ export default function InvitesScreen() {
 
       Alert.alert('Invite declined');
 
-      fetchInvites();
+      await fetchInvites();
     } catch (error) {
-      console.error(error);
+      console.log(error);
 
       Alert.alert('Error', 'Could not decline invite.');
     }

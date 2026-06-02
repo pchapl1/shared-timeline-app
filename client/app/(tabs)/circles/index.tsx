@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   View,
@@ -8,10 +8,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { Link, router } from 'expo-router';
+import {
+  Link,
+  router,
+  useFocusEffect,
+} from 'expo-router';
 
-import { api } from '../../src/services/api';
-import { useAuth } from '../../src/context/AuthContext';
+import { api } from '../../../src/services/api';
+import { useAuth } from '../../../src/context/AuthContext';
 
 type Circle = {
   id: number;
@@ -24,18 +28,20 @@ export default function CirclesScreen() {
 
   const { tokens, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading && tokens) {
-      fetchCircles();
-    }
-  }, [isLoading, tokens]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!isLoading && tokens) {
+        fetchCircles();
+      }
+    }, [isLoading, tokens])
+  );
 
   async function fetchCircles() {
     try {
       const response = await api.get('/circles/');
       setCircles(response.data);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   }
 
@@ -53,7 +59,9 @@ export default function CirclesScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push(`/circles/${item.id}`)}
+            onPress={() =>
+              router.push(`/(tabs)/circles/${item.id}`)
+            }
           >
             <Text style={styles.cardTitle}>
               {item.name}

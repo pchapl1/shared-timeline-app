@@ -1,24 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import { Tabs } from 'expo-router';
+import { Tabs, useFocusEffect } from 'expo-router';
 
 import { getPendingCircleInvites } from '../../src/services/api';
 
 export default function TabsLayout() {
   const [pendingInviteCount, setPendingInviteCount] = useState(0);
 
-  useEffect(() => {
-    async function loadPendingInvites() {
-      try {
-        const invites = await getPendingCircleInvites();
-        setPendingInviteCount(invites.length);
-      } catch (error) {
-        console.log('Error loading pending invites:', error);
-      }
-    }
+  useFocusEffect(
+    useCallback(() => {
+      async function loadPendingInvites() {
+        try {
+          const invites = await getPendingCircleInvites();
 
-    loadPendingInvites();
-  }, []);
+          const pendingInvites = invites.filter(
+            (invite: any) =>
+              invite.status?.toLowerCase() === 'pending'
+          );
+
+          setPendingInviteCount(pendingInvites.length);
+        } catch (error) {
+          console.log('Error loading pending invites:', error);
+        }
+      }
+
+      loadPendingInvites();
+    }, [])
+  );
 
   return (
     <Tabs
@@ -40,25 +48,48 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="circles"
+        name="circles/index"
         options={{
           title: 'Circles',
         }}
       />
 
       <Tabs.Screen
-        name="invites"
+        name="invites/index"
         options={{
           title: 'Invites',
           tabBarBadge:
-            pendingInviteCount > 0 ? pendingInviteCount : undefined,
+            pendingInviteCount > 0
+              ? pendingInviteCount
+              : undefined,
         }}
       />
 
       <Tabs.Screen
-        name="profile"
+        name="profile/index"
         options={{
           title: 'Profile',
+        }}
+      />
+
+      <Tabs.Screen
+        name="circles/[id]/index"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="circles/[id]/invite"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="circles/[id]/add-memory"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
