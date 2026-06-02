@@ -1,6 +1,25 @@
+import { useEffect, useState } from 'react';
+
 import { Tabs } from 'expo-router';
 
+import { getPendingCircleInvites } from '../../src/services/api';
+
 export default function TabsLayout() {
+  const [pendingInviteCount, setPendingInviteCount] = useState(0);
+
+  useEffect(() => {
+    async function loadPendingInvites() {
+      try {
+        const invites = await getPendingCircleInvites();
+        setPendingInviteCount(invites.length);
+      } catch (error) {
+        console.log('Error loading pending invites:', error);
+      }
+    }
+
+    loadPendingInvites();
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -31,6 +50,8 @@ export default function TabsLayout() {
         name="invites"
         options={{
           title: 'Invites',
+          tabBarBadge:
+            pendingInviteCount > 0 ? pendingInviteCount : undefined,
         }}
       />
 

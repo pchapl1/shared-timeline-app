@@ -7,70 +7,94 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  FlatList,
 } from 'react-native';
 
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { createCircleInvite } from '../../../src/services/api';
+import { createCircleInvite, searchUsers } from '../../../src/services/api';
 
+
+type UserSearchResult = {
+  id: number;
+  username: string;
+  email: string;
+};
 export default function InviteMemberScreen() {
   const { id } = useLocalSearchParams();
 
-  const [invitedUserId, setInvitedUserId] = useState('');
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<UserSearchResult[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleInvite() {
-    if (!invitedUserId.trim()) {
-      Alert.alert('Missing user', 'Please enter a user ID.');
-      return;
-    }
-
+  async function handleInvite(userId: number) {
     try {
       setIsSubmitting(true);
 
-      await createCircleInvite(
-        Number(id),
-        Number(invitedUserId)
-      );
+      await createCircleInvite(Number(id), userId);
 
       Alert.alert('Invite sent', 'The invite was created successfully.');
 
       router.back();
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Could not send invite.');
+    } catch (error: any) {
+        console.error('Error creating invite:', error.response?.data || error);
+
+        Alert.alert(
+          'Invite not sent',
+          error.response?.data?.error || 'Could not send invite.'
+        );
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  async function handleSearch(text: string) {
+  setQuery(text);
+
+  if (text.length < 2) {
+    setResults([]);
+    return;
+  }
+
+  try {
+    const data = await searchUsers(text);
+    setResults(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Invite Member</Text>
+    <Text style={styles.label}>Search Users</Text>
 
-      <Text style={styles.label}>User ID</Text>
+    <TextInput
+      style={styles.input}
+      value={query}
+      onChangeText={handleSearch}
+      placeholder="Search username or email"
+      placeholderTextColor="#64748b"
+    />
 
-      <TextInput
-        style={styles.input}
-        value={invitedUserId}
-        onChangeText={setInvitedUserId}
-        placeholder="Enter user ID"
-        placeholderTextColor="#64748b"
-        keyboardType="numeric"
-      />
+    <FlatList
+      data={results}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.userCard}
+          onPress={() => handleInvite(item.id)}
+          disabled={isSubmitting}
+        >
+          <Text style={styles.username}>
+            {item.username}
+          </Text>
 
-      <TouchableOpacity
-        style={[
-          styles.button,
-          isSubmitting && styles.buttonDisabled,
-        ]}
-        onPress={handleInvite}
-        disabled={isSubmitting}
-      >
-        <Text style={styles.buttonText}>
-          {isSubmitting ? 'Sending...' : 'Send Invite'}
-        </Text>
-      </TouchableOpacity>
+          <Text style={styles.email}>
+            {item.email}
+          </Text>
+        </TouchableOpacity>
+      )}
+    />
     </View>
   );
 }
@@ -121,4 +145,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  userCard: {
+  backgroundColor: '#1e293b',
+  padding: 16,
+  borderRadius: 12,
+  marginBottom: 12,
+},
+
+username: {
+  color: '#ffffff',
+  fontSize: 16,
+  fontWeight: '600',
+},
+
+email: {
+  color: '#94a3b8',
+  marginTop: 4,
+},
 });
