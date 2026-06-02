@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import Memory
+from .models import Memory, MemoryPhoto
 from .serializers import MemorySerializer
 
 
@@ -17,4 +17,7 @@ class MemoryViewSet(viewsets.ModelViewSet):
         ).order_by('-memory_date', '-created_at')
 
     def perform_create(self, serializer):
+        memory = serializer.save(created_by=self.request.user)
+        if memory.photo:
+            MemoryPhoto.objects.create(memory=memory, image=memory.photo)
         serializer.save(created_by=self.request.user)

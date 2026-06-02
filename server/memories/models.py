@@ -24,7 +24,8 @@ class Memory(models.Model):
     photo = models.ImageField(
         upload_to='memories/photos/',
         null=True,
-        blank=True)
+        blank=True
+    )
 
     latitude = models.DecimalField(
         max_digits=9,
@@ -52,3 +53,12 @@ class Memory(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class MemoryPhoto(models.Model):
+    memory = models.ForeignKey(Memory, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='memories/photos/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Photo for {self.memory.title}'
