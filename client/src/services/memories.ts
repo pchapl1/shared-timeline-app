@@ -5,6 +5,9 @@ type CreateMemoryData = {
   title: string;
   description: string;
   memoryDate: string;
+  locationName?: string;
+  latitude?: string;
+  longitude?: string;
   imageUri?: string | null;
   imageUris?: string[];
 };
@@ -76,6 +79,18 @@ export async function createMemory(data: CreateMemoryData) {
 
     formData.append('photo', firstFile);
   }
+
+    if (data.locationName) {
+      formData.append('location_name', data.locationName);
+    }
+
+    if (data.latitude) {
+      formData.append('latitude', data.latitude);
+    }
+
+    if (data.longitude) {
+      formData.append('longitude', data.longitude);
+    }
 
   return api.post('/memories/', formData, {
     headers: {

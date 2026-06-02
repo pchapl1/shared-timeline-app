@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import {
-  View,
+  ScrollView,
   Text,
   TextInput,
   StyleSheet,
@@ -29,7 +29,12 @@ export default function AddMemoryScreen() {
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+
   const [images, setImages] = useState<string[]>([]);
+
+  const [locationName, setLocationName] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -52,17 +57,28 @@ export default function AddMemoryScreen() {
         description,
         memoryDate: memoryDate.toISOString().split('T')[0],
         imageUris: images,
+        locationName,
+        latitude: String(latitude),
+        longitude: String(longitude),
       });
 
       router.replace(`/circles/${id}`);
     } catch (error: any) {
-      console.error('Create memory error:', error.response?.data || error);
+      console.error(
+        'Create memory error:',
+        error.response?.data || error
+      );
+
       Alert.alert('Error', 'Could not create memory.');
     }
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       <TouchableOpacity onPress={() => router.back()}>
         <Text style={styles.backLink}>← Back</Text>
       </TouchableOpacity>
@@ -84,6 +100,7 @@ export default function AddMemoryScreen() {
         value={description}
         onChangeText={setDescription}
         multiline
+        numberOfLines={5}
       />
 
       {Platform.OS === 'web' ? (
@@ -124,6 +141,32 @@ export default function AddMemoryScreen() {
         </>
       )}
 
+      <TextInput
+        style={styles.input}
+        placeholder="Location name"
+        placeholderTextColor="#64748b"
+        value={locationName}
+        onChangeText={setLocationName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Latitude"
+        placeholderTextColor="#64748b"
+        value={latitude}
+        onChangeText={setLatitude}
+        keyboardType="decimal-pad"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Longitude"
+        placeholderTextColor="#64748b"
+        value={longitude}
+        onChangeText={setLongitude}
+        keyboardType="decimal-pad"
+      />
+
       <TouchableOpacity
         style={styles.imageButton}
         onPress={pickImage}
@@ -143,7 +186,7 @@ export default function AddMemoryScreen() {
           Save Memory
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -153,6 +196,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f172a',
     paddingTop: 80,
     paddingHorizontal: 24,
+  },
+
+  contentContainer: {
+    paddingBottom: 120,
   },
 
   backLink: {
@@ -177,6 +224,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  textArea: {
+    minHeight: 120,
+    textAlignVertical: 'top',
+    paddingTop: 16,
+  },
+
   dateInput: {
     backgroundColor: '#1e293b',
     padding: 16,
@@ -187,11 +240,6 @@ const styles = StyleSheet.create({
   dateText: {
     color: '#ffffff',
     fontSize: 16,
-  },
-
-  textArea: {
-    height: 120,
-    textAlignVertical: 'top',
   },
 
   imageButton: {
