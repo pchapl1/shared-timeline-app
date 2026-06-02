@@ -6,7 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal,
 } from 'react-native';
+
+import { Image } from 'expo-image';
 
 import {
   useFocusEffect,
@@ -42,6 +45,7 @@ export default function CircleDetailScreen() {
 
   const [circle, setCircle] = useState<Circle | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     if (id && !authLoading && tokens) {
@@ -115,7 +119,11 @@ export default function CircleDetailScreen() {
             </Text>
           ) : (
             memories.map((memory) => (
-              <MemoryCard key={memory.id} memory={memory} />
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onPhotoPress={(photoUrl) => setSelectedPhoto(photoUrl)}
+              />
             ))
           )}
         </View>
@@ -127,6 +135,30 @@ export default function CircleDetailScreen() {
       >
         <Text style={styles.floatingButtonText}>＋</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={!!selectedPhoto}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedPhoto(null)}
+      >
+        <View style={styles.photoModal}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setSelectedPhoto(null)}
+          >
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+
+          {selectedPhoto && (
+            <Image
+              source={{ uri: selectedPhoto }}
+              style={styles.fullscreenPhoto}
+              contentFit="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -211,5 +243,36 @@ const styles = StyleSheet.create({
     fontSize: 34,
     lineHeight: 38,
     fontWeight: '600',
+  },
+
+  photoModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  fullscreenPhoto: {
+    width: '100%',
+    height: '100%',
+  },
+
+  closeButton: {
+    position: 'absolute',
+    top: 60,
+    right: 24,
+    zIndex: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  closeButtonText: {
+    color: '#ffffff',
+    fontSize: 24,
+    fontWeight: '700',
   },
 });
