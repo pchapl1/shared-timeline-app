@@ -36,7 +36,14 @@ type Memory = {
   memory_date: string;
   location_name: string;
   photo?: string | null;
+  photos?: {
+    id: number;
+    image: string;
+    created_at: string;
+  }[];
 };
+  
+
 
 export default function CircleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

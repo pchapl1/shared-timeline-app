@@ -28,10 +28,6 @@ class MemoryViewSet(viewsets.ModelViewSet):
                     image=photo
                 )
 
-            if not memory.photo:
-                memory.photo = uploaded_photos[0]
-                memory.save()
-
         elif memory.photo:
             MemoryPhoto.objects.create(
                 memory=memory,

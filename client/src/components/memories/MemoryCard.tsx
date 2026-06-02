@@ -4,9 +4,16 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
 const API_HOST = 'http://127.0.0.1:8000';
+
+type MemoryPhoto = {
+  id: number;
+  image: string;
+  created_at: string;
+};
 
 type Memory = {
   id: number;
@@ -15,6 +22,7 @@ type Memory = {
   memory_date: string;
   location_name?: string;
   photo?: string | null;
+  photos?: MemoryPhoto[];
 };
 
 type Props = {
@@ -22,10 +30,7 @@ type Props = {
   onPhotoPress?: (photoUrl: string) => void;
 };
 
-export function MemoryCard({
-  memory,
-  onPhotoPress,
-}: Props) {
+export function MemoryCard({ memory, onPhotoPress }: Props) {
   const photoUri = memory.photo
     ? memory.photo.startsWith('http')
       ? memory.photo
@@ -34,15 +39,33 @@ export function MemoryCard({
 
   return (
     <View style={styles.card}>
-      {photoUri ? (
+      {memory.photos && memory.photos.length > 0 ? (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+        >
+          {memory.photos.map((photo) => (
+            <TouchableOpacity
+              key={photo.id}
+              activeOpacity={0.9}
+              onPress={() => onPhotoPress?.(photo.image)}
+            >
+              <Image
+                source={{ uri: photo.image }}
+                style={styles.galleryImage}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : photoUri ? (
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => onPhotoPress?.(photoUri)}
         >
           <Image
-            source={{
-              uri: photoUri,
-            }}
+            source={{ uri: photoUri }}
             style={styles.image}
             resizeMode="cover"
           />
@@ -63,15 +86,11 @@ export function MemoryCard({
         </Text>
 
         {!!memory.location_name && (
-          <Text style={styles.location}>
-            {memory.location_name}
-          </Text>
+          <Text style={styles.location}>{memory.location_name}</Text>
         )}
 
         {!!memory.description && (
-          <Text style={styles.description}>
-            {memory.description}
-          </Text>
+          <Text style={styles.description}>{memory.description}</Text>
         )}
       </View>
     </View>
@@ -88,6 +107,11 @@ const styles = StyleSheet.create({
 
   image: {
     width: '100%',
+    height: 220,
+  },
+
+  galleryImage: {
+    width: 340,
     height: 220,
   },
 
