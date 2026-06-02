@@ -1,31 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 import { Tabs, useFocusEffect } from 'expo-router';
 
-import { getPendingCircleInvites } from '../../src/services/api';
+import { useInvites } from '../../src/context/InviteContext';
 
 export default function TabsLayout() {
-  const [pendingInviteCount, setPendingInviteCount] = useState(0);
+  const {
+    pendingInviteCount,
+    refreshInviteCount,
+  } = useInvites();
 
   useFocusEffect(
     useCallback(() => {
-      async function loadPendingInvites() {
-        try {
-          const invites = await getPendingCircleInvites();
-
-          const pendingInvites = invites.filter(
-            (invite: any) =>
-              invite.status?.toLowerCase() === 'pending'
-          );
-
-          setPendingInviteCount(pendingInvites.length);
-        } catch (error) {
-          console.log('Error loading pending invites:', error);
-        }
-      }
-
-      loadPendingInvites();
-    }, [])
+      refreshInviteCount();
+    }, [refreshInviteCount])
   );
 
   return (

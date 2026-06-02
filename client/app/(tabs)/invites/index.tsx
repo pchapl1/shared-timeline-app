@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 
 import { router, useFocusEffect } from 'expo-router';
 
+import { useInvites } from '../../../src/context/InviteContext';
+
 import {
   View,
   Text,
@@ -27,6 +29,7 @@ type Invite = {
 export default function InvitesScreen() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
+  const { refreshInviteCount } = useInvites();
 
   useFocusEffect(
     useCallback(() => {
@@ -57,9 +60,11 @@ export default function InvitesScreen() {
     try {
       await acceptCircleInvite(inviteId);
 
-      Alert.alert('Success', 'Invite accepted.');
-
       await fetchInvites();
+
+      await refreshInviteCount();
+
+      Alert.alert('Success', 'Invite accepted.');
 
       router.replace('/(tabs)/circles');
     } catch (error) {
@@ -73,9 +78,11 @@ export default function InvitesScreen() {
     try {
       await declineCircleInvite(inviteId);
 
-      Alert.alert('Invite declined');
-
       await fetchInvites();
+
+      await refreshInviteCount();
+
+      Alert.alert('Invite declined');
     } catch (error) {
       console.log(error);
 
