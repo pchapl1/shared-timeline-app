@@ -1,14 +1,19 @@
-import {api} from './api'
+import { api } from './api';
 
-type createMemoryData = {
-    circleId: string,
-    title: string,
-    description: string,
-    memoryDate: string,
-    imageUri?: string | null
-}
+type CreateMemoryData = {
+  circleId: string;
+  title: string;
+  description: string;
+  memoryDate: string;
+  imageUri?: string | null;
+  imageUris?: string[];
+};
 
-async function uriToFile(uri: string, filename: string, mimeType: string) {
+async function uriToFile(
+  uri: string,
+  filename: string,
+  mimeType: string
+) {
   const response = await fetch(uri);
   const blob = await response.blob();
 
@@ -17,41 +22,64 @@ async function uriToFile(uri: string, filename: string, mimeType: string) {
   });
 }
 
-export async function createMemory(data: createMemoryData) {
+function getFileInfo(uri: string, index: number) {
+  let filename = uri.split('/').pop() || `photo-${index + 1}.jpg`;
 
-    const formData = new FormData();
+  if (!filename.includes('.')) {
+    filename = `${filename}.jpg`;
+  }
 
-    formData.append('circle', data.circleId);
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('memory_date', data.memoryDate);
+  const match = /\.(\w+)$/.exec(filename);
 
-    if (data.imageUri) {
-        let filename =
-            data.imageUri.split('/').pop() || 'photo.jpg';
+  const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-        if (!filename.includes('.')) {
-            filename = `${filename}.jpg`;
-        }
+  return {
+    filename,
+    type,
+  };
+}
 
-        const match = /\.(\w+)$/.exec(filename);
+export async function createMemory(data: CreateMemoryData) {
+  const formData = new FormData();
 
-        const type = match
-            ? `image/${match[1]}`
-            : 'image/jpeg';
+  formData.append('circle', data.circleId);
+  formData.append('title', data.title);
+  formData.append('description', data.description);
+  formData.append('memory_date', data.memoryDate);
 
-        const file = await uriToFile(
-            data.imageUri,
-            filename,
-            type
-        );
+  const imageUris = data.imageUris?.length
+    ? data.imageUris
+    : data.imageUri
+      ? [data.imageUri]
+      : [];
 
-        formData.append('photo', file);
-    }
+  for (let i = 0; i < imageUris.length; i++) {
+    const uri = imageUris[i];
 
-    return api.post('/memories/', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
+    const { filename, type } = getFileInfo(uri, i);
+
+    const file = await uriToFile(uri, filename, type);
+
+    formData.append('photos', file);
+  }
+
+  if (imageUris.length > 0) {
+    const firstImageUri = imageUris[0];
+
+    const { filename, type } = getFileInfo(firstImageUri, 0);
+
+    const firstFile = await uriToFile(
+      firstImageUri,
+      filename,
+      type
+    );
+
+    formData.append('photo', firstFile);
+  }
+
+  return api.post('/memories/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 }

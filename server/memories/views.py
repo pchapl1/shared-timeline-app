@@ -18,6 +18,22 @@ class MemoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         memory = serializer.save(created_by=self.request.user)
-        if memory.photo:
-            MemoryPhoto.objects.create(memory=memory, image=memory.photo)
-        serializer.save(created_by=self.request.user)
+
+        uploaded_photos = self.request.FILES.getlist('photos')
+
+        if uploaded_photos:
+            for photo in uploaded_photos:
+                MemoryPhoto.objects.create(
+                    memory=memory,
+                    image=photo
+                )
+
+            if not memory.photo:
+                memory.photo = uploaded_photos[0]
+                memory.save()
+
+        elif memory.photo:
+            MemoryPhoto.objects.create(
+                memory=memory,
+                image=memory.photo
+            )

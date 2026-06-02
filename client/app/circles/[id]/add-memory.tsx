@@ -29,17 +29,18 @@ export default function AddMemoryScreen() {
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsMultipleSelection: true,
       quality: 0.8,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const uris = result.assets.map((asset) => asset.uri);
+      setImages(uris);
     }
   }
 
@@ -50,7 +51,7 @@ export default function AddMemoryScreen() {
         title,
         description,
         memoryDate: memoryDate.toISOString().split('T')[0],
-        imageUri: image,
+        imageUris: images,
       });
 
       router.replace(`/circles/${id}`);
@@ -128,7 +129,9 @@ export default function AddMemoryScreen() {
         onPress={pickImage}
       >
         <Text style={styles.imageButtonText}>
-          {image ? 'Photo Selected ✓' : 'Select Photo'}
+          {images.length > 0
+            ? `${images.length} Photos Selected ✓`
+            : 'Select Photos'}
         </Text>
       </TouchableOpacity>
 
