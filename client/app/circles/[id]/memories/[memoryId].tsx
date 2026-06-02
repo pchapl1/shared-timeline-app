@@ -16,11 +16,11 @@ import { useEffect, useState } from 'react';
 
 import { formatDistanceToNow } from 'date-fns';
 
-import { api } from '../../../../../src/services/api';
+import { api } from '../../../../src/services/api';
 
-import { useAuth } from '../../../../../src/context/AuthContext';
+import { useAuth } from '../../../../src/context/AuthContext';
 
-import type { Memory } from '../../../../../src/types/memory';
+import type { Memory } from '../../../../src/types/memory';
 
 export default function MemoryDetailScreen() {
   const { memoryId, id } = useLocalSearchParams<{
@@ -68,7 +68,7 @@ export default function MemoryDetailScreen() {
       <Text
         style={styles.backButton}
         onPress={() =>
-          router.push(`/(tabs)/circles/${id}`)
+          router.push(`/circles/${id}`)
         }
       >
         ← Back

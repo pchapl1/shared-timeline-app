@@ -5,10 +5,7 @@ import { Tabs, useFocusEffect } from 'expo-router';
 import { useInvites } from '../../src/context/InviteContext';
 
 export default function TabsLayout() {
-  const {
-    pendingInviteCount,
-    refreshInviteCount,
-  } = useInvites();
+  const { pendingInviteCount, refreshInviteCount } = useInvites();
 
   useFocusEffect(
     useCallback(() => {
@@ -32,6 +29,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
+          tabBarLabel: 'Home',
         }}
       />
 
@@ -39,6 +37,7 @@ export default function TabsLayout() {
         name="circles/index"
         options={{
           title: 'Circles',
+          tabBarLabel: 'Circles',
         }}
       />
 
@@ -46,6 +45,7 @@ export default function TabsLayout() {
         name="invites/index"
         options={{
           title: 'Invites',
+          tabBarLabel: 'Invites',
           tabBarBadge:
             pendingInviteCount > 0
               ? pendingInviteCount
@@ -57,27 +57,7 @@ export default function TabsLayout() {
         name="profile/index"
         options={{
           title: 'Profile',
-        }}
-      />
-
-      <Tabs.Screen
-        name="circles/[id]/index"
-        options={{
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="circles/[id]/invite"
-        options={{
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="circles/[id]/add-memory"
-        options={{
-          href: null,
+          tabBarLabel: 'Profile',
         }}
       />
     </Tabs>

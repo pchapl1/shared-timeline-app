@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  RefreshControl,
 } from 'react-native';
 
 import { Image } from 'expo-image';
@@ -17,13 +18,15 @@ import {
   router,
 } from 'expo-router';
 
-import { useAuth } from '../../../../src/context/AuthContext';
-import { MemoryCard } from '../../../../src/components/memories/MemoryCard';
-import { getCircle } from '../../../../src/services/circles';
-import { getMemories } from '../../../../src/services/memories';
+import { useAuth } from '../../../src/context/AuthContext';
+import { MemoryCard } from '../../../src/components/memories/MemoryCard';
+import { getCircle } from '../../../src/services/circles';
+import { getMemories } from '../../../src/services/memories';
+import { colors } from '../../../src/theme/colors';
+import { spacing } from '../../../src/theme/spacing';
 
-import type { Circle } from '../../../../src/types/circle';
-import type { Memory } from '../../../../src/types/memory';
+import type { Circle } from '../../../src/types/circle';
+import type { Memory } from '../../../src/types/memory';
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -60,6 +63,7 @@ export default function CircleDetailScreen() {
   const [circle, setCircle] = useState<Circle | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const groupedMemories = groupMemoriesByMonth(memories);
 
@@ -99,6 +103,16 @@ export default function CircleDetailScreen() {
     }
   }
 
+  async function handleRefresh() {
+    try {
+      setRefreshing(true);
+
+      await Promise.all([fetchCircle(), fetchMemories()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   if (authLoading || !circle) {
     return (
       <View style={styles.container}>
@@ -112,6 +126,13 @@ export default function CircleDetailScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.text}
+          />
+        }
       >
         <TouchableOpacity
           onPress={() => router.push('/(tabs)/circles')}
@@ -129,7 +150,7 @@ export default function CircleDetailScreen() {
           style={styles.inviteButton}
           onPress={() =>
             router.push({
-              pathname: '/(tabs)/circles/[id]/invite',
+              pathname: '/circles/[id]/invite',
               params: {
                 id: id.toString(),
               },
@@ -165,14 +186,9 @@ export default function CircleDetailScreen() {
                       key={memory.id}
                       activeOpacity={0.9}
                       onPress={() => {
-                        console.log('PRESSED MEMORY:', {
-                          circleId: id,
-                          memoryId: memory.id,
-                          title: memory.title,
-                        });
-
                         router.push({
-                          pathname: '/(tabs)/circles/[id]/memories/[memoryId]',
+                          pathname:
+                            '/circles/[id]/memories/[memoryId]',
                           params: {
                             id: id.toString(),
                             memoryId: memory.id.toString(),
@@ -199,7 +215,7 @@ export default function CircleDetailScreen() {
         style={styles.floatingButton}
         onPress={() =>
           router.push({
-            pathname: '/(tabs)/circles/[id]/add-memory',
+            pathname: '/circles/[id]/add-memory',
             params: {
               id: id.toString(),
             },
@@ -239,14 +255,14 @@ export default function CircleDetailScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
   },
 
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
-    paddingTop: 80,
-    paddingHorizontal: 24,
+    backgroundColor: colors.background,
+    paddingTop: spacing.xxl,
+    paddingHorizontal: spacing.lg,
   },
 
   contentContainer: {
@@ -254,78 +270,78 @@ const styles = StyleSheet.create({
   },
 
   loading: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 18,
   },
 
   backLink: {
-    color: '#60a5fa',
+    color: colors.primaryLight,
     fontSize: 16,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
 
   title: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 34,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
 
   subtitle: {
-    color: '#94a3b8',
+    color: colors.muted,
     fontSize: 16,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
 
   date: {
-    color: '#cbd5e1',
+    color: colors.subtleText,
     fontSize: 14,
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
 
   section: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
 
   sectionTitle: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 22,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
 
   timelineGroup: {
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
 
   timelineGroupTitle: {
-    color: '#94a3b8',
+    color: colors.muted,
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: spacing.md,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
 
   emptyText: {
-    color: '#94a3b8',
+    color: colors.muted,
     fontSize: 15,
   },
 
   floatingButton: {
     position: 'absolute',
-    right: 24,
-    bottom: 32,
+    right: spacing.lg,
+    bottom: spacing.xl,
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   floatingButtonText: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 34,
     lineHeight: 38,
     fontWeight: '600',
@@ -333,7 +349,7 @@ const styles = StyleSheet.create({
 
   photoModal: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    backgroundColor: colors.modalOverlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -346,9 +362,9 @@ const styles = StyleSheet.create({
   closeButton: {
     position: 'absolute',
     top: 60,
-    right: 24,
+    right: spacing.lg,
     zIndex: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+    backgroundColor: colors.modalButton,
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -357,22 +373,22 @@ const styles = StyleSheet.create({
   },
 
   closeButtonText: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 24,
     fontWeight: '700',
   },
 
   inviteButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
 
   inviteButtonText: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '600',
   },

@@ -46,7 +46,7 @@ export default function CirclesScreen() {
     console.log('PRESSED CIRCLE ID:', circleId);
 
     router.push({
-      pathname: '/(tabs)/circles/[id]',
+      pathname: '/circles/[id]',
       params: {
         id: circleId.toString(),
       },

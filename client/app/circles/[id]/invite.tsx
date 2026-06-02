@@ -15,9 +15,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   createCircleInvite,
   searchUsers,
-} from '../../../../src/services/api';
+} from '../../../src/services/api';
 
-import { useAuth } from '../../../../src/context/AuthContext';
+import { useAuth } from '../../../src/context/AuthContext';
 
 type UserSearchResult = {
   id: number;
@@ -50,7 +50,7 @@ export default function InviteMemberScreen() {
       );
 
       router.push({
-        pathname: '/(tabs)/circles/[id]',
+        pathname: '/circles/[id]',
         params: {
           id: id.toString(),
         },
@@ -107,7 +107,7 @@ export default function InviteMemberScreen() {
       <TouchableOpacity
         onPress={() =>
           router.push({
-            pathname: '/(tabs)/circles/[id]',
+            pathname: '/circles/[id]',
             params: {
               id: id?.toString(),
             },
