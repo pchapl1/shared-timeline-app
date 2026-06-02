@@ -98,3 +98,8 @@ export async function createMemory(data: CreateMemoryData) {
     },
   });
 }
+
+export async function getMemories() {
+  const response = await api.get('/memories/');
+  return response.data;
+};

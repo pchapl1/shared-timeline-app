@@ -12,89 +12,159 @@ import {
 
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { createCircleInvite, searchUsers } from '../../../../src/services/api';
+import {
+  createCircleInvite,
+  searchUsers,
+} from '../../../../src/services/api';
 
+import { useAuth } from '../../../../src/context/AuthContext';
 
 type UserSearchResult = {
   id: number;
   username: string;
   email: string;
 };
+
 export default function InviteMemberScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  const { tokens, isLoading } = useAuth();
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<UserSearchResult[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleInvite(userId: number) {
+    if (isLoading || !tokens || !id) {
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
       await createCircleInvite(Number(id), userId);
 
-      Alert.alert('Invite sent', 'The invite was created successfully.');
+      Alert.alert(
+        'Invite sent',
+        'The invite was created successfully.'
+      );
 
-      router.back();
+      router.push({
+        pathname: '/(tabs)/circles/[id]',
+        params: {
+          id: id.toString(),
+        },
+      });
     } catch (error: any) {
-        console.error('Error creating invite:', error.response?.data || error);
+      console.error(
+        'Error creating invite:',
+        error.response?.data || error
+      );
 
-        Alert.alert(
-          'Invite not sent',
-          error.response?.data?.error || 'Could not send invite.'
-        );
+      Alert.alert(
+        'Invite not sent',
+        error.response?.data?.error ||
+          'Could not send invite.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function handleSearch(text: string) {
-  setQuery(text);
+    setQuery(text);
 
-  if (text.length < 2) {
-    setResults([]);
-    return;
+    if (text.length < 2) {
+      setResults([]);
+      return;
+    }
+
+    if (isLoading || !tokens) {
+      return;
+    }
+
+    try {
+      const data = await searchUsers(text);
+
+      setResults(data);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
-  try {
-    const data = await searchUsers(text);
-    setResults(data);
-  } catch (error) {
-    console.error(error);
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>
+          Loading...
+        </Text>
+      </View>
+    );
   }
-}
 
   return (
     <View style={styles.container}>
-    <Text style={styles.label}>Search Users</Text>
+      <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: '/(tabs)/circles/[id]',
+            params: {
+              id: id?.toString(),
+            },
+          })
+        }
+      >
+        <Text style={styles.backLink}>← Back</Text>
+      </TouchableOpacity>
 
-    <TextInput
-      style={styles.input}
-      value={query}
-      onChangeText={handleSearch}
-      placeholder="Search username or email"
-      placeholderTextColor="#64748b"
-    />
+      <Text style={styles.title}>Invite Member</Text>
 
-    <FlatList
-      data={results}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.userCard}
-          onPress={() => handleInvite(item.id)}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.username}>
-            {item.username}
-          </Text>
+      <Text style={styles.label}>Search Users</Text>
 
-          <Text style={styles.email}>
-            {item.email}
-          </Text>
-        </TouchableOpacity>
-      )}
-    />
+      <TextInput
+        style={styles.input}
+        value={query}
+        onChangeText={handleSearch}
+        placeholder="Search username or email"
+        placeholderTextColor="#64748b"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.id.toString()}
+        keyboardShouldPersistTaps="handled"
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[
+              styles.userCard,
+              isSubmitting && styles.cardDisabled,
+            ]}
+            onPress={() => handleInvite(item.id)}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.username}>
+              {item.username}
+            </Text>
+
+            <Text style={styles.email}>
+              {item.email}
+            </Text>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          query.length >= 2 ? (
+            <Text style={styles.emptyText}>
+              No users found.
+            </Text>
+          ) : (
+            <Text style={styles.emptyText}>
+              Type at least 2 characters to search.
+            </Text>
+          )
+        }
+      />
     </View>
   );
 }
@@ -105,6 +175,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f172a',
     paddingTop: 80,
     paddingHorizontal: 24,
+  },
+
+  backLink: {
+    color: '#60a5fa',
+    fontSize: 16,
+    marginBottom: 24,
   },
 
   title: {
@@ -129,37 +205,36 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  button: {
-    backgroundColor: '#2563eb',
-    paddingVertical: 16,
+  userCard: {
+    backgroundColor: '#1e293b',
+    padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    marginBottom: 12,
   },
 
-  buttonDisabled: {
+  cardDisabled: {
     opacity: 0.6,
   },
 
-  buttonText: {
+  username: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
-  userCard: {
-  backgroundColor: '#1e293b',
-  padding: 16,
-  borderRadius: 12,
-  marginBottom: 12,
-},
 
-username: {
-  color: '#ffffff',
-  fontSize: 16,
-  fontWeight: '600',
-},
+  email: {
+    color: '#94a3b8',
+    marginTop: 4,
+  },
 
-email: {
-  color: '#94a3b8',
-  marginTop: 4,
-},
+  emptyText: {
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 32,
+  },
+
+  loadingText: {
+    color: '#ffffff',
+    fontSize: 18,
+  },
 });

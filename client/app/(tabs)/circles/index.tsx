@@ -16,12 +16,9 @@ import {
 
 import { api } from '../../../src/services/api';
 import { useAuth } from '../../../src/context/AuthContext';
+import { CircleCard } from '@/components/circles/CircleCard';
+import type { Circle } from '../../../src/types/circle';
 
-type Circle = {
-  id: number;
-  name: string;
-  circle_type: string;
-};
 
 export default function CirclesScreen() {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -45,6 +42,17 @@ export default function CirclesScreen() {
     }
   }
 
+  function handleCirclePress(circleId: number) {
+    console.log('PRESSED CIRCLE ID:', circleId);
+
+    router.push({
+      pathname: '/(tabs)/circles/[id]',
+      params: {
+        id: circleId.toString(),
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Circles</Text>
@@ -57,30 +65,21 @@ export default function CirclesScreen() {
         data={circles}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              router.push(`/(tabs)/circles/${item.id}`)
-            }
-          >
-            <Text style={styles.cardTitle}>
-              {item.name}
-            </Text>
-
-            <Text style={styles.cardSubtitle}>
-              {item.circle_type}
-            </Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No circles yet.
-          </Text>
-        }
-      />
-    </View>
-  );
-}
+          <CircleCard
+            name={item.name}
+            circleType={item.circle_type}
+            onPress={() => handleCirclePress(item.id)}
+          />
+                  )}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>
+                      No circles yet.
+                    </Text>
+                  }
+                />
+              </View>
+            );
+          }
 
 const styles = StyleSheet.create({
   container: {

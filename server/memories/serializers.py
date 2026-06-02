@@ -18,15 +18,24 @@ class MemoryPhotoSerializer(serializers.ModelSerializer):
 
         return None
 
-
 class MemorySerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
     photos = MemoryPhotoSerializer(many=True, read_only=True)
+    created_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Memory
         fields = '__all__'
         read_only_fields = ['created_by', 'created_at', 'updated_at']
+
+    def get_created_by(self, obj):
+        if not obj.created_by:
+            return None
+
+        return {
+            'id': obj.created_by.id,
+            'username': obj.created_by.username,
+        }
 
     def get_photo(self, obj):
         request = self.context.get('request')

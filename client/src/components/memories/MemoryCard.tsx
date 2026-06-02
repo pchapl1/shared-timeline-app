@@ -7,23 +7,11 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { formatDistanceToNow } from 'date-fns';
+
+import type { Memory } from '@/types/memory';
+
 const API_HOST = 'http://127.0.0.1:8000';
-
-type MemoryPhoto = {
-  id: number;
-  image: string;
-  created_at: string;
-};
-
-type Memory = {
-  id: number;
-  title: string;
-  description: string;
-  memory_date: string;
-  location_name?: string;
-  photo?: string | null;
-  photos?: MemoryPhoto[];
-};
 
 type Props = {
   memory: Memory;
@@ -81,16 +69,35 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
       <View style={styles.content}>
         <Text style={styles.title}>{memory.title}</Text>
 
-        <Text style={styles.date}>
-          {new Date(memory.memory_date).toLocaleDateString()}
-        </Text>
+        <View style={styles.metaRow}>
+          <Text style={styles.username}>
+            @{memory.created_by?.username ?? 'unknown'}
+          </Text>
+
+          <Text style={styles.dot}>•</Text>
+
+          <Text style={styles.date}>
+            {formatDistanceToNow(
+              new Date(
+                memory.created_at ?? memory.memory_date
+              ),
+              {
+                addSuffix: true,
+              }
+            )}
+          </Text>
+        </View>
 
         {!!memory.location_name && (
-          <Text style={styles.location}>{memory.location_name}</Text>
+          <Text style={styles.location}>
+            {memory.location_name}
+          </Text>
         )}
 
         {!!memory.description && (
-          <Text style={styles.description}>{memory.description}</Text>
+          <Text style={styles.description}>
+            {memory.description}
+          </Text>
         )}
       </View>
     </View>
@@ -139,10 +146,26 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  username: {
+    color: '#bfdbfe',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  dot: {
+    color: '#64748b',
+    marginHorizontal: 8,
+  },
+
   date: {
     color: '#94a3b8',
     fontSize: 14,
-    marginBottom: 8,
   },
 
   location: {

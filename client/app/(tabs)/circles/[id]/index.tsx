@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import {
   View,
@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-// import MapView, { Marker } from 'react-native-maps';
 
 import {
   useFocusEffect,
@@ -18,35 +17,13 @@ import {
   router,
 } from 'expo-router';
 
-import { api } from '../../../../src/services/api';
 import { useAuth } from '../../../../src/context/AuthContext';
 import { MemoryCard } from '../../../../src/components/memories/MemoryCard';
+import { getCircle } from '../../../../src/services/circles';
+import { getMemories } from '../../../../src/services/memories';
 
-type Circle = {
-  id: number;
-  name: string;
-  circle_type: string;
-  start_date: string;
-};
-
-type MemoryPhoto = {
-  id: number;
-  image: string;
-  created_at: string;
-};
-
-type Memory = {
-  id: number;
-  circle: number;
-  title: string;
-  description: string;
-  memory_date: string;
-  location_name: string;
-  latitude?: string | null;
-  longitude?: string | null;
-  photo?: string | null;
-  photos?: MemoryPhoto[];
-};
+import type { Circle } from '../../../../src/types/circle';
+import type { Memory } from '../../../../src/types/memory';
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -86,16 +63,12 @@ export default function CircleDetailScreen() {
 
   const groupedMemories = groupMemoriesByMonth(memories);
 
-  // useEffect(() => {
-  //   if (id && !authLoading && tokens) {
-  //     fetchCircle();
-  //     fetchMemories();
-  //   }
-  // }, [id, authLoading, tokens]);
-
   useFocusEffect(
     useCallback(() => {
       if (id && !authLoading && tokens) {
+        setCircle(null);
+        setMemories([]);
+
         fetchCircle();
         fetchMemories();
       }
@@ -104,8 +77,9 @@ export default function CircleDetailScreen() {
 
   async function fetchCircle() {
     try {
-      const response = await api.get(`/circles/${id}/`);
-      setCircle(response.data);
+      const circleData = await getCircle(id);
+
+      setCircle(circleData);
     } catch (error) {
       console.error(error);
     }
@@ -113,9 +87,9 @@ export default function CircleDetailScreen() {
 
   async function fetchMemories() {
     try {
-      const response = await api.get('/memories/');
+      const memoriesData = await getMemories();
 
-      const circleMemories = response.data.filter(
+      const circleMemories = memoriesData.filter(
         (memory: Memory) => memory.circle === Number(id)
       );
 
@@ -139,7 +113,9 @@ export default function CircleDetailScreen() {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
       >
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/circles')}
+        >
           <Text style={styles.backLink}>← Back</Text>
         </TouchableOpacity>
 
@@ -152,7 +128,12 @@ export default function CircleDetailScreen() {
         <TouchableOpacity
           style={styles.inviteButton}
           onPress={() =>
-            router.push(`/circles/${id}/invite`)
+            router.push({
+              pathname: '/(tabs)/circles/[id]/invite',
+              params: {
+                id: id.toString(),
+              },
+            })
           }
         >
           <Text style={styles.inviteButtonText}>
@@ -162,30 +143,6 @@ export default function CircleDetailScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Map</Text>
-
-          {/* <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: 47.6062,
-              longitude: -122.3321,
-              latitudeDelta: 15,
-              longitudeDelta: 15,
-            }}
-          >
-            {memories
-              .filter((memory) => memory.latitude && memory.longitude)
-              .map((memory) => (
-                <Marker
-                  key={memory.id}
-                  coordinate={{
-                    latitude: Number(memory.latitude),
-                    longitude: Number(memory.longitude),
-                  }}
-                  title={memory.title}
-                  description={memory.location_name}
-                />
-              ))}
-          </MapView> */}
         </View>
 
         <View style={styles.section}>
@@ -204,13 +161,32 @@ export default function CircleDetailScreen() {
                   </Text>
 
                   {groupMemories.map((memory) => (
-                    <MemoryCard
+                    <TouchableOpacity
                       key={memory.id}
-                      memory={memory}
-                      onPhotoPress={(photoUrl) =>
-                        setSelectedPhoto(photoUrl)
-                      }
-                    />
+                      activeOpacity={0.9}
+                      onPress={() => {
+                        console.log('PRESSED MEMORY:', {
+                          circleId: id,
+                          memoryId: memory.id,
+                          title: memory.title,
+                        });
+
+                        router.push({
+                          pathname: '/(tabs)/circles/[id]/memories/[memoryId]',
+                          params: {
+                            id: id.toString(),
+                            memoryId: memory.id.toString(),
+                          },
+                        });
+                      }}
+                    >
+                      <MemoryCard
+                        memory={memory}
+                        onPhotoPress={(photoUrl) =>
+                          setSelectedPhoto(photoUrl)
+                        }
+                      />
+                    </TouchableOpacity>
                   ))}
                 </View>
               )
@@ -221,7 +197,14 @@ export default function CircleDetailScreen() {
 
       <TouchableOpacity
         style={styles.floatingButton}
-        onPress={() => router.push(`/circles/${id}/add-memory`)}
+        onPress={() =>
+          router.push({
+            pathname: '/(tabs)/circles/[id]/add-memory',
+            params: {
+              id: id.toString(),
+            },
+          })
+        }
       >
         <Text style={styles.floatingButtonText}>＋</Text>
       </TouchableOpacity>
@@ -311,13 +294,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  map: {
-    width: '100%',
-    height: 300,
-    borderRadius: 20,
-    marginBottom: 32,
-  },
-
   timelineGroup: {
     marginBottom: 32,
   },
@@ -385,18 +361,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
   },
-  inviteButton: {
-  backgroundColor: '#2563eb',
-  paddingVertical: 14,
-  borderRadius: 12,
-  alignItems: 'center',
-  marginTop: 20,
-  marginBottom: 24,
-},
 
-inviteButtonText: {
-  color: '#ffffff',
-  fontSize: 16,
-  fontWeight: '600',
-},
+  inviteButton: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 24,
+  },
+
+  inviteButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
