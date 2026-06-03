@@ -33,14 +33,15 @@ export default function CirclesScreen() {
     }, [isLoading, tokens])
   );
 
-  async function fetchCircles() {
-    try {
-      const response = await api.get('/circles/');
-      setCircles(response.data);
-    } catch (error) {
-      console.log(error);
-    }
+async function fetchCircles() {
+  try {
+    const response = await api.get('/circles/');
+
+    setCircles(response.data.results);
+  } catch (error) {
+    console.log(error);
   }
+}
 
   function handleCirclePress(circleId: number) {
     console.log('PRESSED CIRCLE ID:', circleId);

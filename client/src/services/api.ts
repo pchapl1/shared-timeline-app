@@ -90,7 +90,7 @@ export const createCircleInvite = async (
 export const getPendingCircleInvites = async () => {
   const response = await api.get('/circle-invites/');
 
-  return response.data;
+  return response.data.results;
 };
 
 export const acceptCircleInvite = async (inviteId: number) => {

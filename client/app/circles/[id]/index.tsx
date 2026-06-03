@@ -67,16 +67,22 @@ export default function CircleDetailScreen() {
   } = useCircle(id);
 
   const {
-    data: memories = [],
+    data: memoriesData,
     isLoading: isMemoriesLoading,
     refetch: refetchMemories,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useCircleMemories(circleId);
+
+const memories =
+  memoriesData?.pages.flatMap((page) => page.results) ?? [];
 
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const groupedMemories = groupMemoriesByMonth(memories);
-  console.log('CIRCLE DETAIL ID:', id);
+
   async function handleRefresh() {
     try {
       setRefreshing(true);
@@ -109,6 +115,23 @@ export default function CircleDetailScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
+        scrollEventThrottle={400}
+        onScroll={(event) => {
+          const { layoutMeasurement, contentOffset, contentSize } =
+            event.nativeEvent;
+
+          const isCloseToBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 120;
+
+          if (
+            isCloseToBottom &&
+            hasNextPage &&
+            !isFetchingNextPage
+          ) {
+            fetchNextPage();
+          }
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -140,9 +163,7 @@ export default function CircleDetailScreen() {
             })
           }
         >
-          <Text style={styles.inviteButtonText}>
-            Invite Member
-          </Text>
+          <Text style={styles.inviteButtonText}>Invite Member</Text>
         </TouchableOpacity>
 
         <View style={styles.section}>
@@ -200,6 +221,12 @@ export default function CircleDetailScreen() {
                 </View>
               )
             )
+          )}
+
+          {isFetchingNextPage && (
+            <Text style={styles.emptyText}>
+              Loading more memories...
+            </Text>
           )}
         </View>
       </ScrollView>

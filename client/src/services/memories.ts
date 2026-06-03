@@ -125,10 +125,9 @@ export async function deleteMemoryComment(
   );
 }
 
-export async function getCircleMemories(circleId: number) {
-  const response = await api.get('/memories/');
-
-  return response.data.filter(
-    (memory: any) => Number(memory.circle) === circleId
+export async function getCircleMemories(circleId: number, page = 1) {
+  const response = await api.get(
+    `/memories/?circle=${circleId}&page=${page}`
   );
+  return response.data;
 }

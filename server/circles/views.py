@@ -19,7 +19,7 @@ class CircleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Circle.objects.filter(
             members__user=self.request.user
-        ).distinct()
+        ).distinct().order_by('id')
 
     def perform_create(self, serializer):
         circle = serializer.save(created_by=self.request.user)
@@ -37,7 +37,7 @@ class CircleMemberViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return CircleMember.objects.filter(
             circle__members__user=self.request.user
-        ).distinct()
+        ).distinct().order_by('id')
 
 
 class CircleInviteViewSet(viewsets.ModelViewSet):

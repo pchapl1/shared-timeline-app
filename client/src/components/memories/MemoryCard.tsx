@@ -48,25 +48,31 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
 
   function updateMemoryReaction(
     memoryId: number,
-    hasReactedValue: boolean,
-    reactionCountValue: number
+    hasReacted: boolean,
+    reactionCount: number
   ) {
     queryClient.setQueriesData(
       { queryKey: ['memories'] },
-      (oldData: Memory[] | undefined) => {
-        if (!oldData) {
+      (oldData: any) => {
+        if (!oldData?.pages) {
           return oldData;
         }
 
-        return oldData.map((item) =>
-          item.id === memoryId
-            ? {
-                ...item,
-                has_reacted: hasReactedValue,
-                reaction_count: reactionCountValue,
-              }
-            : item
-        );
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            results: page.results.map((item: any) =>
+              item.id === memoryId
+                ? {
+                    ...item,
+                    has_reacted: hasReacted,
+                    reaction_count: reactionCount,
+                  }
+                : item
+            ),
+          })),
+        };
       }
     );
   }

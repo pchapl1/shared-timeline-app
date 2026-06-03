@@ -13,15 +13,17 @@ class MemoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    # def get_queryset(self):
-    #     return Memory.objects.filter(
-    #         circle__created_by=self.request.user
-    #     ).order_by('-memory_date', '-created_at')
-    
     def get_queryset(self):
-        return Memory.objects.filter(
+        queryset = Memory.objects.filter(
             circle__members__user=self.request.user
-        ).distinct().order_by('-memory_date', '-created_at')
+        ).distinct()
+
+        circle_id = self.request.query_params.get('circle')
+
+        if circle_id:
+            queryset = queryset.filter(circle_id=circle_id)
+
+        return queryset.order_by('-memory_date', '-created_at')
 
     def perform_create(self, serializer):
         memory = serializer.save(created_by=self.request.user)
