@@ -62,3 +62,29 @@ class MemoryPhoto(models.Model):
 
     def __str__(self):
         return f'Photo for {self.memory.title}'
+    
+class MemoryReaction(models.Model):
+    memory = models.ForeignKey(
+        Memory,
+        on_delete=models.CASCADE,
+        related_name='reactions'
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='memory_reactions'
+    )
+
+    reaction_type = models.CharField(
+        max_length=20,
+        default='like'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('memory', 'user', 'reaction_type')
+
+    def __str__(self):
+        return f'{self.user.username} reacted to {self.memory.title}'
