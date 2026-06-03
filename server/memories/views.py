@@ -1,17 +1,17 @@
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 
-from .models import Memory, MemoryPhoto, MemoryReaction
-from .serializers import MemorySerializer
+from .models import Memory, MemoryPhoto, MemoryReaction, MemoryComment
+from .serializers import MemorySerializer, MemoryCommentSerializer
 
 
 class MemoryViewSet(viewsets.ModelViewSet):
     serializer_class = MemorySerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         return Memory.objects.filter(
@@ -65,3 +65,52 @@ class MemoryViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
+    @action(detail=True, methods=['get', 'post'])
+    def comments(self, request, pk=None):
+        memory = self.get_object()
+
+        if request.method == 'GET':
+            comments = memory.comments.all()
+            serializer = MemoryCommentSerializer(
+                comments,
+                many=True,
+                context={'request': request}
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = MemoryCommentSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(
+                memory=memory,
+                user=request.user
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=['delete'],
+        url_path='comments/(?P<comment_id>[^/.]+)'
+    )
+    def delete_comment(self, request, pk=None, comment_id=None):
+        memory = self.get_object()
+
+        try:
+            comment = MemoryComment.objects.get(
+                id=comment_id,
+                memory=memory,
+                user=request.user
+            )
+        except MemoryComment.DoesNotExist:
+            return Response(
+                {'detail': 'Comment not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        comment.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

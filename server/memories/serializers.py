@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Memory, MemoryPhoto
+from .models import Memory, MemoryPhoto, MemoryComment 
 
 
 class MemoryPhotoSerializer(serializers.ModelSerializer):
@@ -18,10 +18,37 @@ class MemoryPhotoSerializer(serializers.ModelSerializer):
 
         return None
 
+class MemoryCommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MemoryComment
+        fields = [
+            'id',
+            'memory',
+            'user',
+            'content',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'memory',
+            'user',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username,
+        }
 
 class MemorySerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField()
     photos = MemoryPhotoSerializer(many=True, read_only=True)
+    comments = MemoryCommentSerializer(many=True, read_only=True)
+    comment_count = serializers.SerializerMethodField()
     created_by = serializers.SerializerMethodField()
     reaction_count = serializers.SerializerMethodField()
     has_reacted = serializers.SerializerMethodField()
@@ -35,6 +62,7 @@ class MemorySerializer(serializers.ModelSerializer):
             'updated_at',
             'reaction_count',
             'has_reacted',
+            'comment_count',
         ]
 
     def get_created_by(self, obj):
@@ -67,3 +95,6 @@ class MemorySerializer(serializers.ModelSerializer):
             user=request.user,
             reaction_type='like'
         ).exists()
+    
+    def get_comment_count(self, obj):
+        return obj.comments.count()

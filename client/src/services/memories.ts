@@ -1,16 +1,6 @@
 import { api } from './api';
+import { MemoryComment, CreateMemoryData  } from '../types/memory';
 
-type CreateMemoryData = {
-  circleId: string;
-  title: string;
-  description: string;
-  memoryDate: string;
-  locationName?: string;
-  latitude?: string;
-  longitude?: string;
-  imageUri?: string | null;
-  imageUris?: string[];
-};
 
 async function uriToFile(
   uri: string,
@@ -110,4 +100,27 @@ export async function toggleMemoryReaction(memoryId: number) {
   );
 
   return response.data;
+}
+
+export async function getMemoryComments(memoryId: number) {
+  return api.get<MemoryComment[]>(`/memories/${memoryId}/comments/`);
+}
+
+export async function createMemoryComment(
+  memoryId: number,
+  content: string
+) {
+  return api.post<MemoryComment>(
+    `/memories/${memoryId}/comments/`,
+    { content }
+  );
+}
+
+export async function deleteMemoryComment(
+  memoryId: number,
+  commentId: number
+) {
+  return api.delete(
+    `/memories/${memoryId}/comments/${commentId}/`
+  );
 }

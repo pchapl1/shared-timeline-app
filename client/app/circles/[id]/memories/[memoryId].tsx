@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 
+import { memoryDetailStyles as styles } from '../../../../src/styles/memoryDetailStyles';
+
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 
 import { Image } from 'expo-image';
@@ -17,8 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { api } from '../../../../src/services/api';
 import { useAuth } from '../../../../src/context/AuthContext';
-import { colors } from '../../../../src/theme/colors';
-import { spacing } from '../../../../src/theme/spacing';
+// 
 import { photoModalStyles } from '../../../../src/styles/photoModalStyles';
 
 import type { Memory } from '../../../../src/types/memory';
@@ -33,6 +35,8 @@ export default function MemoryDetailScreen() {
 
   const [memory, setMemory] = useState<Memory | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
     if (memoryId && !isLoading && tokens) {
@@ -58,6 +62,38 @@ export default function MemoryDetailScreen() {
       </View>
     );
   }
+
+  async function handleCreateComment() {
+  const trimmedComment = commentText.trim();
+
+  if (!trimmedComment || !memory) {
+    return;
+  }
+
+  try {
+    setIsSubmittingComment(true);
+
+    const response = await api.post(
+      `/memories/${memory.id}/comments/`,
+      {
+        content: trimmedComment,
+      }
+    );
+
+    setMemory({
+      ...memory,
+      comments: [...(memory.comments ?? []), response.data],
+      comment_count: (memory.comment_count ?? 0) + 1,
+    });
+
+    setCommentText('');
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Error', 'Could not add comment.');
+  } finally {
+    setIsSubmittingComment(false);
+  }
+}
 
   return (
     <View style={styles.screen}>
@@ -134,6 +170,53 @@ export default function MemoryDetailScreen() {
               {memory.description}
             </Text>
           )}
+
+          <View style={styles.commentsSection}>
+            <Text style={styles.commentsTitle}>
+              Comments ({memory.comment_count ?? memory.comments?.length ?? 0})
+            </Text>
+
+            {memory.comments && memory.comments.length > 0 ? (
+              memory.comments.map((comment) => (
+                <View key={comment.id} style={styles.commentCard}>
+                  <Text style={styles.commentUsername}>
+                    @{comment.user.username}
+                  </Text>
+
+                  <Text style={styles.commentContent}>
+                    {comment.content}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyCommentsText}>
+                No comments yet. Start the conversation.
+              </Text>
+            )}
+
+            <View style={styles.commentInputRow}>
+              <TextInput
+                value={commentText}
+                onChangeText={setCommentText}
+                placeholder="Add a comment..."
+                placeholderTextColor="#8A8A8A"
+                style={styles.commentInput}
+                multiline
+              />
+
+              <TouchableOpacity
+                style={styles.commentButton}
+                onPress={handleCreateComment}
+                disabled={isSubmittingComment}
+              >
+                <Text style={styles.commentButtonText}>
+                  {isSubmittingComment ? '...' : 'Send'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+
         </View>
       </ScrollView>
 
@@ -164,117 +247,3 @@ export default function MemoryDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-
-  loadingText: {
-    color: colors.text,
-    fontSize: 18,
-  },
-
-  backButton: {
-    color: colors.primaryLight,
-    fontSize: 16,
-    marginTop: 70,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-
-  heroImage: {
-    width: '100%',
-    height: 340,
-  },
-
-  photoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    paddingHorizontal: 12,
-  },
-
-  gridImageWrapper: {
-    width: '48.8%',
-    height: 180,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-
-  gridImage: {
-    width: '100%',
-    height: '100%',
-  },
-
-  imagePlaceholder: {
-    width: '100%',
-    height: 260,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  placeholderText: {
-    color: colors.subtleText,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  content: {
-    padding: spacing.lg,
-  },
-
-  title: {
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-
-  username: {
-    color: colors.primaryLight,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-
-  dot: {
-    color: colors.border,
-    marginHorizontal: spacing.sm,
-  },
-
-  timestamp: {
-    color: colors.muted,
-    fontSize: 14,
-  },
-
-  location: {
-    color: colors.primaryLight,
-    fontSize: 16,
-    marginBottom: spacing.lg,
-  },
-
-  description: {
-    color: colors.subtleText,
-    fontSize: 18,
-    lineHeight: 30,
-  },
-});
