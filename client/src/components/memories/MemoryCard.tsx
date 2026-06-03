@@ -23,9 +23,10 @@ const GALLERY_IMAGE_WIDTH = 340;
 type Props = {
   memory: Memory;
   onPhotoPress?: (photoUrl: string) => void;
+  onPress?: () => void;
 };
 
-export function MemoryCard({ memory, onPhotoPress }: Props) {
+export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   const [hasReacted, setHasReacted] = useState(
@@ -37,6 +38,11 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
   );
 
   const [isReacting, setIsReacting] = useState(false);
+
+  const latestComment =
+    memory.comments && memory.comments.length > 0
+      ? memory.comments[memory.comments.length - 1]
+      : null;
 
   const photoUri = memory.photo
     ? memory.photo.startsWith('http')
@@ -85,7 +91,11 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
   }
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.95}
+      onPress={onPress}
+    >
       {memory.photos && memory.photos.length > 0 ? (
         <View>
           <ScrollView
@@ -175,26 +185,47 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
           </Text>
         )}
 
-        <TouchableOpacity
-          style={styles.reactionButton}
-          activeOpacity={0.8}
-          onPress={handleToggleReaction}
-          disabled={isReacting}
-        >
-          <Text
-            style={[
-              styles.reactionIcon,
-              hasReacted && styles.reactionIconActive,
-            ]}
+        <View style={styles.engagementRow}>
+          <TouchableOpacity
+            style={styles.reactionButton}
+            activeOpacity={0.8}
+            onPress={handleToggleReaction}
+            disabled={isReacting}
           >
-            {hasReacted ? '❤️' : '🤍'}
-          </Text>
+            <Text
+              style={[
+                styles.reactionIcon,
+                hasReacted && styles.reactionIconActive,
+              ]}
+            >
+              {hasReacted ? '❤️' : '🤍'}
+            </Text>
 
-          <Text style={styles.reactionText}>
-            {reactionCount}
+            <Text style={styles.reactionText}>
+              {reactionCount}
+            </Text>
+          </TouchableOpacity>
+
+          <Text style={styles.commentCountText}>
+            💬 {memory.comment_count ?? memory.comments?.length ?? 0}
           </Text>
-        </TouchableOpacity>
+        </View>
+
+        {latestComment && (
+          <View style={styles.commentPreview}>
+            <Text style={styles.commentPreviewUser}>
+              @{latestComment.user.username}
+            </Text>
+
+            <Text
+              style={styles.commentPreviewText}
+              numberOfLines={2}
+            >
+              {latestComment.content}
+            </Text>
+          </View>
+        )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

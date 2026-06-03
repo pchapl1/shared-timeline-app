@@ -196,12 +196,21 @@ export default function CircleDetailScreen() {
                         });
                       }}
                     >
-                      <MemoryCard
-                        memory={memory}
-                        onPhotoPress={(photoUrl) =>
-                          setSelectedPhoto(photoUrl)
-                        }
-                      />
+                    <MemoryCard
+                      memory={memory}
+                      onPhotoPress={(photoUrl) =>
+                        setSelectedPhoto(photoUrl)
+                      }
+                      onPress={() =>
+                        router.push({
+                          pathname: '/circles/[id]/memories/[memoryId]',
+                          params: {
+                            id: id.toString(),
+                            memoryId: memory.id.toString(),
+                          },
+                        })
+                      }
+                    />
                     </TouchableOpacity>
                   ))}
                 </View>

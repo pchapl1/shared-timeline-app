@@ -99,13 +99,20 @@ export const memoryCardStyles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
+
+  engagementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: spacing.md,
+  },
+
   reactionButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  alignSelf: 'flex-start',
-  gap: spacing.xs,
-  marginTop: spacing.md,
-},
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+  },
 
   reactionIcon: {
     fontSize: 22,
@@ -118,6 +125,38 @@ export const memoryCardStyles = StyleSheet.create({
   reactionText: {
     color: colors.subtleText,
     fontSize: 15,
+    fontWeight: '600',
+  },
+
+  commentCountText: {
+    color: colors.subtleText,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  commentPreview: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+
+  commentPreviewUser: {
+    color: colors.primaryLight,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+
+  commentPreviewText: {
+    color: colors.subtleText,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  metaText: {
+    color: colors.subtleText,
+    fontSize: 14,
     fontWeight: '600',
   },
 });
