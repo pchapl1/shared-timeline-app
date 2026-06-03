@@ -1,17 +1,24 @@
+import { useState } from 'react';
+
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   TouchableOpacity,
   ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 
 import { formatDistanceToNow } from 'date-fns';
 
 import type { Memory } from '@/types/memory';
 
+import { memoryCardStyles as styles } from '@/styles/memoryCardStyles';
+import { toggleMemoryReaction } from '@/services/memories';
+
 const API_HOST = 'http://127.0.0.1:8000';
+const GALLERY_IMAGE_WIDTH = 340;
 
 type Props = {
   memory: Memory;
@@ -19,34 +26,104 @@ type Props = {
 };
 
 export function MemoryCard({ memory, onPhotoPress }: Props) {
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+
+  const [hasReacted, setHasReacted] = useState(
+    memory.has_reacted ?? false
+  );
+
+  const [reactionCount, setReactionCount] = useState(
+    memory.reaction_count ?? 0
+  );
+
+  const [isReacting, setIsReacting] = useState(false);
+
   const photoUri = memory.photo
     ? memory.photo.startsWith('http')
       ? memory.photo
       : `${API_HOST}${memory.photo}`
     : null;
 
+  function handleGalleryScroll(
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const nextIndex = Math.round(offsetX / GALLERY_IMAGE_WIDTH);
+
+    setActivePhotoIndex(nextIndex);
+  }
+
+  async function handleToggleReaction() {
+    if (isReacting) {
+      return;
+    }
+
+    const previousHasReacted = hasReacted;
+    const previousReactionCount = reactionCount;
+
+    setIsReacting(true);
+    setHasReacted(!previousHasReacted);
+    setReactionCount(
+      previousHasReacted
+        ? Math.max(previousReactionCount - 1, 0)
+        : previousReactionCount + 1
+    );
+
+    try {
+      const response = await toggleMemoryReaction(memory.id);
+
+      setHasReacted(response.has_reacted);
+      setReactionCount(response.reaction_count);
+    } catch (error) {
+      console.error(error);
+
+      setHasReacted(previousHasReacted);
+      setReactionCount(previousReactionCount);
+    } finally {
+      setIsReacting(false);
+    }
+  }
+
   return (
     <View style={styles.card}>
       {memory.photos && memory.photos.length > 0 ? (
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-        >
-          {memory.photos.map((photo) => (
-            <TouchableOpacity
-              key={photo.id}
-              activeOpacity={0.9}
-              onPress={() => onPhotoPress?.(photo.image)}
-            >
-              <Image
-                source={{ uri: photo.image }}
-                style={styles.galleryImage}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleGalleryScroll}
+          >
+            {memory.photos.map((photo) => (
+              <TouchableOpacity
+                key={photo.id}
+                activeOpacity={0.9}
+                onPress={() => onPhotoPress?.(photo.image)}
+              >
+                <Image
+                  source={{ uri: photo.image }}
+                  style={styles.galleryImage}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {memory.photos.length > 1 && (
+            <View style={styles.pagination}>
+              {memory.photos.map((photo, index) => (
+                <View
+                  key={photo.id}
+                  style={[
+                    styles.paginationDot,
+                    index === activePhotoIndex &&
+                      styles.paginationDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+        </View>
       ) : photoUri ? (
         <TouchableOpacity
           activeOpacity={0.9}
@@ -78,9 +155,7 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
 
           <Text style={styles.date}>
             {formatDistanceToNow(
-              new Date(
-                memory.created_at ?? memory.memory_date
-              ),
+              new Date(memory.created_at ?? memory.memory_date),
               {
                 addSuffix: true,
               }
@@ -99,84 +174,27 @@ export function MemoryCard({ memory, onPhotoPress }: Props) {
             {memory.description}
           </Text>
         )}
+
+        <TouchableOpacity
+          style={styles.reactionButton}
+          activeOpacity={0.8}
+          onPress={handleToggleReaction}
+          disabled={isReacting}
+        >
+          <Text
+            style={[
+              styles.reactionIcon,
+              hasReacted && styles.reactionIconActive,
+            ]}
+          >
+            {hasReacted ? '❤️' : '🤍'}
+          </Text>
+
+          <Text style={styles.reactionText}>
+            {reactionCount}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#1e293b',
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-
-  image: {
-    width: '100%',
-    height: 220,
-  },
-
-  galleryImage: {
-    width: 340,
-    height: 220,
-  },
-
-  imagePlaceholder: {
-    height: 180,
-    backgroundColor: '#334155',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  placeholderText: {
-    color: '#cbd5e1',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  content: {
-    padding: 18,
-  },
-
-  title: {
-    color: '#ffffff',
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-
-  username: {
-    color: '#bfdbfe',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  dot: {
-    color: '#64748b',
-    marginHorizontal: 8,
-  },
-
-  date: {
-    color: '#94a3b8',
-    fontSize: 14,
-  },
-
-  location: {
-    color: '#bfdbfe',
-    fontSize: 14,
-    marginBottom: 12,
-  },
-
-  description: {
-    color: '#e2e8f0',
-    fontSize: 16,
-    lineHeight: 24,
-  },
-});

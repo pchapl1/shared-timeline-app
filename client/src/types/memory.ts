@@ -18,6 +18,8 @@ export type Memory = {
   location_name?: string;
   photo?: string | null;
   photos?: MemoryPhoto[];
+  reaction_count?: number;
+  has_reacted?: boolean;
   created_by?: MemoryCreator | null;
   created_at?: string;
   updated_at?: string;

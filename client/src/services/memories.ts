@@ -102,4 +102,12 @@ export async function createMemory(data: CreateMemoryData) {
 export async function getMemories() {
   const response = await api.get('/memories/');
   return response.data;
-};
+}
+
+export async function toggleMemoryReaction(memoryId: number) {
+  const response = await api.post(
+    `/memories/${memoryId}/toggle_reaction/`
+  );
+
+  return response.data;
+}
