@@ -124,3 +124,11 @@ export async function deleteMemoryComment(
     `/memories/${memoryId}/comments/${commentId}/`
   );
 }
+
+export async function getCircleMemories(circleId: number) {
+  const response = await api.get('/memories/');
+
+  return response.data.filter(
+    (memory: any) => Number(memory.circle) === circleId
+  );
+}

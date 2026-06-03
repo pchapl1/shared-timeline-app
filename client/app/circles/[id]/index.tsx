@@ -1,28 +1,30 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
+
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
+import { useCircle } from '@/hooks/useCircle';
+import { useCircleMemories } from '@/hooks/useCircleMemories';
+
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Modal,
   RefreshControl,
 } from 'react-native';
+
 import { Image } from 'expo-image';
+
 import {
-  useFocusEffect,
   useLocalSearchParams,
   router,
 } from 'expo-router';
+
 import { useAuth } from '../../../src/context/AuthContext';
 import { MemoryCard } from '../../../src/components/memories/MemoryCard';
-import { getCircle } from '../../../src/services/circles';
-import { getMemories } from '../../../src/services/memories';
 import { colors } from '../../../src/theme/colors';
-import type { Circle } from '../../../src/types/circle';
+
 import type { Memory } from '../../../src/types/memory';
-import { useMemories } from '@/context/MemoryContext';
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -56,69 +58,45 @@ export default function CircleDetailScreen() {
 
   const { isLoading: authLoading, tokens } = useAuth();
 
-  const [circle, setCircle] = useState<Circle | null>(null);
-  const { memories, setMemories } = useMemories();  
+  const circleId = Number(id);
+
+  const {
+    data: circle,
+    isLoading: isCircleLoading,
+    refetch: refetchCircle,
+  } = useCircle(id);
+
+  const {
+    data: memories = [],
+    isLoading: isMemoriesLoading,
+    refetch: refetchMemories,
+  } = useCircleMemories(circleId);
+
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const groupedMemories = groupMemoriesByMonth(memories);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (id && !authLoading && tokens) {
-        // setCircle(null);
-        // setMemories([]);
-
-        fetchCircle();
-        fetchMemories();
-      }
-    }, [id, authLoading, tokens])
-  );
-
-  async function fetchCircle() {
-    try {
-      const circleData = await getCircle(id);
-
-      setCircle(circleData);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function fetchMemories() {
-    try {
-      const memoriesData = await getMemories();
-
-      const circleMemories = memoriesData.filter(
-        (memory: Memory) => memory.circle === Number(id)
-      );
-
-      setMemories((previous) => {
-        const optimisticMemories = previous.filter(
-          (memory) => memory.id < 0
-        );
-
-        return [
-          ...optimisticMemories,
-          ...circleMemories,
-        ];
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
+  console.log('CIRCLE DETAIL ID:', id);
   async function handleRefresh() {
     try {
       setRefreshing(true);
 
-      await Promise.all([fetchCircle(), fetchMemories()]);
+      await Promise.all([
+        refetchCircle(),
+        refetchMemories(),
+      ]);
     } finally {
       setRefreshing(false);
     }
   }
 
-  if (authLoading || !circle) {
+  if (
+    authLoading ||
+    isCircleLoading ||
+    isMemoriesLoading ||
+    !tokens ||
+    !circle
+  ) {
     return (
       <View style={styles.container}>
         <Text style={styles.loading}>Loading circle...</Text>
@@ -127,7 +105,6 @@ export default function CircleDetailScreen() {
   }
 
   return (
-    
     <View style={styles.screen}>
       <ScrollView
         style={styles.container}
@@ -202,21 +179,22 @@ export default function CircleDetailScreen() {
                         });
                       }}
                     >
-                    <MemoryCard
-                      memory={memory}
-                      onPhotoPress={(photoUrl) =>
-                        setSelectedPhoto(photoUrl)
-                      }
-                      onPress={() =>
-                        router.push({
-                          pathname: '/circles/[id]/memories/[memoryId]',
-                          params: {
-                            id: id.toString(),
-                            memoryId: memory.id.toString(),
-                          },
-                        })
-                      }
-                    />
+                      <MemoryCard
+                        memory={memory}
+                        onPhotoPress={(photoUrl) =>
+                          setSelectedPhoto(photoUrl)
+                        }
+                        onPress={() =>
+                          router.push({
+                            pathname:
+                              '/circles/[id]/memories/[memoryId]',
+                            params: {
+                              id: id.toString(),
+                              memoryId: memory.id.toString(),
+                            },
+                          })
+                        }
+                      />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -266,4 +244,3 @@ export default function CircleDetailScreen() {
     </View>
   );
 }
-

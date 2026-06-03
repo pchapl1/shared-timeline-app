@@ -3,14 +3,18 @@ import { useCallback } from 'react';
 import { Tabs, useFocusEffect } from 'expo-router';
 
 import { useInvites } from '../../src/context/InviteContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TabsLayout() {
+  const { tokens, isLoading } = useAuth();
   const { pendingInviteCount, refreshInviteCount } = useInvites();
 
   useFocusEffect(
     useCallback(() => {
-      refreshInviteCount();
-    }, [refreshInviteCount])
+      if (!isLoading && tokens) {
+        refreshInviteCount();
+      }
+    }, [isLoading, tokens, refreshInviteCount])
   );
 
   return (

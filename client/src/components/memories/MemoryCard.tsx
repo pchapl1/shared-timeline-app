@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 
 import { formatDistanceToNow } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { Memory } from '@/types/memory';
-
 import { memoryCardStyles as styles } from '@/styles/memoryCardStyles';
 import { toggleMemoryReaction } from '@/services/memories';
 
@@ -28,16 +28,12 @@ type Props = {
 
 export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
-
-  const [hasReacted, setHasReacted] = useState(
-    memory.has_reacted ?? false
-  );
-
-  const [reactionCount, setReactionCount] = useState(
-    memory.reaction_count ?? 0
-  );
-
   const [isReacting, setIsReacting] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const hasReacted = memory.has_reacted ?? false;
+  const reactionCount = memory.reaction_count ?? 0;
 
   const latestComment =
     memory.comments && memory.comments.length > 0
@@ -49,6 +45,31 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
       ? memory.photo
       : `${API_HOST}${memory.photo}`
     : null;
+
+  function updateMemoryReaction(
+    memoryId: number,
+    hasReactedValue: boolean,
+    reactionCountValue: number
+  ) {
+    queryClient.setQueriesData(
+      { queryKey: ['memories'] },
+      (oldData: Memory[] | undefined) => {
+        if (!oldData) {
+          return oldData;
+        }
+
+        return oldData.map((item) =>
+          item.id === memoryId
+            ? {
+                ...item,
+                has_reacted: hasReactedValue,
+                reaction_count: reactionCountValue,
+              }
+            : item
+        );
+      }
+    );
+  }
 
   function handleGalleryScroll(
     event: NativeSyntheticEvent<NativeScrollEvent>
@@ -67,24 +88,35 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
     const previousHasReacted = hasReacted;
     const previousReactionCount = reactionCount;
 
+    const optimisticHasReacted = !previousHasReacted;
+    const optimisticReactionCount = previousHasReacted
+      ? Math.max(previousReactionCount - 1, 0)
+      : previousReactionCount + 1;
+
     setIsReacting(true);
-    setHasReacted(!previousHasReacted);
-    setReactionCount(
-      previousHasReacted
-        ? Math.max(previousReactionCount - 1, 0)
-        : previousReactionCount + 1
+
+    updateMemoryReaction(
+      memory.id,
+      optimisticHasReacted,
+      optimisticReactionCount
     );
 
     try {
       const response = await toggleMemoryReaction(memory.id);
 
-      setHasReacted(response.has_reacted);
-      setReactionCount(response.reaction_count);
+      updateMemoryReaction(
+        memory.id,
+        response.has_reacted,
+        response.reaction_count
+      );
     } catch (error) {
       console.error(error);
 
-      setHasReacted(previousHasReacted);
-      setReactionCount(previousReactionCount);
+      updateMemoryReaction(
+        memory.id,
+        previousHasReacted,
+        previousReactionCount
+      );
     } finally {
       setIsReacting(false);
     }
@@ -166,9 +198,7 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
           <Text style={styles.date}>
             {formatDistanceToNow(
               new Date(memory.created_at ?? memory.memory_date),
-              {
-                addSuffix: true,
-              }
+              { addSuffix: true }
             )}
           </Text>
         </View>

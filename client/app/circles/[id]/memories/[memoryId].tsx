@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { memoryDetailStyles as styles } from '../../../../src/styles/memoryDetailStyles';
+import { photoModalStyles } from '../../../../src/styles/photoModalStyles';
+
+import { useMemory } from '@/hooks/useMemory';
+import { createMemoryComment, deleteMemoryComment } from '@/services/memories';
 
 import {
   View,
@@ -13,17 +17,11 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-
 import { useLocalSearchParams, router } from 'expo-router';
-
 import { formatDistanceToNow } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { api } from '../../../../src/services/api';
 import { useAuth } from '../../../../src/context/AuthContext';
-// 
-import { photoModalStyles } from '../../../../src/styles/photoModalStyles';
-
-import type { Memory } from '../../../../src/types/memory';
 
 export default function MemoryDetailScreen() {
   const { memoryId, id } = useLocalSearchParams<{
@@ -31,31 +29,19 @@ export default function MemoryDetailScreen() {
     id: string;
   }>();
 
-  const { tokens, isLoading } = useAuth();
+  const { isLoading } = useAuth();
+  const queryClient = useQueryClient();
 
-  const [memory, setMemory] = useState<Memory | null>(null);
+  const {
+    data: memory,
+    isLoading: memoryLoading,
+  } = useMemory(memoryId);
+
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  useEffect(() => {
-    if (memoryId && !isLoading && tokens) {
-      setMemory(null);
-      fetchMemory();
-    }
-  }, [memoryId, isLoading, tokens]);
-
-  async function fetchMemory() {
-    try {
-      const response = await api.get(`/memories/${memoryId}/`);
-
-      setMemory(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  if (isLoading || !memory) {
+  if (isLoading || memoryLoading || !memory) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading memory...</Text>
@@ -64,53 +50,63 @@ export default function MemoryDetailScreen() {
   }
 
   async function handleCreateComment() {
-  const trimmedComment = commentText.trim();
+    const trimmedComment = commentText.trim();
 
-  if (!trimmedComment || !memory) {
-    return;
-  }
-
-  try {
-    setIsSubmittingComment(true);
-
-    const response = await api.post(
-      `/memories/${memory.id}/comments/`,
-      {
-        content: trimmedComment,
-      }
-    );
-
-    setMemory({
-      ...memory,
-      comments: [...(memory.comments ?? []), response.data],
-      comment_count: (memory.comment_count ?? 0) + 1,
-    });
-
-    setCommentText('');
-  } catch (error) {
-    console.error(error);
-    Alert.alert('Error', 'Could not add comment.');
-  } finally {
-    setIsSubmittingComment(false);
-  }
-}
-
-  async function handleDeleteComment(commentId: number) {
-    if (!memory) {
+    if (!trimmedComment || !memoryId || !memory) {
       return;
     }
 
     try {
-      await api.delete(
-        `/memories/${memory.id}/comments/${commentId}/`
+      setIsSubmittingComment(true);
+
+      const response = await createMemoryComment(
+        memory.id,
+        trimmedComment
       );
 
-      setMemory({
-        ...memory,
-        comments: memory.comments?.filter(
-          (comment) => comment.id !== commentId
-        ),
-        comment_count: Math.max((memory.comment_count ?? 1) - 1, 0),
+      queryClient.setQueryData(
+        ['memory', memoryId],
+        {
+          ...memory,
+          comments: [...(memory.comments ?? []), response.data],
+          comment_count: (memory.comment_count ?? 0) + 1,
+        }
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ['memories', Number(id)],
+      });
+
+      setCommentText('');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Could not add comment.');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  }
+
+  async function handleDeleteComment(commentId: number) {
+    if (!memoryId || !memory) {
+      return;
+    }
+
+    try {
+      await deleteMemoryComment(memory.id, commentId);
+
+      queryClient.setQueryData(
+        ['memory', memoryId],
+        {
+          ...memory,
+          comments: memory.comments?.filter(
+            (comment) => comment.id !== commentId
+          ),
+          comment_count: Math.max((memory.comment_count ?? 1) - 1, 0),
+        }
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ['memories', Number(id)],
       });
     } catch (error) {
       console.error(error);
@@ -135,7 +131,7 @@ export default function MemoryDetailScreen() {
                 key={photo.id}
                 activeOpacity={0.9}
                 style={styles.gridImageWrapper}
-                onPress={() => setSelectedPhoto(photo.image?? null)}
+                onPress={() => setSelectedPhoto(photo.image ?? null)}
               >
                 <Image
                   source={{ uri: photo.image }}
@@ -175,9 +171,7 @@ export default function MemoryDetailScreen() {
             <Text style={styles.timestamp}>
               {formatDistanceToNow(
                 new Date(memory.created_at ?? memory.memory_date),
-                {
-                  addSuffix: true,
-                }
+                { addSuffix: true }
               )}
             </Text>
           </View>
@@ -209,6 +203,7 @@ export default function MemoryDetailScreen() {
                   <Text style={styles.commentContent}>
                     {comment.content}
                   </Text>
+
                   <TouchableOpacity
                     style={styles.deleteCommentButton}
                     onPress={() => handleDeleteComment(comment.id)}
@@ -246,8 +241,6 @@ export default function MemoryDetailScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
-
         </View>
       </ScrollView>
 
@@ -277,4 +270,3 @@ export default function MemoryDetailScreen() {
     </View>
   );
 }
-

@@ -21,7 +21,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 
 import { createMemory } from '../../../src/services/memories';
-import { useMemories } from '@/context/MemoryContext';
+
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AddMemoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -30,17 +31,12 @@ export default function AddMemoryScreen() {
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-
   const [images, setImages] = useState<string[]>([]);
-
   const [locationName, setLocationName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const {
-    addMemory,
-    removeMemory,
-    replaceMemory,
-  } = useMemories();
+
+  const queryClient = useQueryClient();
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -87,7 +83,7 @@ export default function AddMemoryScreen() {
       updated_at: new Date().toISOString(),
     };
 
-    addMemory(optimisticMemory);
+    // addMemory(optimisticMemory);
 
     router.replace(`/circles/${id}`);
 
@@ -104,10 +100,10 @@ export default function AddMemoryScreen() {
         longitude: longitude ? String(longitude) : undefined,
       });
 
-      replaceMemory(tempId, response.data);
+      await queryClient.invalidateQueries({
+        queryKey: ['memories', Number(id)],
+    });
     } catch (error: any) {
-      removeMemory(tempId);
-
       console.error(
         'Create memory error:',
         error.response?.data || error
