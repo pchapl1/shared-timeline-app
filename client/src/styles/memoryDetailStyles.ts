@@ -186,4 +186,15 @@ commentButtonText: {
   fontSize: 14,
   fontWeight: '700',
 },
+
+deleteCommentButton: {
+  alignSelf: 'flex-start',
+  marginTop: 8,
+},
+
+deleteCommentText: {
+  color: colors.danger,
+  fontSize: 13,
+  fontWeight: '700',
+},
 });

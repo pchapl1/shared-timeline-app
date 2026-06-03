@@ -9,6 +9,7 @@ export const colors = {
   primaryLight: '#60a5fa',
 
   border: '#475569',
+  danger: '#dEF4444',
 
   modalOverlay: 'rgba(0, 0, 0, 0.95)',
   modalButton: 'rgba(15, 23, 42, 0.8)',

@@ -21,6 +21,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 
 import { createMemory } from '../../../src/services/memories';
+import { useMemories } from '@/context/MemoryContext';
 
 export default function AddMemoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,6 +36,11 @@ export default function AddMemoryScreen() {
   const [locationName, setLocationName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const {
+    addMemory,
+    removeMemory,
+    replaceMemory,
+  } = useMemories();
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -50,20 +56,58 @@ export default function AddMemoryScreen() {
   }
 
   async function handleCreateMemory() {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      Alert.alert('Missing title', 'Please add a title.');
+      return;
+    }
+
+    const tempId = Date.now() * -1;
+
+    const optimisticMemory = {
+      id: tempId,
+      circle: Number(id),
+      title: trimmedTitle,
+      description,
+      memory_date: memoryDate.toISOString().split('T')[0],
+      location_name: locationName,
+      photo: images[0] ?? null,
+      photos: images.map((imageUri, index) => ({
+        id: tempId - index - 1,
+        image: imageUri,
+        created_at: new Date().toISOString(),
+      })),
+      reaction_count: 0,
+      has_reacted: false,
+      comments: [],
+      comment_count: 0,
+      created_by: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    addMemory(optimisticMemory);
+
+    router.replace(`/circles/${id}`);
+
+  setTimeout(async () => {
     try {
-      await createMemory({
+      const response = await createMemory({
         circleId: String(id),
-        title,
+        title: trimmedTitle,
         description,
         memoryDate: memoryDate.toISOString().split('T')[0],
         imageUris: images,
         locationName,
-        latitude: String(latitude),
-        longitude: String(longitude),
+        latitude: latitude ? String(latitude) : undefined,
+        longitude: longitude ? String(longitude) : undefined,
       });
 
-      router.replace(`/circles/${id}`);
+      replaceMemory(tempId, response.data);
     } catch (error: any) {
+      removeMemory(tempId);
+
       console.error(
         'Create memory error:',
         error.response?.data || error
@@ -71,6 +115,7 @@ export default function AddMemoryScreen() {
 
       Alert.alert('Error', 'Could not create memory.');
     }
+  }, 300)
   }
 
   return (

@@ -95,6 +95,29 @@ export default function MemoryDetailScreen() {
   }
 }
 
+  async function handleDeleteComment(commentId: number) {
+    if (!memory) {
+      return;
+    }
+
+    try {
+      await api.delete(
+        `/memories/${memory.id}/comments/${commentId}/`
+      );
+
+      setMemory({
+        ...memory,
+        comments: memory.comments?.filter(
+          (comment) => comment.id !== commentId
+        ),
+        comment_count: Math.max((memory.comment_count ?? 1) - 1, 0),
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Could not delete comment.');
+    }
+  }
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.container}>
@@ -186,6 +209,14 @@ export default function MemoryDetailScreen() {
                   <Text style={styles.commentContent}>
                     {comment.content}
                   </Text>
+                  <TouchableOpacity
+                    style={styles.deleteCommentButton}
+                    onPress={() => handleDeleteComment(comment.id)}
+                  >
+                    <Text style={styles.deleteCommentText}>
+                      Delete
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))
             ) : (

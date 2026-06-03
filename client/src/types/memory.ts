@@ -50,3 +50,19 @@ export type CreateMemoryData = {
   imageUri?: string | null;
   imageUris?: string[];
 };
+
+export type MemoryContextType = {
+  memories: Memory[];
+  setMemories: React.Dispatch<
+    React.SetStateAction<Memory[]>
+  >;
+
+  addMemory: (memory: Memory) => void;
+
+  removeMemory: (memoryId: number) => void;
+
+  replaceMemory: (
+    tempId: number,
+    memory: Memory
+  ) => void;
+};
