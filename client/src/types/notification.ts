@@ -10,8 +10,8 @@ export type Notification = {
     | 'member_joined';
   is_read: boolean;
   circle: number | null;
-  circle_name?: string | null;
+  circle_name: string | null;
   memory: number | null;
-  memory_title?: string | null;
+  memory_title: string | null;
   created_at: string;
 };

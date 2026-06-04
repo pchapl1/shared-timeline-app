@@ -1,4 +1,6 @@
 import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -38,20 +40,69 @@ export default function NotificationsScreen() {
     isLoading,
   } = useNotifications();
 
-  const notifications =
-    data?.pages.flatMap((page) => page.results) ?? [];
-
-  async function handleNotificationPress(notificationId: number) {
-    try {
-      await markNotificationRead(notificationId);
-
-      await queryClient.invalidateQueries({
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({
         queryKey: ['notifications'],
       });
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ['unreadNotificationCount'],
       });
+    }, [queryClient])
+  );
+
+  const notifications =
+    data?.pages.flatMap((page) => page.results) ?? [];
+
+  async function handleNotificationPress(
+    notification: Notification
+  ) {
+    try {
+      if (!notification.is_read) {
+        await markNotificationRead(notification.id);
+
+        await queryClient.invalidateQueries({
+          queryKey: ['notifications'],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ['unreadNotificationCount'],
+        });
+      }
+
+      if (
+        notification.notification_type === 'memory_comment' ||
+        notification.notification_type === 'memory_reaction'
+      ) {
+        if (notification.circle && notification.memory) {
+          router.push({
+            pathname: '/circles/[id]/memories/[memoryId]',
+            params: {
+              id: notification.circle.toString(),
+              memoryId: notification.memory.toString(),
+            },
+          });
+        }
+
+        return;
+      }
+
+      if (notification.notification_type === 'circle_invite') {
+        router.push('/invites');
+        return;
+      }
+
+      if (notification.notification_type === 'member_joined') {
+        if (notification.circle) {
+          router.push({
+            pathname: '/circles/[id]',
+            params: {
+              id: notification.circle.toString(),
+            },
+          });
+        }
+      }
     } catch (error) {
       console.log(error);
     }
@@ -95,7 +146,7 @@ export default function NotificationsScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => handleNotificationPress(item.id)}
+            onPress={() => handleNotificationPress(item)}
           >
             <View
               style={[
