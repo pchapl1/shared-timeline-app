@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from .models import Memory, MemoryPhoto, MemoryReaction, MemoryComment
 from .serializers import MemorySerializer, MemoryCommentSerializer
 
+from activities.models import Activity
+
 
 class MemoryViewSet(viewsets.ModelViewSet):
     serializer_class = MemorySerializer
@@ -43,6 +45,13 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 image=memory.photo
             )
 
+        Activity.objects.create(
+            actor=self.request.user,
+            circle=memory.circle,
+            activity_type=Activity.MEMORY_CREATED,
+            memory=memory
+        )
+
     @action(detail=True, methods=['post'])
     def toggle_reaction(self, request, pk=None):
         memory = self.get_object()
@@ -62,6 +71,13 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 user=request.user,
                 reaction_type='like'
             )
+
+            Activity.objects.create(
+                actor=request.user,
+                circle=memory.circle,
+                activity_type=Activity.REACTION_CREATED,
+                memory=memory
+            )
             has_reacted = True
 
         return Response(
@@ -72,6 +88,7 @@ class MemoryViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
+    
     @action(detail=True, methods=['get', 'post'])
     def comments(self, request, pk=None):
         memory = self.get_object()
@@ -89,12 +106,23 @@ class MemoryViewSet(viewsets.ModelViewSet):
         serializer = MemoryCommentSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(
+            comment = serializer.save(
                 memory=memory,
                 user=request.user
             )
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            Activity.objects.create(
+                actor=request.user,
+                circle=memory.circle,
+                activity_type=Activity.COMMENT_CREATED,
+                memory=memory,
+                comment=comment
+            )
+
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

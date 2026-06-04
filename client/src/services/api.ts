@@ -107,5 +107,9 @@ export const declineCircleInvite = async (inviteId: number) => {
 
 export const searchUsers = async (query: string) => {
   const response = await api.get(`/auth/search/?q=${query}`);
-  return response.data;
+
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+  return response.data.results;
 };

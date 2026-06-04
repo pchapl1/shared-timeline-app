@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from activities.models import Activity
 from .models import Circle, CircleMember, CircleInvite
 from .serializers import (
     CircleSerializer,
@@ -151,6 +151,12 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
         invite.status = 'accepted'
         invite.responded_at = timezone.now()
         invite.save()
+
+        Activity.objects.create(
+            actor=request.user,
+            circle=invite.circle,
+            activity_type=Activity.MEMBER_JOINED,
+)
 
         return Response({
             'message': 'Invite accepted'
