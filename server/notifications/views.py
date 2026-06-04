@@ -31,3 +31,14 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(
             {'status': 'read'}
         )
+    
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        count = Notification.objects.filter(
+            recipient=request.user,
+            is_read=False,
+        ).count()
+
+        return Response({
+            'count': count,
+        })

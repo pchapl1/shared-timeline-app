@@ -1,20 +1,20 @@
 import { useCallback } from 'react';
 
 import { Tabs, useFocusEffect } from 'expo-router';
-
-import { useInvites } from '../../src/context/InviteContext';
+import { useUnreadNotificationCount } from '@/hooks/useUnreadNotificationCount';
 import { useAuth } from '@/context/AuthContext';
 
 export default function TabsLayout() {
   const { tokens, isLoading } = useAuth();
-  const { pendingInviteCount, refreshInviteCount } = useInvites();
+  const { data: unreadNotificationCount = 0, refetch } =
+    useUnreadNotificationCount();
 
   useFocusEffect(
     useCallback(() => {
       if (!isLoading && tokens) {
-        refreshInviteCount();
+        refetch();
       }
-    }, [isLoading, tokens, refreshInviteCount])
+    }, [isLoading, tokens, refetch])
   );
 
   return (
@@ -51,8 +51,8 @@ export default function TabsLayout() {
           title: 'Notifications',
           tabBarLabel: 'Notifications',
           tabBarBadge:
-            pendingInviteCount > 0
-              ? pendingInviteCount
+            unreadNotificationCount > 0
+              ? unreadNotificationCount
               : undefined,
         }}
       />

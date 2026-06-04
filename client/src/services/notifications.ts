@@ -17,3 +17,9 @@ export async function markNotificationRead(
 
   return response.data;
 }
+
+export async function getUnreadNotificationCount() {
+  const response = await api.get('/notifications/unread_count/');
+
+  return response.data.count;
+}

@@ -48,6 +48,10 @@ export default function NotificationsScreen() {
       await queryClient.invalidateQueries({
         queryKey: ['notifications'],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['unreadNotificationCount'],
+      });
     } catch (error) {
       console.log(error);
     }
