@@ -29,6 +29,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +41,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    'channels',
+
 
     'accounts',
     'activities',
@@ -80,6 +85,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# =====================================================
+# Channels / ASGI Configuration
+#
+# WSGI handles normal HTTP requests.
+# ASGI can handle HTTP plus long-lived WebSocket connections.
+# =====================================================
+ASGI_APPLICATION = 'config.asgi.application'
+
+# =====================================================
+# Channel Layers
+#
+# This tells Django Channels how WebSocket connections
+# communicate with each other.
+#
+# We are using RedisPubSubChannelLayer instead of the
+# default RedisChannelLayer because it uses Redis Pub/Sub.
+#
+# That avoids the blocking sorted-set receive behavior
+# that was causing the BZPOPMIN timeout in your logs.
+# =====================================================
+CHANNEL_LAYERS = {
+    'default': {
+        # Pub/Sub Redis backend for Django Channels.
+        'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
+
+        'CONFIG': {
+            # Local Redis server/database 0.
+            'hosts': ['redis://127.0.0.1:6379/0'],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

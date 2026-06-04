@@ -1,16 +1,35 @@
 """
-ASGI config for config project.
+ASGI configuration for the Shared Timeline app.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.0/howto/deployment/asgi/
+ASGI lets Django handle both:
+- normal HTTP requests
+- WebSocket connections
 """
 
 import os
 
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+from config.middleware import JWTAuthMiddleware
+from notifications.routing import websocket_urlpatterns
 
-application = get_asgi_application()
+os.environ.setdefault(
+    'DJANGO_SETTINGS_MODULE',
+    'config.settings'
+)
+
+# This handles normal Django/DRF HTTP requests.
+django_asgi_app = get_asgi_application()
+
+application = ProtocolTypeRouter({
+    # Normal API/browser requests go here.
+    'http': django_asgi_app,
+
+    # WebSocket requests go here.
+    # JWTAuthMiddleware reads the token from the URL
+    # and adds the logged-in user to scope['user'].
+    'websocket': JWTAuthMiddleware(
+        URLRouter(websocket_urlpatterns)
+    ),
+})
