@@ -4,6 +4,7 @@ import { memoryDetailStyles as styles } from '../../../../src/styles/memoryDetai
 import { photoModalStyles } from '../../../../src/styles/photoModalStyles';
 
 import { useMemory } from '@/hooks/useMemory';
+import { useMemoryCommentsSocket } from '@/hooks/useMemoryCommentsSocket';
 import { createMemoryComment, deleteMemoryComment } from '@/services/memories';
 
 import {
@@ -36,6 +37,8 @@ export default function MemoryDetailScreen() {
     data: memory,
     isLoading: memoryLoading,
   } = useMemory(memoryId);
+
+  useMemoryCommentsSocket(memoryId);
 
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');

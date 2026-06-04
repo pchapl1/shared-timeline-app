@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .consumers import NotificationConsumer
+from .consumers import NotificationConsumer, MemoryCommentConsumer
 
 
 # =====================================================
@@ -17,5 +17,9 @@ websocket_urlpatterns = [
     path(
         'ws/notifications/',
         NotificationConsumer.as_asgi(),
+    ),
+        path(
+        'ws/memories/<int:memory_id>/comments/',
+        MemoryCommentConsumer.as_asgi(),
     ),
 ]

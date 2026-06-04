@@ -1,3 +1,8 @@
+import json
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -98,13 +103,29 @@ class MemoryViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
-    
+
     @action(detail=True, methods=['get', 'post'])
     def comments(self, request, pk=None):
+        """
+        Handles both fetching comments and creating a new comment.
+
+        GET:
+            Returns all comments for this memory.
+
+        POST:
+            Creates a new comment, saves activity/notification records,
+            then broadcasts the new comment over WebSockets so other users
+            viewing this memory can see it without refreshing.
+        """
+
         memory = self.get_object()
 
+        # ---------------------------------------------
+        # GET /api/memories/<memory_id>/comments/
+        # ---------------------------------------------
         if request.method == 'GET':
             comments = memory.comments.all()
+
             serializer = MemoryCommentSerializer(
                 comments,
                 many=True,
@@ -113,14 +134,19 @@ class MemoryViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+        # ---------------------------------------------
+        # POST /api/memories/<memory_id>/comments/
+        # ---------------------------------------------
         serializer = MemoryCommentSerializer(data=request.data)
 
         if serializer.is_valid():
+            # Save the new comment to the database.
             comment = serializer.save(
                 memory=memory,
                 user=request.user
             )
 
+            # Save an activity feed item.
             Activity.objects.create(
                 actor=request.user,
                 circle=memory.circle,
@@ -129,6 +155,8 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 comment=comment
             )
 
+            # Create a notification for the memory owner,
+            # unless the owner commented on their own memory.
             if memory.created_by != request.user:
                 Notification.objects.create(
                     recipient=memory.created_by,
@@ -138,8 +166,37 @@ class MemoryViewSet(viewsets.ModelViewSet):
                     memory=memory
                 )
 
+            # Re-serialize the saved comment.
+            # This makes sure the response includes fields added by the database,
+            # like id, user info, and created_at.
+            comment_data = MemoryCommentSerializer(
+                comment,
+                context={'request': request}
+            ).data
+
+            # Get the active Django Channels layer.
+            # This is what lets normal HTTP views send messages to WebSocket groups.
+            channel_layer = get_channel_layer()
+
+            # Send the new comment to everyone currently connected to this memory's
+            # WebSocket group.
+            #
+            # Example:
+            # memory id 12 sends to group:
+            # memory_comments_12
+            async_to_sync(channel_layer.group_send)(
+                f'memory_comments_{memory.id}',
+                {
+                    # This calls comment_created() inside MemoryCommentConsumer.
+                    'type': 'comment_created',
+
+                    # This is the actual comment data the frontend receives.
+                    'comment': comment_data,
+                }
+            )
+
             return Response(
-                serializer.data,
+                comment_data,
                 status=status.HTTP_201_CREATED
             )
 

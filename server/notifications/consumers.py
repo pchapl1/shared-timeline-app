@@ -4,6 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
+
     """
     Handles real-time notification updates for one connected user.
 
@@ -64,5 +65,69 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps({
                 'type': 'notification_created',
                 'notification': event['notification'],
+            })
+        )
+
+class MemoryCommentConsumer(AsyncWebsocketConsumer):
+    """
+    Handles real-time comments for one memory detail screen.
+
+    Every user viewing the same memory joins the same group:
+
+        memory_comments_12
+
+    When someone adds a comment, the backend can broadcast it
+    to everyone currently viewing that memory.
+    """
+
+    async def connect(self):
+        """
+        Runs when the frontend opens a WebSocket connection
+        for a specific memory.
+        """
+
+        self.user = self.scope['user']
+
+        # Only logged-in users can connect.
+        if self.user.is_anonymous:
+            await self.close()
+            return
+
+        # Get the memory id from the websocket URL.
+        self.memory_id = self.scope['url_route']['kwargs']['memory_id']
+
+        # Create a group name for this memory.
+        self.group_name = f'memory_comments_{self.memory_id}'
+
+        # Add this socket connection to the memory comment group.
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name,
+        )
+
+        # Accept the socket connection.
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        """
+        Runs when the user leaves the memory screen
+        or the socket disconnects.
+        """
+
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name,
+            )
+
+    async def comment_created(self, event):
+        """
+        Runs when the backend broadcasts a newly created comment.
+        """
+
+        await self.send(
+            text_data=json.dumps({
+                'type': 'comment_created',
+                'comment': event['comment'],
             })
         )
