@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'activities',
     'circles',
     'memories',
+    'notifications',
     'places',
     'goals',
     'trips',

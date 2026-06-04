@@ -32,8 +32,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarLabel: 'Home',
+          title: 'Activity',
+          tabBarLabel: 'Activity',
         }}
       />
 
@@ -46,10 +46,10 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="invites/index"
+        name="notifications/index"
         options={{
-          title: 'Invites',
-          tabBarLabel: 'Invites',
+          title: 'Notifications',
+          tabBarLabel: 'Notifications',
           tabBarBadge:
             pendingInviteCount > 0
               ? pendingInviteCount
@@ -62,6 +62,13 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
+        }}
+      />
+
+      <Tabs.Screen
+        name="invites/index"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

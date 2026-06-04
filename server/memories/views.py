@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from .models import Memory, MemoryPhoto, MemoryReaction, MemoryComment
 from .serializers import MemorySerializer, MemoryCommentSerializer
-
+from notifications.models import Notification
 from activities.models import Activity
 
 
@@ -78,6 +78,16 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 activity_type=Activity.REACTION_CREATED,
                 memory=memory
             )
+
+            if memory.created_by != request.user:
+                Notification.objects.create(
+                    recipient=memory.created_by,
+                    actor=request.user,
+                    notification_type=Notification.MEMORY_REACTION,
+                    circle=memory.circle,
+                    memory=memory
+                )
+
             has_reacted = True
 
         return Response(
@@ -118,6 +128,15 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 memory=memory,
                 comment=comment
             )
+
+            if memory.created_by != request.user:
+                Notification.objects.create(
+                    recipient=memory.created_by,
+                    actor=request.user,
+                    notification_type=Notification.MEMORY_COMMENT,
+                    circle=memory.circle,
+                    memory=memory
+                )
 
             return Response(
                 serializer.data,

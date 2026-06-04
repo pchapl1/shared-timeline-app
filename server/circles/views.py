@@ -5,6 +5,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from activities.models import Activity
+from notifications.models import Notification
 from .models import Circle, CircleMember, CircleInvite
 from .serializers import (
     CircleSerializer,
@@ -115,6 +116,13 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
             invited_by=request.user,
             status='pending'
         )
+        
+        Notification.objects.create(
+            recipient=invited_user,
+            actor=request.user,
+            notification_type=Notification.CIRCLE_INVITE,
+            circle=circle
+        )
 
         serializer = self.get_serializer(invite)
 
@@ -156,7 +164,7 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
             actor=request.user,
             circle=invite.circle,
             activity_type=Activity.MEMBER_JOINED,
-)
+        )
 
         return Response({
             'message': 'Invite accepted'
