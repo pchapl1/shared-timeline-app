@@ -1,7 +1,8 @@
-import { Text, View, StyleSheet, FlatList } from 'react-native';
-import { activityStyles as styles } from '@/styles/activityStyles';
+import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 import { formatDistanceToNow } from 'date-fns';
 
+import { activityStyles as styles } from '@/styles/activityStyles';
 import { useActivities } from '@/hooks/useActivities';
 import type { Activity } from '@/types/activity';
 
@@ -37,6 +38,37 @@ export default function ActivityScreen() {
   const activities =
     data?.pages.flatMap((page) => page.results) ?? [];
 
+  function handleActivityPress(activity: Activity) {
+    if (
+      activity.activity_type === 'memory_created' ||
+      activity.activity_type === 'comment_created' ||
+      activity.activity_type === 'reaction_created'
+    ) {
+      if (activity.circle && activity.memory) {
+        router.push({
+          pathname: '/circles/[id]/memories/[memoryId]',
+          params: {
+            id: activity.circle.toString(),
+            memoryId: activity.memory.toString(),
+          },
+        });
+      }
+
+      return;
+    }
+
+    if (activity.activity_type === 'member_joined') {
+      if (activity.circle) {
+        router.push({
+          pathname: '/circles/[id]',
+          params: {
+            id: activity.circle.toString(),
+          },
+        });
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -59,9 +91,7 @@ export default function ActivityScreen() {
         }}
         onEndReachedThreshold={0.4}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No activity yet.
-          </Text>
+          <Text style={styles.emptyText}>No activity yet.</Text>
         }
         ListFooterComponent={
           isFetchingNextPage ? (
@@ -71,30 +101,36 @@ export default function ActivityScreen() {
           ) : null
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              {getActivityText(item)}
-            </Text>
-
-            {item.memory_title ? (
-              <Text style={styles.memoryTitle}>
-                {item.memory_title}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => handleActivityPress(item)}
+          >
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                {getActivityText(item)}
               </Text>
-            ) : null}
 
-            <Text style={styles.circleName}>
-              {item.circle_name}
-            </Text>
+              {item.memory_title ? (
+                <Text style={styles.memoryTitle}>
+                  {item.memory_title}
+                </Text>
+              ) : null}
 
-            <Text style={styles.timestamp}>
-              {formatDistanceToNow(new Date(item.created_at), {
-                addSuffix: true,
-              })}
-            </Text>
-          </View>
+              {item.circle_name ? (
+                <Text style={styles.circleName}>
+                  {item.circle_name}
+                </Text>
+              ) : null}
+
+              <Text style={styles.timestamp}>
+                {formatDistanceToNow(new Date(item.created_at), {
+                  addSuffix: true,
+                })}
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
   );
 }
-
