@@ -7,3 +7,13 @@ export async function getNotifications(page = 1) {
 
   return response.data;
 }
+
+export async function markNotificationRead(
+  notificationId: number
+) {
+  const response = await api.post(
+    `/notifications/${notificationId}/mark_read/`
+  );
+
+  return response.data;
+}

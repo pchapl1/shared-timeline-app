@@ -1,7 +1,9 @@
-import { Text, View, FlatList } from 'react-native';
+import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 
 import { useNotifications } from '@/hooks/useNotifications';
+import { markNotificationRead } from '@/services/notifications';
 import type { Notification } from '@/types/notification';
 import { notificationStyles as styles } from '@/styles/notificationStyles';
 
@@ -26,6 +28,8 @@ function getNotificationText(notification: Notification) {
 }
 
 export default function NotificationsScreen() {
+  const queryClient = useQueryClient();
+
   const {
     data,
     fetchNextPage,
@@ -36,6 +40,18 @@ export default function NotificationsScreen() {
 
   const notifications =
     data?.pages.flatMap((page) => page.results) ?? [];
+
+  async function handleNotificationPress(notificationId: number) {
+    try {
+      await markNotificationRead(notificationId);
+
+      await queryClient.invalidateQueries({
+        queryKey: ['notifications'],
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -73,39 +89,39 @@ export default function NotificationsScreen() {
           ) : null
         }
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.card,
-              !item.is_read
-                ? styles.unreadCard
-                : undefined,
-            ]}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => handleNotificationPress(item.id)}
           >
-            <Text style={styles.cardTitle}>
-              {getNotificationText(item)}
-            </Text>
-
-            {item.memory_title ? (
-              <Text style={styles.memoryTitle}>
-                {item.memory_title}
+            <View
+              style={[
+                styles.card,
+                !item.is_read ? styles.unreadCard : undefined,
+              ]}
+            >
+              <Text style={styles.cardTitle}>
+                {getNotificationText(item)}
               </Text>
-            ) : null}
 
-            {item.circle_name ? (
-              <Text style={styles.circleName}>
-                {item.circle_name}
-              </Text>
-            ) : null}
+              {item.memory_title ? (
+                <Text style={styles.memoryTitle}>
+                  {item.memory_title}
+                </Text>
+              ) : null}
 
-            <Text style={styles.timestamp}>
-              {formatDistanceToNow(
-                new Date(item.created_at),
-                {
+              {item.circle_name ? (
+                <Text style={styles.circleName}>
+                  {item.circle_name}
+                </Text>
+              ) : null}
+
+              <Text style={styles.timestamp}>
+                {formatDistanceToNow(new Date(item.created_at), {
                   addSuffix: true,
-                }
-              )}
-            </Text>
-          </View>
+                })}
+              </Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
