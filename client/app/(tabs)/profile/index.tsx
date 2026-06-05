@@ -1,23 +1,44 @@
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 
-export default function HomeScreen() {
+import { router } from 'expo-router';
+
+import { useAuth } from '@/context/AuthContext';
+
+import { profileStyles as styles } from '@/styles/profileStyles';
+
+export default function ProfileScreen() {
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    try {
+      await logout();
+
+      // Send the user back to login after
+      // removing tokens and auth state.
+      router.replace('/login');
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>
+        Profile
+      </Text>
+
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        <Text style={styles.logoutButtonText}>
+          Logout
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-  },
-  title: {
-    color: '#ffffff',
-    fontSize: 32,
-    fontWeight: '700',
-  },
-});

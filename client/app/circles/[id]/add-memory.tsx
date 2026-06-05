@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { addMemoryStyles as styles } from '@/styles/addMemoryStyles';
 import {
   ScrollView,
   Text,
@@ -24,9 +24,11 @@ import { createMemory } from '../../../src/services/memories';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function AddMemoryScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+import { LocationSearch } from '../../../src/components/search/LocationSearch';
 
+export default function AddMemoryScreen() {
+
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
@@ -182,30 +184,13 @@ export default function AddMemoryScreen() {
         </>
       )}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Location name"
-        placeholderTextColor="#64748b"
-        value={locationName}
-        onChangeText={setLocationName}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Latitude"
-        placeholderTextColor="#64748b"
-        value={latitude}
-        onChangeText={setLatitude}
-        keyboardType="decimal-pad"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Longitude"
-        placeholderTextColor="#64748b"
-        value={longitude}
-        onChangeText={setLongitude}
-        keyboardType="decimal-pad"
+      <LocationSearch
+        locationName={locationName}
+        latitude={latitude}
+        longitude={longitude}
+        onChangeLocationName={setLocationName}
+        onChangeLatitude={setLatitude}
+        onChangeLongitude={setLongitude}
       />
 
       <TouchableOpacity
@@ -230,84 +215,3 @@ export default function AddMemoryScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-  },
-
-  contentContainer: {
-    paddingBottom: 120,
-  },
-
-  backLink: {
-    color: '#60a5fa',
-    fontSize: 16,
-    marginBottom: 24,
-  },
-
-  title: {
-    color: '#ffffff',
-    fontSize: 34,
-    fontWeight: '700',
-    marginBottom: 24,
-  },
-
-  input: {
-    backgroundColor: '#1e293b',
-    color: '#ffffff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-
-  textArea: {
-    minHeight: 120,
-    textAlignVertical: 'top',
-    paddingTop: 16,
-  },
-
-  dateInput: {
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-
-  dateText: {
-    color: '#ffffff',
-    fontSize: 16,
-  },
-
-  imageButton: {
-    backgroundColor: '#334155',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-
-  imageButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  button: {
-    backgroundColor: '#2563eb',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-
-  buttonText: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});
