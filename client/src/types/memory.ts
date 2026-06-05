@@ -16,6 +16,8 @@ export type Memory = {
   description: string;
   memory_date: string;
   location_name?: string;
+  latitude?: string;
+  longitude?: string;
   photo?: string | null;
   photos?: MemoryPhoto[];
   reaction_count?: number;

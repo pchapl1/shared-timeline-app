@@ -10,6 +10,5 @@ export async function getCircle(circleId: string) {
 
   const response = await api.get(`/circles/${circleId}/`);
 
-  console.log('CIRCLES RESPONSE:', response.data);
   return response.data;
 }

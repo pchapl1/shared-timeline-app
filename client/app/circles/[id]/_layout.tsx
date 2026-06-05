@@ -1,6 +1,11 @@
 import { Stack } from 'expo-router';
 
-
-export default function CircleIdLayout() {
-  return <Stack />;
+export default function CircleLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
+  );
 }

@@ -1,9 +1,5 @@
 import { useState } from 'react';
 
-import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
-import { useCircle } from '@/hooks/useCircle';
-import { useCircleMemories } from '@/hooks/useCircleMemories';
-
 import {
   View,
   Text,
@@ -15,10 +11,12 @@ import {
 
 import { Image } from 'expo-image';
 
-import {
-  useLocalSearchParams,
-  router,
-} from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
+
+import { CircleTabs } from '@/components/circles/CircleTabs';
+import { useCircle } from '@/hooks/useCircle';
+import { useCircleMemories } from '@/hooks/useCircleMemories';
+import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
 
 import { useAuth } from '../../../src/context/AuthContext';
 import { MemoryCard } from '../../../src/components/memories/MemoryCard';
@@ -75,10 +73,12 @@ export default function CircleDetailScreen() {
     isFetchingNextPage,
   } = useCircleMemories(circleId);
 
-const memories =
-  memoriesData?.pages.flatMap((page) => page.results) ?? [];
+  const memories =
+    memoriesData?.pages.flatMap((page) => page.results) ?? [];
 
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] =
+    useState<string | null>(null);
+
   const [refreshing, setRefreshing] = useState(false);
 
   const groupedMemories = groupMemoriesByMonth(memories);
@@ -117,8 +117,11 @@ const memories =
         contentContainerStyle={styles.contentContainer}
         scrollEventThrottle={400}
         onScroll={(event) => {
-          const { layoutMeasurement, contentOffset, contentSize } =
-            event.nativeEvent;
+          const {
+            layoutMeasurement,
+            contentOffset,
+            contentSize,
+          } = event.nativeEvent;
 
           const isCloseToBottom =
             layoutMeasurement.height + contentOffset.y >=
@@ -150,29 +153,16 @@ const memories =
 
         <Text style={styles.subtitle}>{circle.circle_type}</Text>
 
-        <Text style={styles.date}>Started: {circle.start_date}</Text>
+        <Text style={styles.date}>
+          Started: {circle.start_date}
+        </Text>
 
-        <TouchableOpacity
-          style={styles.inviteButton}
-          onPress={() =>
-            router.push({
-              pathname: '/circles/[id]/invite',
-              params: {
-                id: id.toString(),
-              },
-            })
-          }
-        >
-          <Text style={styles.inviteButtonText}>Invite Member</Text>
-        </TouchableOpacity>
+        <CircleTabs
+          circleId={circleId}
+          activeTab="timeline"
+        />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Map</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Timeline</Text>
-
           {memories.length === 0 ? (
             <Text style={styles.emptyText}>
               Memories will appear here.
@@ -180,7 +170,10 @@ const memories =
           ) : (
             Object.entries(groupedMemories).map(
               ([groupTitle, groupMemories]) => (
-                <View key={groupTitle} style={styles.timelineGroup}>
+                <View
+                  key={groupTitle}
+                  style={styles.timelineGroup}
+                >
                   <Text style={styles.timelineGroupTitle}>
                     {groupTitle}
                   </Text>

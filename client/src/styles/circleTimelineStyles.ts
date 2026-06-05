@@ -17,7 +17,7 @@ export const circleTimelineStyles = StyleSheet.create({
   },
 
   contentContainer: {
-    paddingBottom: 120,
+    paddingBottom: 40,
   },
 
   loading: {
@@ -129,18 +129,64 @@ export const circleTimelineStyles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  inviteButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
+  memberCount: {
+    marginBottom: 16,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  memberRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: spacing.lg,
+    gap: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    backgroundColor: '#1F2937',
+  },
+
+  memberAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2563EB',
+  },
+
+  memberAvatarText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  memberName: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  memberRole: {
+    marginTop: 4,
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+
+  inviteButton: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 18,
+    backgroundColor: '#2563EB',
   },
 
   inviteButtonText: {
-    color: colors.text,
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '800',
   },
 });
