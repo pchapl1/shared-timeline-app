@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/', include('memories.urls')),
     path('api/', include('activities.urls')),
     path('api/', include('notifications.urls')),
+    path('api/', include('trips.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

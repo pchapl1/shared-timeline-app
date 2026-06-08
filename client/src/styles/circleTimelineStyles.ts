@@ -189,4 +189,23 @@ export const circleTimelineStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
   },
+  compactHeader: {
+  marginBottom: 8,
+},
+
+  compactHeaderTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
+  },
+
+  compactHeaderTitle: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
 });

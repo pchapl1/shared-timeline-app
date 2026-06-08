@@ -23,6 +23,7 @@ import { MemoryCard } from '../../../src/components/memories/MemoryCard';
 import { colors } from '../../../src/theme/colors';
 
 import type { Memory } from '../../../src/types/memory';
+import { CircleHeader } from '@/components/circles/CircleHeader';
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -143,7 +144,7 @@ export default function CircleDetailScreen() {
           />
         }
       >
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => router.push('/(tabs)/circles')}
         >
           <Text style={styles.backLink}>← Back</Text>
@@ -155,12 +156,14 @@ export default function CircleDetailScreen() {
 
         <Text style={styles.date}>
           Started: {circle.start_date}
-        </Text>
+        </Text> */}
 
-        <CircleTabs
-          circleId={circleId}
+        <CircleHeader
+          circle={circle}
           activeTab="timeline"
         />
+
+
 
         <View style={styles.section}>
           {memories.length === 0 ? (

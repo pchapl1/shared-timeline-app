@@ -23,7 +23,7 @@ export const circleTabsStyles = StyleSheet.create({
   },
 
   tabText: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
     color: '#9CA3AF',
   },

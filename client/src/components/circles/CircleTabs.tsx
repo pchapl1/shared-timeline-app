@@ -3,17 +3,39 @@ import { router } from 'expo-router';
 
 import { circleTabsStyles as styles } from '@/styles/circleTabsStyles';
 
-type CircleTab = 'timeline' | 'members' | 'map';
+type CircleTab = 'timeline' | 'members' | 'map' | 'trips';
 
 type Props = {
   circleId: number;
   activeTab: CircleTab;
 };
 
+const tabs: CircleTab[] = [
+  'timeline',
+  'members',
+  'map',
+  'trips',
+];
+
+function getTabLabel(tab: CircleTab) {
+  if (tab === 'timeline') {
+    return 'Timeline';
+  }
+
+  if (tab === 'members') {
+    return 'Members';
+  }
+
+  if (tab === 'map') {
+    return 'Map';
+  }
+
+  return 'Trips';
+}
+
 export function CircleTabs({ circleId, activeTab }: Props) {
   function navigateToTab(tab: CircleTab) {
-    // Keep circle-level navigation centralized so future tabs
-    // like Trips can be added without repeating route logic.
+    // Timeline is the index route for a circle.
     if (tab === 'timeline') {
       router.push(`/circles/${circleId}`);
       return;
@@ -24,7 +46,7 @@ export function CircleTabs({ circleId, activeTab }: Props) {
 
   return (
     <View style={styles.container}>
-      {(['timeline', 'members', 'map'] as CircleTab[]).map((tab) => {
+      {tabs.map((tab) => {
         const isActive = tab === activeTab;
 
         return (
@@ -42,11 +64,7 @@ export function CircleTabs({ circleId, activeTab }: Props) {
                 isActive && styles.activeTabText,
               ]}
             >
-              {tab === 'timeline'
-                ? 'Timeline'
-                : tab === 'members'
-                  ? 'Members'
-                  : 'Map'}
+              {getTabLabel(tab)}
             </Text>
           </TouchableOpacity>
         );

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from circles.models import Circle
+from trips.models import Trip
 
 
 class Memory(models.Model):
@@ -9,6 +10,8 @@ class Memory(models.Model):
         on_delete=models.CASCADE,
         related_name='memories'
     )
+
+    trip = models.ForeignKey(Trip, on_delete=models.SET_NULL, related_name='memories', null=True, blank=True)
 
     title = models.CharField(max_length=255)
 

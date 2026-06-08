@@ -1,30 +1,33 @@
 import { api } from './api';
-import { MemoryComment, CreateMemoryData  } from '../types/memory';
 
+import type {
+  CreateMemoryData,
+  MemoryComment,
+} from '../types/memory';
 
-async function uriToFile(
-  uri: string,
-  filename: string,
-  mimeType: string
-) {
-  const response = await fetch(uri);
-  const blob = await response.blob();
-
-  return new File([blob], filename, {
-    type: mimeType,
-  });
-}
+type ReactNativeFile = {
+  uri: string;
+  name: string;
+  type: string;
+};
 
 function getFileInfo(uri: string, index: number) {
-  let filename = uri.split('/').pop() || `photo-${index + 1}.jpg`;
+  let filename =
+    uri.split('/').pop() || `photo-${index + 1}.jpg`;
 
   if (!filename.includes('.')) {
     filename = `${filename}.jpg`;
   }
 
-  const match = /\.(\w+)$/.exec(filename);
+  const extension =
+    filename.split('.').pop()?.toLowerCase() ?? 'jpg';
 
-  const type = match ? `image/${match[1]}` : 'image/jpeg';
+  const type =
+    extension === 'png'
+      ? 'image/png'
+      : extension === 'webp'
+        ? 'image/webp'
+        : 'image/jpeg';
 
   return {
     filename,
@@ -32,10 +35,25 @@ function getFileInfo(uri: string, index: number) {
   };
 }
 
+function createReactNativeFile(
+  uri: string,
+  filename: string,
+  type: string
+): ReactNativeFile {
+  // React Native FormData expects this file-like object shape.
+  // Browser File objects can crash on native because their name
+  // property is read-only in some runtimes.
+  return {
+    uri,
+    name: filename,
+    type,
+  };
+}
+
 export async function createMemory(data: CreateMemoryData) {
   const formData = new FormData();
 
-  formData.append('circle', data.circleId);
+  formData.append('circle', String(data.circleId));
   formData.append('title', data.title);
   formData.append('description', data.description);
   formData.append('memory_date', data.memoryDate);
@@ -51,36 +69,41 @@ export async function createMemory(data: CreateMemoryData) {
 
     const { filename, type } = getFileInfo(uri, i);
 
-    const file = await uriToFile(uri, filename, type);
-
-    formData.append('photos', file);
+    formData.append(
+      'photos',
+      createReactNativeFile(uri, filename, type) as any
+    );
   }
 
   if (imageUris.length > 0) {
     const firstImageUri = imageUris[0];
 
-    const { filename, type } = getFileInfo(firstImageUri, 0);
-
-    const firstFile = await uriToFile(
+    const { filename, type } = getFileInfo(
       firstImageUri,
-      filename,
-      type
+      0
     );
 
-    formData.append('photo', firstFile);
+    formData.append(
+      'photo',
+      createReactNativeFile(
+        firstImageUri,
+        filename,
+        type
+      ) as any
+    );
   }
 
-    if (data.locationName) {
-      formData.append('location_name', data.locationName);
-    }
+  if (data.locationName) {
+    formData.append('location_name', data.locationName);
+  }
 
-    if (data.latitude) {
-      formData.append('latitude', data.latitude);
-    }
+  if (data.latitude) {
+    formData.append('latitude', data.latitude);
+  }
 
-    if (data.longitude) {
-      formData.append('longitude', data.longitude);
-    }
+  if (data.longitude) {
+    formData.append('longitude', data.longitude);
+  }
 
   return api.post('/memories/', formData, {
     headers: {
@@ -91,6 +114,7 @@ export async function createMemory(data: CreateMemoryData) {
 
 export async function getMemories() {
   const response = await api.get('/memories/');
+
   return response.data;
 }
 
@@ -103,7 +127,9 @@ export async function toggleMemoryReaction(memoryId: number) {
 }
 
 export async function getMemoryComments(memoryId: number) {
-  return api.get<MemoryComment[]>(`/memories/${memoryId}/comments/`);
+  return api.get<MemoryComment[]>(
+    `/memories/${memoryId}/comments/`
+  );
 }
 
 export async function createMemoryComment(
@@ -125,9 +151,13 @@ export async function deleteMemoryComment(
   );
 }
 
-export async function getCircleMemories(circleId: number, page = 1) {
+export async function getCircleMemories(
+  circleId: number,
+  page = 1
+) {
   const response = await api.get(
     `/memories/?circle=${circleId}&page=${page}`
   );
+
   return response.data;
 }
