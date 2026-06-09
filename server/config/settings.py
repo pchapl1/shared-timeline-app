@@ -23,7 +23,11 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='127.0.0.1,localhost',
+    cast=lambda value: [host.strip() for host in value.split(',')]
+)
 
 
 # Application definition
@@ -105,14 +109,16 @@ ASGI_APPLICATION = 'config.asgi.application'
 # That avoids the blocking sorted-set receive behavior
 # that was causing the BZPOPMIN timeout in your logs.
 # =====================================================
+REDIS_URL = config(
+    'REDIS_URL',
+    default='redis://127.0.0.1:6379/0'
+)
+
 CHANNEL_LAYERS = {
     'default': {
-        # Pub/Sub Redis backend for Django Channels.
         'BACKEND': 'channels_redis.pubsub.RedisPubSubChannelLayer',
-
         'CONFIG': {
-            # Local Redis server/database 0.
-            'hosts': ['redis://127.0.0.1:6379/0'],
+            'hosts': [REDIS_URL],
         },
     },
 }

@@ -18,9 +18,18 @@ class CircleViewSet(viewsets.ModelViewSet):
     serializer_class = CircleSerializer
 
     def get_queryset(self):
-        return Circle.objects.filter(
+        queryset = Circle.objects.filter(
             members__user=self.request.user
-        ).distinct().order_by('id')
+        ).distinct()
+
+        include_archived = self.request.query_params.get(
+            'include_archived'
+        )
+
+        if self.action == 'list' and include_archived != 'true':
+            queryset = queryset.filter(is_archived=False)
+
+        return queryset.order_by('id')
 
     def perform_create(self, serializer):
         circle = serializer.save(created_by=self.request.user)

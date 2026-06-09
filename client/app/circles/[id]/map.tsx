@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { CircleMap } from '@/components/maps/CircleMap';
 
-import { useCircle } from '@/hooks/useCircle';
+import { useCircle } from '@/hooks/circles/useCircle';
 import { useCircleMapMemories } from '@/hooks/useCircleMapMemories';
 
 import { circleMapStyles as styles } from '@/styles/circleMapStyles';

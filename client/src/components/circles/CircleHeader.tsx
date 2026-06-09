@@ -59,6 +59,22 @@ export function CircleHeader({
         Started: {circle.start_date}
       </Text>
 
+      <TouchableOpacity
+        style={styles.inviteButton}
+        onPress={() =>
+          router.push({
+            pathname: '/circles/[id]/edit',
+            params: {
+              id: String(circle.id),
+            },
+          })
+        }
+      >
+        <Text style={styles.inviteButtonText}>
+          Edit Circle
+        </Text>
+      </TouchableOpacity>
+
       <CircleTabs
         circleId={circle.id}
         activeTab={activeTab}

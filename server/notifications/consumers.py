@@ -1,6 +1,8 @@
 import json
-
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
@@ -24,10 +26,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         self.user = self.scope['user']
 
-        # For now, reject anonymous users.
-        # Later this depends on WebSocket auth working correctly.
+        logger.info(
+            f'Notification WebSocket connect attempt: user={self.user}'
+        )
+
         if self.user.is_anonymous:
-            await self.close()
+            await self.close(code=4001)
             return
 
         # Create a unique group name for this user.
@@ -41,12 +45,18 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         # Accept the WebSocket connection.
         await self.accept()
+        logger.info('Notification WebSocket connected: user_id={self.user.id}')
+
 
     async def disconnect(self, close_code):
         """
         Runs when the frontend closes or loses the WebSocket connection.
         """
-
+        logger.info(
+            f'Notification WebSocket disconnected: '
+            f'user_id={getattr(self.user, "id", None)} '
+            f'code={close_code}'
+        )
         # Remove this WebSocket connection from the user's group.
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(
@@ -88,9 +98,11 @@ class MemoryCommentConsumer(AsyncWebsocketConsumer):
 
         self.user = self.scope['user']
 
+        logger.info(f'Memory comment WebSocket connect attempt: user={self.user}')
+    
         # Only logged-in users can connect.
         if self.user.is_anonymous:
-            await self.close()
+            await self.close(code=4001)
             return
 
         # Get the memory id from the websocket URL.
@@ -107,13 +119,23 @@ class MemoryCommentConsumer(AsyncWebsocketConsumer):
 
         # Accept the socket connection.
         await self.accept()
+        logger.info(
+            f'Memory comment WebSocket connected: '
+            f'user_id={self.user.id} '
+            f'memory_id={self.memory_id}'
+        )
 
     async def disconnect(self, close_code):
         """
         Runs when the user leaves the memory screen
         or the socket disconnects.
         """
-
+        logger.info(
+            f'Memory comment WebSocket disconnected: '
+            f'user_id={getattr(self.user, "id", None)} '
+            f'memory_id={getattr(self, "memory_id", None)} '
+            f'code={close_code}'
+        )
         if hasattr(self, 'group_name'):
             await self.channel_layer.group_discard(
                 self.group_name,

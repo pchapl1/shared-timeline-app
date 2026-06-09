@@ -2,7 +2,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { CircleHeader } from '@/components/circles/CircleHeader';
-import { useCircle } from '@/hooks/useCircle';
+import { useCircle } from '@/hooks/circles/useCircle';
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
 
 export default function CircleMembersScreen() {

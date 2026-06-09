@@ -1,34 +1,32 @@
+import logging
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
+logger = logging.getLogger(__name__)
 
 
 @database_sync_to_async
 def get_user_from_token(token):
-    """
-    Convert a JWT access token into a Django user.
-
-    WebSockets do not automatically use the same auth flow
-    as normal API requests, so we manually validate the token.
-    """
-
     try:
-        # JWTAuthentication is the same authentication class
-        # your DRF API already uses.
         jwt_authentication = JWTAuthentication()
-
-        # Validate the raw token string.
         validated_token = jwt_authentication.get_validated_token(token)
+        user = jwt_authentication.get_user(validated_token)
 
-        # Get the user connected to that token.
-        return jwt_authentication.get_user(validated_token)
+        if not user or not user.is_active:
+            return AnonymousUser()
 
-    except Exception:
-        # If anything goes wrong, treat this connection as anonymous.
+        return user
+
+    except (InvalidToken, TokenError):
         return AnonymousUser()
 
+    except Exception:
+        logger.exception('Unexpected WebSocket authentication error')
+        return AnonymousUser()
 
 class JWTAuthMiddleware:
     """

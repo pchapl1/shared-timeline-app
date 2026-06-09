@@ -14,7 +14,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { CircleTabs } from '@/components/circles/CircleTabs';
-import { useCircle } from '@/hooks/useCircle';
+import { useCircle } from '@/hooks/circles/useCircle';
 import { useCircleMemories } from '@/hooks/useCircleMemories';
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
 
@@ -144,19 +144,6 @@ export default function CircleDetailScreen() {
           />
         }
       >
-        {/* <TouchableOpacity
-          onPress={() => router.push('/(tabs)/circles')}
-        >
-          <Text style={styles.backLink}>← Back</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>{circle.name}</Text>
-
-        <Text style={styles.subtitle}>{circle.circle_type}</Text>
-
-        <Text style={styles.date}>
-          Started: {circle.start_date}
-        </Text> */}
 
         <CircleHeader
           circle={circle}

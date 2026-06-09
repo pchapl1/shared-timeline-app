@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { TripCard } from '@/components/trips/TripCard';
 
-import { useCircle } from '@/hooks/useCircle';
+import { useCircle } from '@/hooks/circles/useCircle';
 import { useTrips } from '@/hooks/trips/useTrips';
 
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';

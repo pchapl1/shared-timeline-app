@@ -19,6 +19,8 @@ class Circle(models.Model):
 
     start_date = models.DateField()
 
+    is_archived = models.BooleanField(default=False)
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

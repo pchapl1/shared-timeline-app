@@ -13,4 +13,5 @@ export type Circle = {
   circle_type: string;
   start_date: string;
   members: CircleMember[];
+  is_archived: boolean;
 };
