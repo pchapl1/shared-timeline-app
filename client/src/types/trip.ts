@@ -7,6 +7,8 @@ export type Trip = {
 
   description: string;
 
+  memory_count?: number;
+
   start_date: string;
 
   end_date?: string | null;
@@ -25,3 +27,16 @@ export type Trip = {
 
   updated_at: string;
 };
+
+export type UpdateTripPayload = Partial<
+  Pick<
+    Trip,
+    | 'title'
+    | 'description'
+    | 'start_date'
+    | 'end_date'
+    | 'destination_name'
+    | 'latitude'
+    | 'longitude'
+  >
+>;

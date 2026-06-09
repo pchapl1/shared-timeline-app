@@ -24,6 +24,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '../../../../src/context/AuthContext';
 
+import { useDeleteMemory } from '@/hooks/memories/useDeleteMemory';
+
 export default function MemoryDetailScreen() {
   const { memoryId, id } = useLocalSearchParams<{
     memoryId: string;
@@ -38,11 +40,48 @@ export default function MemoryDetailScreen() {
     isLoading: memoryLoading,
   } = useMemory(memoryId);
 
+  const deleteMemoryMutation = useDeleteMemory(Number(id));
+
   useMemoryCommentsSocket(memoryId);
 
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  function handleDeleteMemory() {
+    if (!memory) {
+      return;
+    }
+
+    const currentMemoryId = memory.id;
+    const currentMemoryTitle = memory.title;
+
+    Alert.alert(
+      'Delete Memory',
+      `Are you sure you want to delete "${currentMemoryTitle}"?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMemoryMutation.mutateAsync(currentMemoryId);
+
+              router.replace(`/circles/${id}`);
+            } catch (error) {
+              console.error(error);
+
+              Alert.alert('Error', 'Could not delete memory.');
+            }
+          },
+        },
+      ]
+    );
+  }
 
   if (isLoading || memoryLoading || !memory) {
     return (
@@ -190,6 +229,32 @@ export default function MemoryDetailScreen() {
               {memory.description}
             </Text>
           )}
+
+          <TouchableOpacity
+            style={styles.commentButton}
+            onPress={() =>
+              router.push({
+                pathname: '/circles/[id]/memories/edit/[memoryId]',
+                params: {
+                  id,
+                  memoryId,
+                },
+              })
+            }
+          >
+          <Text style={styles.commentButtonText}>
+            Edit Memory
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.commentButton}
+          onPress={handleDeleteMemory}
+        >
+          <Text style={[styles.commentButtonText, { color: '#EF4444' }]}>
+            Delete Memory
+          </Text>
+        </TouchableOpacity>
 
           <View style={styles.commentsSection}>
             <Text style={styles.commentsTitle}>

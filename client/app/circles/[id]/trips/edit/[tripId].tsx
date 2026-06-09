@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Alert,
@@ -18,14 +18,40 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { LocationSearch } from '@/components/search/LocationSearch';
-import { useCreateTrip } from '@/hooks/trips/useCreateTrip';
+import { useTrip } from '@/hooks/trips/useTrip';
+import { useUpdateTrip } from '@/hooks/trips/useUpdateTrip';
 
 import { addMemoryStyles as styles } from '@/styles/addMemoryStyles';
 
-export default function AddTripScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+function parseDate(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate;
+}
+
+export default function EditTripScreen() {
+  const { id, tripId } = useLocalSearchParams<{
+    id: string;
+    tripId: string;
+  }>();
 
   const circleId = Number(id);
+  const numericTripId = Number(tripId);
+
+  const { data: trip, isLoading } = useTrip(numericTripId);
+
+  const updateTripMutation = useUpdateTrip(
+    circleId,
+    numericTripId
+  );
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -45,9 +71,21 @@ export default function AddTripScreen() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
-  const createTripMutation = useCreateTrip(circleId);
+  useEffect(() => {
+    if (!trip) {
+      return;
+    }
 
-  async function handleCreateTrip() {
+    setTitle(trip.title);
+    setDescription(trip.description ?? '');
+    setStartDate(parseDate(trip.start_date) ?? new Date());
+    setEndDate(parseDate(trip.end_date));
+    setDestinationName(trip.destination_name ?? '');
+    setLatitude(trip.latitude ?? '');
+    setLongitude(trip.longitude ?? '');
+  }, [trip]);
+
+  async function handleUpdateTrip() {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle) {
@@ -64,28 +102,38 @@ export default function AddTripScreen() {
     }
 
     try {
-      await createTripMutation.mutateAsync({
-        circle: circleId,
+      await updateTripMutation.mutateAsync({
         title: trimmedTitle,
         description,
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate
           ? endDate.toISOString().split('T')[0]
-          : undefined,
+          : null,
         destination_name: destinationName,
-        latitude: latitude || undefined,
-        longitude: longitude || undefined,
+        latitude: latitude || null,
+        longitude: longitude || null,
       });
 
-      router.replace(`/circles/${id}/trips`);
+      router.replace(`/circles/${id}/trips/${tripId}`);
     } catch (error: any) {
       console.error(
-        'Create trip error:',
+        'Update trip error:',
         error.response?.data || error
       );
 
-      Alert.alert('Error', 'Could not create trip.');
+      Alert.alert('Error', 'Could not update trip.');
     }
+  }
+
+  if (isLoading || !trip) {
+    return (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <Text style={styles.title}>Loading trip...</Text>
+      </ScrollView>
+    );
   }
 
   return (
@@ -98,7 +146,7 @@ export default function AddTripScreen() {
         <Text style={styles.backLink}>← Back</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Add Trip</Text>
+      <Text style={styles.title}>Edit Trip</Text>
 
       <Text style={styles.label}>Trip Title</Text>
       <TextInput
@@ -127,9 +175,9 @@ export default function AddTripScreen() {
           style={styles.input}
           value={startDate.toISOString().split('T')[0]}
           onChangeText={(text) => {
-            const parsedDate = new Date(text);
+            const parsedDate = parseDate(text);
 
-            if (!Number.isNaN(parsedDate.getTime())) {
+            if (parsedDate) {
               setStartDate(parsedDate);
             }
           }}
@@ -180,9 +228,9 @@ export default function AddTripScreen() {
               return;
             }
 
-            const parsedDate = new Date(text);
+            const parsedDate = parseDate(text);
 
-            if (!Number.isNaN(parsedDate.getTime())) {
+            if (parsedDate) {
               setEndDate(parsedDate);
             }
           }}
@@ -228,13 +276,13 @@ export default function AddTripScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={handleCreateTrip}
-        disabled={createTripMutation.isPending}
+        onPress={handleUpdateTrip}
+        disabled={updateTripMutation.isPending}
       >
         <Text style={styles.buttonText}>
-          {createTripMutation.isPending
-            ? 'Saving Trip...'
-            : 'Save Trip'}
+          {updateTripMutation.isPending
+            ? 'Saving Changes...'
+            : 'Save Changes'}
         </Text>
       </TouchableOpacity>
     </ScrollView>

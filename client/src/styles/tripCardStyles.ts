@@ -33,4 +33,10 @@ export const tripCardStyles = StyleSheet.create({
     lineHeight: 20,
     color: '#9CA3AF',
   },
+  memoryCount: {
+    marginTop: 12,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#93C5FD',
+  },
 });

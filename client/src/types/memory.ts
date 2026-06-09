@@ -12,6 +12,7 @@ export type MemoryCreator = {
 export type Memory = {
   id: number;
   circle: number;
+  trip?: number | null;
   title: string;
   description: string;
   memory_date: string;
@@ -43,6 +44,7 @@ export type MemoryComment = {
 
 export type CreateMemoryData = {
   circleId: string;
+  trip?: number | null;
   title: string;
   description: string;
   memoryDate: string;

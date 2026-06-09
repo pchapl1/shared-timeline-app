@@ -11,39 +11,51 @@ import {
 
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginScreen() {
-  const { login } = useAuth();
+export default function RegisterScreen() {
+  const { register } = useAuth();
 
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const [message, setMessage] = useState('');
 
-  async function handleLogin() {
+  async function handleRegister() {
     try {
-      setMessage('');
-
-      await login({
+      await register({
         username,
+        email,
         password,
       });
 
       router.replace('/(tabs)/circles');
     } catch (error) {
-      setMessage('Invalid username or password');
+      setMessage('Could not create account');
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>
+        Register
+      </Text>
 
       <TextInput
         placeholder="Username"
         placeholderTextColor="#94a3b8"
         style={styles.input}
-        autoCapitalize="none"
         value={username}
         onChangeText={setUsername}
+      />
+
+      <TextInput
+        placeholder="Email"
+        placeholderTextColor="#94a3b8"
+        style={styles.input}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <TextInput
@@ -57,21 +69,25 @@ export default function LoginScreen() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={handleLogin}
+        onPress={handleRegister}
       >
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={styles.buttonText}>
+          Create Account
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => router.push('/register')}
+        onPress={() => router.push('/login')}
       >
-        <Text style={styles.registerText}>
-          Need an account? Register
+        <Text style={styles.loginText}>
+          Already have an account? Login
         </Text>
       </TouchableOpacity>
 
       {message ? (
-        <Text style={styles.message}>{message}</Text>
+        <Text style={styles.message}>
+          {message}
+        </Text>
       ) : null}
     </View>
   );
@@ -113,7 +129,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  registerText: {
+  loginText: {
     color: '#93c5fd',
     marginTop: 18,
     textAlign: 'center',

@@ -4,9 +4,10 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 
-import { AuthProvider } from '../src/context/AuthContext';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { InviteProvider } from '../src/context/InviteContext';
 import { useNotificationSocket } from '@/hooks/useNotificationSocket';
+import { Redirect } from 'expo-router';
 
 /**
  * =====================================================
@@ -17,21 +18,18 @@ import { useNotificationSocket } from '@/hooks/useNotificationSocket';
  */
 const queryClient = new QueryClient();
 
-/**
- * =====================================================
- * SocketInitializer
- *
- * This component exists only to start the notification
- * WebSocket connection.
- *
- * It does not render any UI.
- *
- * Because it sits near the top of the app tree, the
- * WebSocket remains connected while the user is using
- * the app.
- * =====================================================
- */
+
 function SocketInitializer() {
+  const { tokens, isLoading } = useAuth();
+
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (!tokens) {
+    return <Redirect href="/login" />;
+  }
   useNotificationSocket();
 
   return null;
@@ -50,6 +48,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="create-circle" />
             <Stack.Screen name="login" />
+            <Stack.Screen name="register" />
             <Stack.Screen name="circles/[id]" />
             <Stack.Screen name="circles/[id]/invite" />
             <Stack.Screen name="circles/[id]/add-memory" />

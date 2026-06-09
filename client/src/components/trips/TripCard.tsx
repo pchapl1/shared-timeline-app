@@ -10,6 +10,8 @@ type Props = {
 };
 
 export function TripCard({ trip, onPress }: Props) {
+  const memoryCount = trip.memory_count ?? 0;
+
   return (
     <TouchableOpacity
       style={styles.card}
@@ -35,6 +37,11 @@ export function TripCard({ trip, onPress }: Props) {
             {trip.description}
           </Text>
         )}
+
+        <Text style={styles.memoryCount}>
+          {memoryCount}{' '}
+          {memoryCount === 1 ? 'Memory' : 'Memories'}
+        </Text>
       </View>
     </TouchableOpacity>
   );

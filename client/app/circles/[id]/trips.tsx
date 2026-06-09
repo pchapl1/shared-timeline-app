@@ -50,6 +50,15 @@ export default function CircleTripsScreen() {
               <TripCard
                 key={trip.id}
                 trip={trip}
+                onPress={()=> 
+                  router.push({
+                    pathname: '/circles/[id]/trips/[tripId]',
+                    params: {
+                      id: String(circleId),
+                      tripId: String(trip.id),
+                    },
+                  })
+                }
               />
             ))
           )}

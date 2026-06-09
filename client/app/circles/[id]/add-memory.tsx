@@ -26,6 +26,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { LocationSearch } from '../../../src/components/search/LocationSearch';
 
+import { useTrips } from '@/hooks/trips/useTrips';
+
 export default function AddMemoryScreen() {
 
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,10 +37,13 @@ export default function AddMemoryScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [locationName, setLocationName] = useState('');
+  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
   const queryClient = useQueryClient();
+
+  const { data: trips = [] } = useTrips(Number(id));
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -66,6 +71,7 @@ export default function AddMemoryScreen() {
     const optimisticMemory = {
       id: tempId,
       circle: Number(id),
+      trip: selectedTripId,
       title: trimmedTitle,
       description,
       memory_date: memoryDate.toISOString().split('T')[0],
@@ -91,8 +97,11 @@ export default function AddMemoryScreen() {
 
   setTimeout(async () => {
     try {
+
+      console.log('Selected trip id:', selectedTripId);
       const response = await createMemory({
         circleId: String(id),
+        trip: selectedTripId,
         title: trimmedTitle,
         description,
         memoryDate: memoryDate.toISOString().split('T')[0],
@@ -192,6 +201,45 @@ export default function AddMemoryScreen() {
         onChangeLatitude={setLatitude}
         onChangeLongitude={setLongitude}
       />
+
+      {trips.length > 0 && (
+        <>
+          <Text style={styles.label}>Trip</Text>
+
+          <TouchableOpacity
+            style={styles.input}
+            onPress={() => setSelectedTripId(null)}
+          >
+            <Text style={{ color: selectedTripId ? '#64748b' : '#FFFFFF' }}>
+              No Trip
+            </Text>
+          </TouchableOpacity>
+
+          {trips.map((trip) => (
+            <TouchableOpacity
+              key={trip.id}
+              style={styles.input}
+              onPress={() => setSelectedTripId(trip.id)}
+            >
+              <Text
+                style={{
+                  color:
+                    selectedTripId === trip.id
+                      ? '#FFFFFF'
+                      : '#64748b',
+                  fontWeight:
+                    selectedTripId === trip.id
+                      ? '800'
+                      : '400',
+                }}
+              >
+                {selectedTripId === trip.id ? '✓ ' : ''}
+                {trip.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.imageButton}

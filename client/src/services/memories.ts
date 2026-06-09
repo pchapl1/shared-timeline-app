@@ -2,6 +2,7 @@ import { api } from './api';
 
 import type {
   CreateMemoryData,
+  Memory,
   MemoryComment,
 } from '../types/memory';
 
@@ -9,6 +10,23 @@ type ReactNativeFile = {
   uri: string;
   name: string;
   type: string;
+};
+
+export type UpdateMemoryPayload = {
+  trip?: number | null;
+  title?: string;
+  description?: string;
+  memory_date?: string;
+  location_name?: string;
+  latitude?: string | null;
+  longitude?: string | null;
+};
+
+type PaginatedMemoriesResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Memory[];
 };
 
 function getFileInfo(uri: string, index: number) {
@@ -40,9 +58,6 @@ function createReactNativeFile(
   filename: string,
   type: string
 ): ReactNativeFile {
-  // React Native FormData expects this file-like object shape.
-  // Browser File objects can crash on native because their name
-  // property is read-only in some runtimes.
   return {
     uri,
     name: filename,
@@ -54,6 +69,11 @@ export async function createMemory(data: CreateMemoryData) {
   const formData = new FormData();
 
   formData.append('circle', String(data.circleId));
+
+  if (data.trip) {
+    formData.append('trip', String(data.trip));
+  }
+
   formData.append('title', data.title);
   formData.append('description', data.description);
   formData.append('memory_date', data.memoryDate);
@@ -105,7 +125,7 @@ export async function createMemory(data: CreateMemoryData) {
     formData.append('longitude', data.longitude);
   }
 
-  return api.post('/memories/', formData, {
+  return api.post<Memory>('/memories/', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -113,9 +133,38 @@ export async function createMemory(data: CreateMemoryData) {
 }
 
 export async function getMemories() {
-  const response = await api.get('/memories/');
+  const response = await api.get<Memory[] | PaginatedMemoriesResponse>(
+    '/memories/'
+  );
 
   return response.data;
+}
+
+export async function getCircleMemories(
+  circleId: number,
+  page = 1
+) {
+  const response = await api.get<PaginatedMemoriesResponse>(
+    `/memories/?circle=${circleId}&page=${page}`
+  );
+
+  return response.data;
+}
+
+export async function updateMemory(
+  memoryId: number,
+  payload: UpdateMemoryPayload
+) {
+  const response = await api.patch<Memory>(
+    `/memories/${memoryId}/`,
+    payload
+  );
+
+  return response.data;
+}
+
+export async function deleteMemory(memoryId: number) {
+  await api.delete(`/memories/${memoryId}/`);
 }
 
 export async function toggleMemoryReaction(memoryId: number) {
@@ -149,15 +198,4 @@ export async function deleteMemoryComment(
   return api.delete(
     `/memories/${memoryId}/comments/${commentId}/`
   );
-}
-
-export async function getCircleMemories(
-  circleId: number,
-  page = 1
-) {
-  const response = await api.get(
-    `/memories/?circle=${circleId}&page=${page}`
-  );
-
-  return response.data;
 }
