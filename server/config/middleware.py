@@ -66,5 +66,7 @@ class JWTAuthMiddleware:
             # Validate the JWT and attach the user to the scope.
             scope['user'] = await get_user_from_token(token)
 
+            
+
         # Continue to the WebSocket router/consumer.
         return await self.app(scope, receive, send)
