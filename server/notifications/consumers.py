@@ -1,5 +1,7 @@
 import json
 import logging
+from channels.db import database_sync_to_async
+from memories.models import Memory
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 logger = logging.getLogger(__name__)
@@ -69,7 +71,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         Runs when the backend sends a notification_created event
         to this user's WebSocket group.
         """
+        notification = event.get('notification')
 
+        if not notification: 
+            return
+        
         # Send JSON data to the frontend WebSocket listener.
         await self.send(
             text_data=json.dumps({
@@ -77,6 +83,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 'notification': event['notification'],
             })
         )
+
+@database_sync_to_async
+def user_can_access_memory_comments(user, memory_id):
+    return Memory.objects.filter(
+        id=memory_id,
+        circle__members__user=user,
+    ).exists()
 
 class MemoryCommentConsumer(AsyncWebsocketConsumer):
     """
@@ -107,6 +120,15 @@ class MemoryCommentConsumer(AsyncWebsocketConsumer):
 
         # Get the memory id from the websocket URL.
         self.memory_id = self.scope['url_route']['kwargs']['memory_id']
+
+        can_access = await user_can_access_memory_comments(
+            self.user,
+            self.memory_id,
+        )
+
+        if not can_access:
+            await self.close(code=4003)
+            return
 
         # Create a group name for this memory.
         self.group_name = f'memory_comments_{self.memory_id}'
@@ -147,6 +169,11 @@ class MemoryCommentConsumer(AsyncWebsocketConsumer):
         Runs when the backend broadcasts a newly created comment.
         """
 
+        comment = event.get('comment')
+
+        if not comment:
+            return
+        
         await self.send(
             text_data=json.dumps({
                 'type': 'comment_created',
