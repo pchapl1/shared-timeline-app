@@ -1,5 +1,3 @@
-import json
-
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -13,6 +11,7 @@ from .models import Memory, MemoryPhoto, MemoryReaction, MemoryComment
 from .serializers import MemorySerializer, MemoryCommentSerializer
 from notifications.models import Notification
 from activities.models import Activity
+from notifications.services import create_notification, create_circle_notification
 
 
 class MemoryViewSet(viewsets.ModelViewSet):
@@ -84,14 +83,12 @@ class MemoryViewSet(viewsets.ModelViewSet):
                 memory=memory
             )
 
-            if memory.created_by != request.user:
-                Notification.objects.create(
-                    recipient=memory.created_by,
-                    actor=request.user,
-                    notification_type=Notification.MEMORY_REACTION,
-                    circle=memory.circle,
-                    memory=memory
-                )
+            create_circle_notification(
+                circle=memory.circle,
+                actor=request.user,
+                notification_type=Notification.MEMORY_REACTION,
+                memory=memory,
+            )
 
             has_reacted = True
 
@@ -157,15 +154,12 @@ class MemoryViewSet(viewsets.ModelViewSet):
 
             # Create a notification for the memory owner,
             # unless the owner commented on their own memory.
-            if memory.created_by != request.user:
-                Notification.objects.create(
-                    recipient=memory.created_by,
-                    actor=request.user,
-                    notification_type=Notification.MEMORY_COMMENT,
-                    circle=memory.circle,
-                    memory=memory
-                )
-
+            create_circle_notification(
+                circle=memory.circle,
+                actor=request.user,
+                notification_type=Notification.MEMORY_COMMENT,
+                memory=memory,
+            )
             # Re-serialize the saved comment.
             # This makes sure the response includes fields added by the database,
             # like id, user info, and created_at.

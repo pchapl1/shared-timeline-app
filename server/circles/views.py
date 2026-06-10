@@ -12,6 +12,7 @@ from .serializers import (
     CircleMemberSerializer,
     CircleInviteSerializer,
 )
+from notifications.services import create_notification
 
 
 class CircleViewSet(viewsets.ModelViewSet):
@@ -126,11 +127,11 @@ class CircleInviteViewSet(viewsets.ModelViewSet):
             status='pending'
         )
         
-        Notification.objects.create(
+        create_notification(
             recipient=invited_user,
             actor=request.user,
             notification_type=Notification.CIRCLE_INVITE,
-            circle=circle
+            circle=circle,
         )
 
         serializer = self.get_serializer(invite)
