@@ -22,6 +22,7 @@ type AuthContextType = {
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
+  refreshAccessToken: () => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,7 +33,6 @@ export function AuthProvider({
   children: ReactNode;
 }) {
   const [tokens, setTokens] = useState<AuthTokens | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,7 +47,6 @@ export function AuthProvider({
         const parsedTokens: AuthTokens = JSON.parse(storedTokens);
 
         setTokens(parsedTokens);
-
         setAuthToken(parsedTokens.access);
       }
     } finally {
@@ -62,7 +61,6 @@ export function AuthProvider({
     );
 
     setTokens(response.data);
-
     setAuthToken(response.data.access);
 
     await AsyncStorage.setItem(
@@ -82,10 +80,43 @@ export function AuthProvider({
 
   async function logout() {
     setTokens(null);
-
     setAuthToken(null);
 
     await AsyncStorage.removeItem('tokens');
+  }
+
+  async function refreshAccessToken() {
+    try {
+      if (!tokens?.refresh) {
+        await logout();
+        return null;
+      }
+
+      const response = await api.post<{ access: string }>(
+        '/auth/token/refresh/',
+        {
+          refresh: tokens.refresh,
+        }
+      );
+
+      const updatedTokens: AuthTokens = {
+        ...tokens,
+        access: response.data.access,
+      };
+
+      setTokens(updatedTokens);
+      setAuthToken(updatedTokens.access);
+
+      await AsyncStorage.setItem(
+        'tokens',
+        JSON.stringify(updatedTokens)
+      );
+
+      return updatedTokens.access;
+    } catch (error) {
+      await logout();
+      return null;
+    }
   }
 
   return (
@@ -96,6 +127,7 @@ export function AuthProvider({
         login,
         register,
         logout,
+        refreshAccessToken,
       }}
     >
       {children}

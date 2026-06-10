@@ -4,10 +4,9 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 
-import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { AuthProvider } from '../src/context/AuthContext';
 import { InviteProvider } from '../src/context/InviteContext';
 import { useNotificationSocket } from '@/hooks/useNotificationSocket';
-import { Redirect } from 'expo-router';
 
 /**
  * =====================================================
@@ -19,17 +18,7 @@ import { Redirect } from 'expo-router';
 const queryClient = new QueryClient();
 
 
-function SocketInitializer() {
-  const { tokens, isLoading } = useAuth();
-
-
-  if (isLoading) {
-    return null;
-  }
-
-  if (!tokens) {
-    return <Redirect href="/login" />;
-  }
+export function SocketInitializer() {
   useNotificationSocket();
 
   return null;
@@ -50,13 +39,10 @@ export default function RootLayout() {
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
             <Stack.Screen name="circles/[id]" />
-            <Stack.Screen name="circles/[id]/invite" />
+            {/* <Stack.Screen name="circles/[id]/invite" />
             <Stack.Screen name="circles/[id]/add-memory" />
-            <Stack.Screen
-              name="circles/[id]/memories/[memoryId]"
-            />
+            <Stack.Screen name="circles/[id]/memories/[memoryId]"/> */}
           </Stack>
-
         </InviteProvider>
       </AuthProvider>
     </QueryClientProvider>

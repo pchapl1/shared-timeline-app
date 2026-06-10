@@ -1,6 +1,9 @@
-import { useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { useAuth } from '@/context/AuthContext';
+import { createWebSocketUrl } from '@/services/websocket/createWebSocketUrl';
+import { useManagedWebSocket } from '@/hooks/websockets/useManagedWebSocket';
 
 import type { Memory } from '@/types/memory';
 
@@ -9,94 +12,77 @@ type CommentCreatedMessage = {
   comment: NonNullable<Memory['comments']>[number];
 };
 
-export function useMemoryCommentsSocket(memoryId: string | undefined) {
+export function useMemoryCommentsSocket(
+  memoryId: string | undefined
+) {
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!memoryId) {
-      return;
+  const { tokens, refreshAccessToken } = useAuth();
+
+  const url = useMemo(() => {
+    if (!memoryId || !tokens?.access) {
+      return null;
     }
 
-    let socket: WebSocket | null = null;
+    return createWebSocketUrl(
+      `/ws/memories/${memoryId}/comments/`,
+      tokens.access
+    );
+  }, [memoryId, tokens?.access]);
 
-    async function connectSocket() {
-      try {
-        // Get the saved JWT tokens from storage.
-        // This should be the same "tokens" key your Axios auth uses.
-        const storedTokens = await AsyncStorage.getItem('tokens');
+  const handleMessage = useCallback(
+    async (data: unknown) => {
+      if (
+        typeof data !== 'object' ||
+        data === null ||
+        !('type' in data) ||
+        data.type !== 'comment_created'
+      ) {
+        return;
+      }
 
-        if (!storedTokens) {
-          console.log('No stored tokens found for memory comments socket.');
-          return;
-        }
+      const message = data as CommentCreatedMessage;
 
-        const parsedTokens = JSON.parse(storedTokens);
-        const accessToken = parsedTokens.access;
-
-        if (!accessToken) {
-          console.log('No access token found for memory comments socket.');
-          return;
-        }
-
-        // Send the access token in the query string.
-        // Your Django JWTAuthMiddleware reads this token and sets scope["user"].
-        socket = new WebSocket(
-          `ws://127.0.0.1:8000/ws/memories/${memoryId}/comments/?token=${accessToken}`
-        );
-
-        socket.onopen = () => {
-          console.log(`Connected to memory comments socket: ${memoryId}`);
-        };
-
-        socket.onmessage = (event) => {
-          const data: CommentCreatedMessage = JSON.parse(event.data);
-
-          if (data.type !== 'comment_created') {
-            return;
+      queryClient.setQueryData<Memory>(
+        ['memory', memoryId],
+        (oldMemory) => {
+          if (!oldMemory) {
+            return oldMemory;
           }
 
-          queryClient.setQueryData<Memory>(
-            ['memory', memoryId],
-            (oldMemory) => {
-              if (!oldMemory) {
-                return oldMemory;
-              }
+          const existingComments = oldMemory.comments ?? [];
 
-              const existingComments = oldMemory.comments ?? [];
-
-              const alreadyExists = existingComments.some(
-                (comment) => comment.id === data.comment.id
-              );
-
-              if (alreadyExists) {
-                return oldMemory;
-              }
-
-              return {
-                ...oldMemory,
-                comments: [...existingComments, data.comment],
-                comment_count: (oldMemory.comment_count ?? 0) + 1,
-              };
-            }
+          const alreadyExists = existingComments.some(
+            (comment) => comment.id === message.comment.id
           );
-        };
 
-        socket.onerror = (error) => {
-          console.log('Memory comments socket error:', error);
-        };
+          if (alreadyExists) {
+            return oldMemory;
+          }
 
-        socket.onclose = () => {
-          console.log(`Disconnected from memory comments socket: ${memoryId}`);
-        };
-      } catch (error) {
-        console.log('Could not connect memory comments socket:', error);
-      }
-    }
+          return {
+            ...oldMemory,
+            comments: [
+              ...existingComments,
+              message.comment,
+            ],
+            comment_count:
+              (oldMemory.comment_count ?? 0) + 1,
+          };
+        }
+      );
+    },
+    [memoryId, queryClient]
+  );
 
-    connectSocket();
+  const handleUnauthorized = useCallback(async () => {
+    await refreshAccessToken();
+  }, [refreshAccessToken]);
 
-    return () => {
-      socket?.close();
-    };
-  }, [memoryId, queryClient]);
+  useManagedWebSocket({
+    url,
+    name: 'Memory comments',
+    onMessage: handleMessage,
+    onUnauthorized: handleUnauthorized,
+  });
 }

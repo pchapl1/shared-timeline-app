@@ -9,6 +9,7 @@ import {
 import { AppState } from 'react-native';
 
 import { getPendingCircleInvites } from '../services/api';
+import { useAuth } from './AuthContext';
 
 type InviteContextValue = {
   pendingInviteCount: number;
@@ -26,7 +27,14 @@ export function InviteProvider({
 }) {
   const [pendingInviteCount, setPendingInviteCount] = useState(0);
 
+  const { tokens, isLoading } = useAuth();
+
   const refreshInviteCount = useCallback(async () => {
+    if (isLoading || !tokens?.access) {
+      setPendingInviteCount(0);
+      return;
+    }
+
     try {
       const invites = await getPendingCircleInvites();
 
@@ -39,7 +47,7 @@ export function InviteProvider({
     } catch (error) {
       console.log('Error refreshing invite count:', error);
     }
-  }, []);
+  }, [tokens?.access, isLoading]);
 
   useEffect(() => {
     refreshInviteCount();
