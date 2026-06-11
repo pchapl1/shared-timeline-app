@@ -77,7 +77,7 @@ export default function AddTripScreen() {
         longitude: longitude || undefined,
       });
 
-      router.replace(`/circles/${id}/trips`);
+      router.replace({pathname: '/circles/[id]/trips', params: { id }})
     } catch (error: any) {
       console.error(
         'Create trip error:',

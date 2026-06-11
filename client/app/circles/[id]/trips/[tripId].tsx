@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 
 import { router, useLocalSearchParams } from 'expo-router';
 
@@ -9,8 +9,6 @@ import { memoryDetailStyles as styles } from '@/styles/memoryDetailStyles';
 
 import { useCircleMemories } from '@/hooks/useCircleMemories';
 import { MemoryCard } from '@/components/memories/MemoryCard';
-
-import { Alert } from 'react-native';
 import { useDeleteTrip } from '@/hooks/trips/useDeleteTrip';
 
 export default function TripDetailScreen() {
@@ -69,8 +67,7 @@ export default function TripDetailScreen() {
                 currentTripId
               );
 
-              router.replace(
-                `/circles/${id}/trips`
+              router.replace({ pathname: '/circles/[id]/trips', params: { id }}
               );
             } catch (error) {
               console.error(error);
@@ -98,7 +95,7 @@ export default function TripDetailScreen() {
       <ScrollView style={styles.container}>
         <Text
           style={styles.backButton}
-          onPress={() => router.push(`/circles/${id}/trips`)}
+          onPress={() => router.push({pathname:'/circles/[id]/trips', params: { id }})}
         >
           ← Back
         </Text>

@@ -4,7 +4,6 @@ import {
   ScrollView,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
   Alert,
   Pressable,
@@ -66,40 +65,8 @@ export default function AddMemoryScreen() {
       return;
     }
 
-    const tempId = Date.now() * -1;
-
-    const optimisticMemory = {
-      id: tempId,
-      circle: Number(id),
-      trip: selectedTripId,
-      title: trimmedTitle,
-      description,
-      memory_date: memoryDate.toISOString().split('T')[0],
-      location_name: locationName,
-      photo: images[0] ?? null,
-      photos: images.map((imageUri, index) => ({
-        id: tempId - index - 1,
-        image: imageUri,
-        created_at: new Date().toISOString(),
-      })),
-      reaction_count: 0,
-      has_reacted: false,
-      comments: [],
-      comment_count: 0,
-      created_by: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    // addMemory(optimisticMemory);
-
-    router.replace(`/circles/${id}`);
-
-  setTimeout(async () => {
     try {
-
-      console.log('Selected trip id:', selectedTripId);
-      const response = await createMemory({
+      await createMemory({
         circleId: String(id),
         trip: selectedTripId,
         title: trimmedTitle,
@@ -113,7 +80,16 @@ export default function AddMemoryScreen() {
 
       await queryClient.invalidateQueries({
         queryKey: ['memories', Number(id)],
-    });
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ['trips', Number(id)],
+      });
+
+      router.replace({
+        pathname: '/circles/[id]',
+        params: { id },
+      });
     } catch (error: any) {
       console.error(
         'Create memory error:',
@@ -121,8 +97,7 @@ export default function AddMemoryScreen() {
       );
 
       Alert.alert('Error', 'Could not create memory.');
-    }
-  }, 300)
+    } 
   }
 
   return (

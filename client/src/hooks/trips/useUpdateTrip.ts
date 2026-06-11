@@ -2,8 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { updateTrip } from '@/services/trips';
 
-import type { Trip } from '@/types/trip';
-
 import type { UpdateTripPayload } from '@/types/trip';
 
 export function useUpdateTrip(

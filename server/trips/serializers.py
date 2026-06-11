@@ -37,5 +37,20 @@ class TripSerializer(serializers.ModelSerializer):
             'memory_count',
         ]
 
+    def validate_circle(self, circle):
+        request = self.context['request']
+
+        is_member = circle.members.filter(
+            user=request.user
+        ).exists()
+
+        if not is_member:
+            raise serializers.ValidationError(
+                'You are not a member of this circle.'
+            )
+
+        return circle
+    
     def get_memory_count(self, obj):
         return obj.memories.count()
+    

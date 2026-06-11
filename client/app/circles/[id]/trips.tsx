@@ -69,7 +69,7 @@ export default function CircleTripsScreen() {
               router.push({
                 pathname: '/circles/[id]/add-trip',
                 params: {
-                  id: id.toString(),
+                  id: id,
                 },
               })
             }
