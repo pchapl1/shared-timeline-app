@@ -127,6 +127,7 @@ export function CircleMap({ circleId, memories, trips }: Props) {
   }, [isMapReady, allPoints]);
 
   function openMapItem(item: MapItem) {
+    console.log("MAP ITEM PRESSED: ", item)
     if (item.type === 'memory') {
       router.push({
         pathname: '/circles/[id]/memories/[memoryId]',
@@ -177,6 +178,13 @@ export function CircleMap({ circleId, memories, trips }: Props) {
                   ? 'purple'
                   : undefined
               }
+              onCalloutPress={() => {
+                const tripItem = group.items.find(
+                  (item) => item.type === 'trip'
+                );
+
+                openMapItem(tripItem ?? firstItem);
+              }}
             >
               {isGrouped && (
                 <View

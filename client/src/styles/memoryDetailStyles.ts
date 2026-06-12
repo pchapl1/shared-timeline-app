@@ -42,7 +42,7 @@ export const memoryDetailStyles = StyleSheet.create({
 
   heroImage: {
     width: '100%',
-    height: 300,
+    height: 220,
   },
 
   photoGrid: {
@@ -77,7 +77,7 @@ export const memoryDetailStyles = StyleSheet.create({
   },
 
   imagePlaceholder: {
-    height: 300,
+    height: 280,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.surfaceMuted,
@@ -89,7 +89,9 @@ export const memoryDetailStyles = StyleSheet.create({
   },
 
   memoryCard: {
-    marginTop: 0,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
   },
 
   creatorRow: {
@@ -114,8 +116,7 @@ export const memoryDetailStyles = StyleSheet.create({
   memoryActions: {
     flexDirection: 'row',
     gap: spacing.md,
-    marginTop: spacing.sm,
-    marginBottom: spacing.xl,
+    marginTop: spacing.md,
   },
 
   inlineActionButton: {
@@ -133,7 +134,7 @@ export const memoryDetailStyles = StyleSheet.create({
   },
 
   section: {
-    marginTop: spacing.xl,
+    marginTop: spacing.lg,
   },
 
   description: {
@@ -173,6 +174,7 @@ export const memoryDetailStyles = StyleSheet.create({
   },
 
   commentComposer: {
+    minHeight: 0,
     marginTop: spacing.md,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -183,7 +185,7 @@ export const memoryDetailStyles = StyleSheet.create({
   },
 
   commentInput: {
-    minHeight: 40,
+    minHeight: 20,
     color: colors.text,
     fontSize: 16,
     lineHeight: 20,

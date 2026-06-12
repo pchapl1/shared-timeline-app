@@ -1,11 +1,17 @@
+import { useState } from 'react';
 import {
   Alert,
+  Modal,
   ScrollView,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import { formatDistanceToNow } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { AppScreen } from '@/components/ui/layout/AppScreen';
 import { AppCard } from '@/components/ui/AppCard';
@@ -13,91 +19,158 @@ import { AppText } from '@/components/ui/AppText';
 import { Avatar } from '@/components/ui/Avatar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 
-import { MemoryCard } from '@/components/memories/MemoryCard';
+import { useAuth } from '@/context/AuthContext';
+import { useMemory } from '@/hooks/useMemory';
+import { useMemoryCommentsSocket } from '@/hooks/useMemoryCommentsSocket';
+import { useDeleteMemory } from '@/hooks/memories/useDeleteMemory';
 
-import { useTrip } from '@/hooks/trips/useTrip';
-import { useDeleteTrip } from '@/hooks/trips/useDeleteTrip';
-import { useCircleMemories } from '@/hooks/useCircleMemories';
+import {
+  createMemoryComment,
+  deleteMemoryComment,
+} from '@/services/memories';
 
 import { colors } from '@/theme/colors';
-import { tripDetailStyles as styles } from '@/styles/tripDetailStyles';
+import { memoryDetailStyles as styles } from '@/styles/memoryDetailStyles';
+import { photoModalStyles } from '@/styles/photoModalStyles';
 
-export default function TripDetailScreen() {
-  const { id, tripId } = useLocalSearchParams<{
+export default function MemoryDetailScreen() {
+  const { memoryId, id } = useLocalSearchParams<{
+    memoryId: string;
     id: string;
-    tripId: string;
   }>();
 
-  const numericTripId = Number(tripId);
+  const { isLoading } = useAuth();
+  const queryClient = useQueryClient();
 
-  const { data: trip, isLoading } = useTrip(numericTripId);
+  const { data: memory, isLoading: memoryLoading } =
+    useMemory(memoryId);
 
-  const deleteTripMutation = useDeleteTrip(Number(id));
+  const deleteMemoryMutation = useDeleteMemory(Number(id));
 
-  const { data: memoriesData } = useCircleMemories(Number(id));
+  useMemoryCommentsSocket(memoryId);
 
-  if (isLoading || !trip) {
-    return (
-      <AppScreen>
-        <View style={styles.loadingContainer}>
-          <AppText variant="bodyStrong" color={colors.textMuted}>
-            Loading trip...
-          </AppText>
-        </View>
-      </AppScreen>
-    );
-  }
-
-  const memoryCount = trip.memory_count ?? 0;
-
-  const allMemories = memoriesData?.pages
-    ? memoriesData.pages.flatMap(
-        (page) => page.results
-      )
-    : [];
-
-  const tripMemories = allMemories.filter(
-    (memory) => Number(memory.trip) === Number(trip.id)
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(
+    null
   );
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] =
+    useState(false);
 
-  const dateRange = `${trip.start_date}${
-    trip.end_date ? ` → ${trip.end_date}` : ''
-  }`;
-
-  function handleDeleteTrip() {
-    if (!trip) {
+  function handleDeleteMemory() {
+    if (!memory) {
       return;
     }
 
     Alert.alert(
-      'Delete Trip',
-      `Are you sure you want to delete "${trip.title}"?`,
+      'Delete Memory',
+      `Are you sure you want to delete "${memory.title}"?`,
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteTripMutation.mutateAsync(trip.id);
-
-              router.replace({
-                pathname: '/circles/[id]/trips',
-                params: { id },
-              });
+              await deleteMemoryMutation.mutateAsync(memory.id);
+              router.replace(`/circles/${id}`);
             } catch (error) {
               console.error(error);
-
-              Alert.alert('Error', 'Could not delete trip.');
+              Alert.alert('Error', 'Could not delete memory.');
             }
           },
         },
       ]
     );
   }
+
+  async function handleCreateComment() {
+    const trimmedComment = commentText.trim();
+
+    if (!trimmedComment || !memoryId || !memory) {
+      return;
+    }
+
+    try {
+      setIsSubmittingComment(true);
+
+      const response = await createMemoryComment(
+        memory.id,
+        trimmedComment
+      );
+
+      queryClient.setQueryData(['memory', memoryId], {
+        ...memory,
+        comments: [...(memory.comments ?? []), response.data],
+        comment_count: (memory.comment_count ?? 0) + 1,
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['memories', Number(id)],
+      });
+
+      setCommentText('');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Could not add comment.');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  }
+
+  async function handleDeleteComment(commentId: number) {
+    if (!memoryId || !memory) {
+      return;
+    }
+
+    try {
+      await deleteMemoryComment(memory.id, commentId);
+
+      queryClient.setQueryData(['memory', memoryId], {
+        ...memory,
+        comments: memory.comments?.filter(
+          (comment) => comment.id !== commentId
+        ),
+        comment_count: Math.max(
+          (memory.comment_count ?? 1) - 1,
+          0
+        ),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['memories', Number(id)],
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Could not delete comment.');
+    }
+  }
+
+  if (isLoading || memoryLoading || !memory) {
+    return (
+      <AppScreen>
+        <View style={styles.loadingContainer}>
+          <AppText variant="bodyStrong" color={colors.textMuted}>
+            Loading memory...
+          </AppText>
+        </View>
+      </AppScreen>
+    );
+  }
+
+  const photos = memory.photos ?? [];
+
+  const heroPhoto =
+    photos.length === 1
+      ? photos[0].image
+      : photos.length === 0
+        ? memory.photo
+        : null;
+
+  const hasPhotoGrid = photos.length > 1;
+  const hasSinglePhoto = !!heroPhoto;
+
+  const commentCount =
+    memory.comment_count ?? memory.comments?.length ?? 0;
 
   return (
     <AppScreen padded={false}>
@@ -106,126 +179,127 @@ export default function TripDetailScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
+        <View style={styles.heroSection}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() =>
-              router.push({
-                pathname: '/circles/[id]/trips',
-                params: { id },
-              })
-            }
+            onPress={() => router.push(`/circles/${id}`)}
           >
-            <AppText variant="bodyStrong">← Back</AppText>
+            <AppText variant="bodyStrong" color={colors.text}>
+              ← Back
+            </AppText>
           </TouchableOpacity>
 
-          <AppCard style={styles.tripCard}>
+          {hasPhotoGrid ? (
+            <View style={styles.photoGrid}>
+              {photos.map((photo) => (
+                <TouchableOpacity
+                  key={photo.id}
+                  activeOpacity={0.9}
+                  style={styles.gridImageWrapper}
+                  onPress={() => setSelectedPhoto(photo.image)}
+                >
+                  <Image
+                    source={{ uri: photo.image }}
+                    style={styles.gridImage}
+                    contentFit="cover"
+                  />
+                </TouchableOpacity>
+              ))}
+
+              <View style={styles.photoCountBadge}>
+                <AppText variant="caption" color={colors.textInverse}>
+                  {photos.length} photos
+                </AppText>
+              </View>
+            </View>
+          ) : hasSinglePhoto ? (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => setSelectedPhoto(heroPhoto)}
+            >
+              <Image
+                source={{ uri: heroPhoto }}
+                style={styles.heroImage}
+                contentFit="cover"
+              />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <AppText variant="h3" color={colors.textMuted}>
+                Photo Coming Soon
+              </AppText>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.content}>
+          <AppCard style={styles.memoryCard}>
             <View style={styles.creatorRow}>
               <Avatar
-                label={trip.created_by_username ?? '?'}
+                label={memory.created_by?.username ?? '?'}
                 size={44}
               />
 
               <View style={styles.creatorText}>
                 <AppText variant="bodyStrong">
-                  @{trip.created_by_username}
+                  @{memory.created_by?.username ?? 'unknown'}
                 </AppText>
 
                 <AppText variant="bodySmall" color={colors.textMuted}>
-                  Trip organizer
+                  {formatDistanceToNow(
+                    new Date(
+                      memory.created_at ?? memory.memory_date
+                    ),
+                    { addSuffix: true }
+                  )}
                 </AppText>
               </View>
             </View>
 
-            <AppText variant="h1" style={styles.title}>
-              {trip.title}
+            <AppText variant="h2" style={styles.title}>
+              {memory.title}
             </AppText>
 
-            {!!trip.destination_name && (
-              <View style={styles.destinationRow}>
+            {!!memory.location_name && (
+              <View style={styles.locationRow}>
                 <AppText
                   variant="bodySmall"
                   color={colors.textMuted}
-                  numberOfLines={1}
                 >
-                  📍 {trip.destination_name}
+                  📍 {memory.location_name}
                 </AppText>
+                <View style={styles.memoryActions}>
+                  <TouchableOpacity
+                    style={styles.inlineActionButton}
+                    onPress={() =>
+                      router.push({
+                        pathname:
+                          '/circles/[id]/memories/edit/[memoryId]',
+                        params: { id, memoryId },
+                      })
+                    }
+                  >
+                    <AppText variant="bodySmall" color={colors.primary}>
+                      Edit
+                    </AppText>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.inlineDangerButton}
+                    onPress={handleDeleteMemory}
+                  >
+                    <AppText variant="bodySmall" color={colors.danger}>
+                      Delete
+                    </AppText>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
-
-            <View style={styles.datePill}>
-              <AppText variant="bodySmall" color={colors.primary}>
-                {dateRange}
-              </AppText>
-            </View>
           </AppCard>
 
-          <View style={styles.tripActions}>
-            <TouchableOpacity
-              style={styles.inlineActionButton}
-              onPress={() =>
-                router.push({
-                  pathname: '/circles/[id]/add-memory',
-                  params: {
-                    id,
-                    tripId: String(trip.id),
-                  },
-                })
-              }
-            >
-              <AppText variant="bodySmall" color={colors.primary}>
-                Add Memory
-              </AppText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.inlineActionButton}
-              onPress={() =>
-                router.push({
-                  pathname: '/circles/[id]/trips/edit/[tripId]',
-                  params: {
-                    id,
-                    tripId,
-                  },
-                })
-              }
-            >
-              <AppText variant="bodySmall" color={colors.primary}>
-                Edit
-              </AppText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.inlineDangerButton}
-              onPress={handleDeleteTrip}
-            >
-              <AppText variant="bodySmall" color={colors.danger}>
-                Delete
-              </AppText>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.statRow}>
-            <AppCard style={styles.statCard}>
-              <AppText variant="h2">{memoryCount}</AppText>
-              <AppText variant="caption" color={colors.textMuted}>
-                Memories
-              </AppText>
-            </AppCard>
-
-            <AppCard style={styles.statCard}>
-              <AppText variant="h2">
-                {trip.end_date ? 'Multi' : '1'}
-              </AppText>
-              <AppText variant="caption" color={colors.textMuted}>
-                Day Trip
-              </AppText>
-            </AppCard>
-          </View>
-
-          {!!trip.description && (
+          {!!memory.description && (
             <View style={styles.section}>
-              <SectionHeader title="About this trip" />
+              <SectionHeader title="Story" />
 
               <AppCard>
                 <AppText
@@ -233,7 +307,7 @@ export default function TripDetailScreen() {
                   color={colors.textMuted}
                   style={styles.description}
                 >
-                  {trip.description}
+                  {memory.description}
                 </AppText>
               </AppCard>
             </View>
@@ -241,45 +315,116 @@ export default function TripDetailScreen() {
 
           <View style={styles.section}>
             <SectionHeader
-              title="Trip Memories"
-              subtitle={`${tripMemories.length} linked`}
+              title="Comments"
+              subtitle={`${commentCount} total`}
             />
 
-            {tripMemories.length === 0 ? (
-              <View style={styles.emptyMemories}>
-                <AppText variant="h3">🧳</AppText>
+            {memory.comments && memory.comments.length > 0 ? (
+              memory.comments.map((comment) => (
+                <AppCard key={comment.id} style={styles.commentCard}>
+                  <View style={styles.commentHeader}>
+                    <Avatar label={comment.user.username} size={36} />
+
+                    <View style={styles.commentHeaderText}>
+                      <AppText variant="bodyStrong">
+                        @{comment.user.username}
+                      </AppText>
+
+                      <AppText
+                        variant="caption"
+                        color={colors.textSubtle}
+                      >
+                        {formatDistanceToNow(
+                          new Date(comment.created_at),
+                          { addSuffix: true }
+                        )}
+                      </AppText>
+                    </View>
+                  </View>
+
+                  <AppText
+                    variant="bodySmall"
+                    color={colors.textMuted}
+                    style={styles.commentContent}
+                  >
+                    {comment.content}
+                  </AppText>
+
+                  <TouchableOpacity
+                    style={styles.deleteCommentButton}
+                    onPress={() => handleDeleteComment(comment.id)}
+                  >
+                    <AppText variant="caption" color={colors.danger} >
+                      Delete
+                    </AppText>
+                  </TouchableOpacity>
+                </AppCard>
+              ))
+            ) : (
+              <View style={styles.emptyComments}>
+                <AppText variant="h3">💬</AppText>
 
                 <AppText variant="bodyStrong" color={colors.textMuted}>
-                  No memories linked yet.
+                  No comments yet.
                 </AppText>
 
                 <AppText variant="bodySmall" color={colors.textSubtle}>
-                  Memories assigned to this trip will appear here.
+                  Be the first to comment.
                 </AppText>
               </View>
-            ) : (
-              <View style={styles.memoryList}>
-                {tripMemories.map((memory) => (
-                  <MemoryCard
-                    key={memory.id}
-                    memory={memory}
-                    onPress={() =>
-                      router.push({
-                        pathname:
-                          '/circles/[id]/memories/[memoryId]',
-                        params: {
-                          id,
-                          memoryId: String(memory.id),
-                        },
-                      })
-                    }
-                  />
-                ))}
-              </View>
             )}
+
+            <View style={styles.commentComposer}>
+              <TextInput
+                value={commentText}
+                onChangeText={setCommentText}
+                placeholder="Add a comment..."
+                placeholderTextColor={colors.textSubtle}
+                style={styles.commentInput}
+                multiline
+              />
+
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={handleCreateComment}
+                disabled={isSubmittingComment}
+              >
+                <AppText
+                  variant="bodyStrong"
+                  color={colors.primary}
+                >
+
+                  {isSubmittingComment ? '...' : 'Send'}
+                </AppText>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={!!selectedPhoto}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedPhoto(null)}
+      >
+        <View style={photoModalStyles.photoModal}>
+          <TouchableOpacity
+            style={photoModalStyles.closeButton}
+            onPress={() => setSelectedPhoto(null)}
+          >
+            <AppText color={colors.textInverse}>✕</AppText>
+          </TouchableOpacity>
+
+          {selectedPhoto && (
+            <Image
+              source={{ uri: selectedPhoto }}
+              style={photoModalStyles.fullscreenPhoto}
+              contentFit="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </AppScreen>
   );
 }

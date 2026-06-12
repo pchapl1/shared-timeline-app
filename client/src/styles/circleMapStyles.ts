@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
+import { shadows } from '@/theme/shadows';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 
@@ -20,6 +21,9 @@ export const circleMapStyles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: radius.xl,
     backgroundColor: colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
   },
 
   mapWrapper: {
@@ -40,24 +44,24 @@ export const circleMapStyles = StyleSheet.create({
 
   filterOverlay: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    top: spacing.sm,
+    left: spacing.sm,
+    right: spacing.sm,
     zIndex: 10,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.xs,
     padding: spacing.xs,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    borderRadius: radius.full,
     backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
   },
 
   filterButton: {
+    flex: 1,
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
@@ -70,7 +74,7 @@ export const circleMapStyles = StyleSheet.create({
 
   filterText: {
     ...typography.caption,
-    color: colors.text,
+    color: colors.textMuted,
   },
 
   activeFilterText: {
@@ -79,19 +83,23 @@ export const circleMapStyles = StyleSheet.create({
 
   mapTypeToggle: {
     position: 'absolute',
-    right: 12,
-    bottom: 12,
+    right: spacing.sm,
+    bottom: spacing.sm,
     zIndex: 10,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
   },
 
   mapTypeToggleText: {
     ...typography.caption,
-    color: colors.text,
+    color: colors.primary,
   },
+
   groupMarker: {
     minWidth: 36,
     height: 36,
