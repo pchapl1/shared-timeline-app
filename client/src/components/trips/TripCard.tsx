@@ -1,4 +1,10 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+import { IconBubble } from '@/components/ui/IconBubble';
+
+import { colors } from '@/theme/colors';
 
 import type { Trip } from '@/types/trip';
 
@@ -14,35 +20,65 @@ export function TripCard({ trip, onPress }: Props) {
 
   return (
     <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.85}
+      activeOpacity={0.9}
       onPress={onPress}
     >
-      <View>
-        <Text style={styles.title}>{trip.title}</Text>
+      <AppCard style={styles.card}>
+        <View style={styles.headerRow}>
+          <IconBubble icon="✈️" />
 
-        {!!trip.destination_name && (
-          <Text style={styles.destination}>
-            {trip.destination_name}
-          </Text>
-        )}
+          <View style={styles.content}>
+            <AppText
+              variant="h3"
+              style={styles.title}
+            >
+              {trip.title}
+            </AppText>
 
-        <Text style={styles.date}>
-          {trip.start_date}
-          {trip.end_date ? ` → ${trip.end_date}` : ''}
-        </Text>
+            {!!trip.destination_name && (
+              <AppText
+                variant="bodySmall"
+                color={colors.primary}
+                style={styles.destination}
+              >
+                {trip.destination_name}
+              </AppText>
+            )}
 
-        {!!trip.description && (
-          <Text style={styles.description}>
-            {trip.description}
-          </Text>
-        )}
+            <AppText
+              variant="caption"
+              color={colors.textSubtle}
+              style={styles.date}
+            >
+              {trip.start_date}
+              {trip.end_date
+                ? ` → ${trip.end_date}`
+                : ''}
+            </AppText>
 
-        <Text style={styles.memoryCount}>
-          {memoryCount}{' '}
-          {memoryCount === 1 ? 'Memory' : 'Memories'}
-        </Text>
-      </View>
+            {!!trip.description && (
+              <AppText
+                variant="bodySmall"
+                color={colors.textMuted}
+                style={styles.description}
+              >
+                {trip.description}
+              </AppText>
+            )}
+
+            <AppText
+              variant="bodyStrong"
+              color={colors.primary}
+              style={styles.memoryCount}
+            >
+              {memoryCount}{' '}
+              {memoryCount === 1
+                ? 'Memory'
+                : 'Memories'}
+            </AppText>
+          </View>
+        </View>
+      </AppCard>
     </TouchableOpacity>
   );
 }

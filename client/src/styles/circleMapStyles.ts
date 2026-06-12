@@ -1,8 +1,30 @@
 import { StyleSheet } from 'react-native';
 
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
+
 export const circleMapStyles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+
+  screenContent: {
+    paddingBottom: spacing.lg,
+  },
+
+  mapShell: {
+    flex: 1,
+    minHeight: 520,
+    overflow: 'hidden',
+    borderRadius: radius.xl,
+    backgroundColor: colors.surfaceMuted,
+  },
+
+  mapWrapper: {
+    flex: 1,
+    position: 'relative',
   },
 
   map: {
@@ -13,86 +35,93 @@ export const circleMapStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.background,
   },
 
-  filterContainer: {
+  filterOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#111827',
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
 
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: '#1F2937',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceMuted,
   },
 
   activeFilterButton: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.primary,
   },
 
   filterText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...typography.caption,
+    color: colors.text,
   },
 
+  activeFilterText: {
+    color: colors.textInverse,
+  },
+
+  mapTypeToggle: {
+    position: 'absolute',
+    right: 12,
+    bottom: 12,
+    zIndex: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: colors.surface,
+  },
+
+  mapTypeToggleText: {
+    ...typography.caption,
+    color: colors.text,
+  },
   groupMarker: {
     minWidth: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: '#2563EB',
+    borderRadius: radius.full,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
 
   tripGroupMarker: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: colors.primaryLight,
   },
 
   groupMarkerText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 13,
+    ...typography.caption,
+    color: colors.textInverse,
   },
 
   calloutTitle: {
-    fontWeight: '800',
-    marginBottom: 4,
+    ...typography.bodyStrong,
+    color: colors.text,
+    marginBottom: spacing.xs,
   },
 
   calloutText: {
-    marginBottom: 2,
-  },
-
-  mapTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#111827',
-  },
-
-  mapTypeButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: '#1F2937',
-  },
-
-  activeMapTypeButton: {
-    backgroundColor: '#10B981',
-  },
-
-  mapTypeText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...typography.bodySmall,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
   },
 });

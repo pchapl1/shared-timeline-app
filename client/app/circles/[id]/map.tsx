@@ -1,8 +1,10 @@
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { CircleMap } from '@/components/maps/CircleMap';
+import { AppScreen } from '@/components/ui/layout/AppScreen';
+import { LoadingState } from '@/components/ui/LoadingState';
 
 import { useCircle } from '@/hooks/circles/useCircle';
 import { useCircleMapMemories } from '@/hooks/useCircleMapMemories';
@@ -14,10 +16,8 @@ export default function CircleMapScreen() {
 
   const circleId = Number(id);
 
-  const {
-    data: circle,
-    isLoading: isCircleLoading,
-  } = useCircle(id);
+  const { data: circle, isLoading: isCircleLoading } =
+    useCircle(id);
 
   const {
     mapMemories,
@@ -27,25 +27,27 @@ export default function CircleMapScreen() {
 
   if (isCircleLoading || isMapLoading || !circle) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator />
-      </View>
+      <AppScreen>
+        <LoadingState message="Loading map..." />
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <AppScreen contentStyle={styles.screenContent}>
       <CircleHeader
         circle={circle}
         activeTab="map"
-        variant='compact'
+        variant="compact"
       />
 
-    <CircleMap
-      circleId={circleId}
-      memories={mapMemories}
-      trips={mapTrips}
-    />
-    </View>
+      <View style={styles.mapShell}>
+        <CircleMap
+          circleId={circleId}
+          memories={mapMemories}
+          trips={mapTrips}
+        />
+      </View>
+    </AppScreen>
   );
 }

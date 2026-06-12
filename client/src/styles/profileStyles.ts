@@ -1,30 +1,50 @@
 import { StyleSheet } from 'react-native';
 
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
+
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
     paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.lg,
   },
 
-  title: {
-    color: '#ffffff',
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 32,
+  profileCard: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+
+  avatar: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.full,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+
+  profileName: {
+    textAlign: 'center',
+  },
+
+  profileSubtitle: {
+    marginTop: spacing.xs,
+    textAlign: 'center',
+  },
+
+  sectionCard: {
+    marginBottom: spacing.lg,
+  },
+
+  sectionText: {
+    marginTop: spacing.sm,
   },
 
   logoutButton: {
-    backgroundColor: '#dc2626',
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-
-  logoutButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: spacing.sm,
   },
 });

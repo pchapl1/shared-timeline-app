@@ -1,42 +1,40 @@
 import { StyleSheet } from 'react-native';
 
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+
 export const tripCardStyles = StyleSheet.create({
   card: {
-    padding: 18,
-    borderRadius: 20,
-    marginBottom: 14,
-    backgroundColor: '#1F2937',
+    marginBottom: spacing.md,
+  },
+
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+
+  content: {
+    flex: 1,
   },
 
   title: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    marginBottom: spacing.xs,
   },
 
   destination: {
-    marginTop: 6,
-    fontSize: 15,
-    color: '#D1D5DB',
+    marginBottom: spacing.xs,
   },
 
   date: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#93C5FD',
+    marginBottom: spacing.sm,
   },
 
   description: {
-    marginTop: 10,
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#9CA3AF',
+    marginTop: spacing.xs,
   },
+
   memoryCount: {
-    marginTop: 12,
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#93C5FD',
+    marginTop: spacing.md,
   },
 });

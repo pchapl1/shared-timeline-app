@@ -9,8 +9,6 @@ import { circleMapStyles as styles } from '@/styles/circleMapStyles';
 import type { MapMemory, MapTrip } from '@/types/map';
 
 type MapFilter = 'all' | 'memories' | 'trips';
-
-
 type MapType = 'standard' | 'satellite';
 
 type MapItem =
@@ -36,16 +34,13 @@ function getCoordinateKey(latitude: number, longitude: number) {
 
 export function CircleMap({ circleId, memories, trips }: Props) {
   const mapRef = useRef<MapView>(null);
+
   const [isMapReady, setIsMapReady] = useState(false);
   const [filter, setFilter] = useState<MapFilter>('all');
   const [mapType, setMapType] = useState<MapType>('standard');
 
-
-  const visibleMemories =
-    filter === 'trips' ? [] : memories;
-
-  const visibleTrips =
-    filter === 'memories' ? [] : trips;
+  const visibleMemories = filter === 'trips' ? [] : memories;
+  const visibleTrips = filter === 'memories' ? [] : trips;
 
   const mapItems = useMemo<MapItem[]>(() => {
     return [
@@ -154,71 +149,18 @@ export function CircleMap({ circleId, memories, trips }: Props) {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === 'all' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('all')}
-        >
-          <Text style={styles.filterText}>All</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === 'memories' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('memories')}
-        >
-          <Text style={styles.filterText}>Memories</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter === 'trips' && styles.activeFilterButton,
-          ]}
-          onPress={() => setFilter('trips')}
-        >
-          <Text style={styles.filterText}>Trips</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.mapTypeContainer}>
-        <TouchableOpacity
-          style={[
-            styles.mapTypeButton,
-            mapType === 'standard' && styles.activeMapTypeButton,
-          ]}
-          onPress={() => setMapType('standard')}
-        >
-          <Text style={styles.mapTypeText}>Standard</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.mapTypeButton,
-            mapType === 'satellite' && styles.activeMapTypeButton,
-          ]}
-          onPress={() => setMapType('satellite')}
-        >
-          <Text style={styles.mapTypeText}>Satellite</Text>
-        </TouchableOpacity>
-      </View>
-
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={initialRegion}
-          mapType={mapType}
-          onMapReady={() => setIsMapReady(true)}
-        >
+    <View style={styles.mapWrapper}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={initialRegion}
+        mapType={mapType}
+        onMapReady={() => setIsMapReady(true)}
+      >
         {markerGroups.map((group) => {
           const isGrouped = group.items.length > 1;
           const firstItem = group.items[0];
+
           const isTripOnlyGroup = group.items.every(
             (item) => item.type === 'trip'
           );
@@ -277,6 +219,7 @@ export function CircleMap({ circleId, memories, trips }: Props) {
                         {firstItem.type === 'memory' ? '📸' : '✈️'}{' '}
                         {firstItem.title}
                       </Text>
+
                       <Text style={styles.calloutText}>
                         Tap to view
                       </Text>
@@ -288,6 +231,47 @@ export function CircleMap({ circleId, memories, trips }: Props) {
           );
         })}
       </MapView>
+
+      <View style={styles.filterOverlay}>
+        {(['all', 'memories', 'trips'] as MapFilter[]).map(
+          (item) => (
+            <TouchableOpacity
+              key={item}
+              style={[
+                styles.filterButton,
+                filter === item && styles.activeFilterButton,
+              ]}
+              onPress={() => setFilter(item)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === item && styles.activeFilterText,
+                ]}
+              >
+                {item === 'all'
+                  ? 'All'
+                  : item === 'memories'
+                    ? 'Memories'
+                    : 'Trips'}
+              </Text>
+            </TouchableOpacity>
+          )
+        )}
+      </View>
+
+      <TouchableOpacity
+        style={styles.mapTypeToggle}
+        onPress={() =>
+          setMapType((current) =>
+            current === 'standard' ? 'satellite' : 'standard'
+          )
+        }
+      >
+        <Text style={styles.mapTypeToggleText}>
+          {mapType === 'standard' ? 'Satellite' : 'Standard'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

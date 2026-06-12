@@ -1,78 +1,55 @@
 import { ReactNode } from 'react';
 
 import {
-  ScrollView,
+  SafeAreaView,
+  StyleSheet,
   View,
   ViewStyle,
+  StyleProp,
 } from 'react-native';
-
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
 
 type Props = {
   children: ReactNode;
-  scroll?: boolean;
-  style?: ViewStyle | ViewStyle[];
-  contentContainerStyle?: ViewStyle | ViewStyle[];
-  safeTop?: boolean;
-  safeBottom?: boolean;
+  style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  padded?: boolean;
 };
 
 export function AppScreen({
   children,
-  scroll = false,
   style,
-  contentContainerStyle,
-  safeTop = true,
-  safeBottom = true,
+  contentStyle,
+  padded = true,
 }: Props) {
-  const insets = useSafeAreaInsets();
-
-  const containerStyle = [
-    {
-      flex: 1,
-      backgroundColor: colors.background,
-      paddingTop: safeTop ? insets.top : 0,
-      paddingBottom: safeBottom ? insets.bottom : 0,
-    },
-    style,
-  ];
-
-  if (scroll) {
-    return (
-      <View style={containerStyle}>
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={[
-            {
-              paddingHorizontal: spacing.lg,
-              paddingBottom: spacing.xxl,
-            },
-            contentContainerStyle,
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          {children}
-        </ScrollView>
-      </View>
-    );
-  }
-
   return (
-    <View style={containerStyle}>
+    <SafeAreaView style={[styles.safeArea, style]}>
       <View
         style={[
-          {
-            flex: 1,
-            paddingHorizontal: spacing.lg,
-          },
-          contentContainerStyle,
+          styles.content,
+          padded && styles.padded,
+          contentStyle,
         ]}
       >
         {children}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
+  content: {
+    flex: 1,
+  },
+
+  padded: {
+    paddingHorizontal: spacing.lg,
+  },
+});

@@ -1,85 +1,89 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { TripCard } from '@/components/trips/TripCard';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppScreen } from '@/components/ui/layout/AppScreen';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 
 import { useCircle } from '@/hooks/circles/useCircle';
 import { useTrips } from '@/hooks/trips/useTrips';
 
-import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
+import { spacing } from '@/theme/spacing';
 
 export default function CircleTripsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const circleId = Number(id);
 
-  const {
-    data: circle,
-    isLoading: isCircleLoading,
-  } = useCircle(id);
+  const { data: circle, isLoading: isCircleLoading } =
+    useCircle(id);
 
-  const {
-    data: trips = [],
-    isLoading: isTripsLoading,
-  } = useTrips(circleId);
+  const { data: trips = [], isLoading: isTripsLoading } =
+    useTrips(circleId);
 
   if (isCircleLoading || isTripsLoading || !circle) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loading}>Loading trips...</Text>
-      </View>
+      <AppScreen>
+        <LoadingState message="Loading trips..." />
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.container}>
-        <CircleHeader
-          circle={circle}
-          activeTab="trips"
+    <AppScreen>
+      <CircleHeader
+        circle={circle}
+        activeTab="trips"
+        variant="compact"
+      />
+
+      <SectionHeader
+        title="Trips"
+        subtitle="Travel plans and places you have shared."
+      />
+
+      <View>
+        {trips.length === 0 ? (
+          <EmptyState
+            icon="✈️"
+            title="No trips yet"
+            message="Add a trip to start planning shared travel."
+          />
+        ) : (
+          trips.map((trip) => (
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              onPress={() =>
+                router.push({
+                  pathname: '/circles/[id]/trips/[tripId]',
+                  params: {
+                    id: String(circleId),
+                    tripId: String(trip.id),
+                  },
+                })
+              }
+            />
+          ))
+        )}
+
+        <AppButton
+          title="Add Trip"
+          onPress={() =>
+            router.push({
+              pathname: '/circles/[id]/add-trip',
+              params: {
+                id,
+              },
+            })
+          }
+          style={{ marginTop: spacing.md }}
         />
-
-        <View style={styles.section}>
-          {trips.length === 0 ? (
-            <Text style={styles.emptyText}>
-              Trips will appear here.
-            </Text>
-          ) : (
-            trips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onPress={()=> 
-                  router.push({
-                    pathname: '/circles/[id]/trips/[tripId]',
-                    params: {
-                      id: String(circleId),
-                      tripId: String(trip.id),
-                    },
-                  })
-                }
-              />
-            ))
-          )}
-
-          <TouchableOpacity
-            style={styles.inviteButton}
-            onPress={() =>
-              router.push({
-                pathname: '/circles/[id]/add-trip',
-                params: {
-                  id: id,
-                },
-              })
-            }
-          >
-            <Text style={styles.inviteButtonText}>
-              Add Trip
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
-    </View>
+    </AppScreen>
   );
 }
