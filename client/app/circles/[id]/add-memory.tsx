@@ -1,53 +1,61 @@
 import { useState } from 'react';
-import { addMemoryStyles as styles } from '@/styles/addMemoryStyles';
+
 import {
+  Alert,
+  Platform,
+  Pressable,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  Pressable,
-  Platform,
+  View,
 } from 'react-native';
 
-import {
-  router,
-  useLocalSearchParams,
-} from 'expo-router';
-
 import DateTimePicker from '@react-native-community/datetimepicker';
-
 import * as ImagePicker from 'expo-image-picker';
-
-import { createMemory } from '../../../src/services/memories';
-
+import { router, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { LocationSearch } from '../../../src/components/search/LocationSearch';
+import { AppScreen } from '@/components/ui/layout/AppScreen';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 
+import { LocationSearch } from '@/components/search/LocationSearch';
+
+import { createMemory } from '@/services/memories';
 import { useTrips } from '@/hooks/trips/useTrips';
 
-export default function AddMemoryScreen() {
+import { colors } from '@/theme/colors';
+import { addMemoryStyles as styles } from '@/styles/addMemoryStyles';
 
+export default function AddMemoryScreen() {
   const { id, tripId } = useLocalSearchParams<{
     id: string;
     tripId?: string;
   }>();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [locationName, setLocationName] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+
   const [selectedTripId, setSelectedTripId] = useState<number | null>(
     tripId ? Number(tripId) : null
   );
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+
+  const [showTripDropdown, setShowTripDropdown] = useState(false);
 
   const queryClient = useQueryClient();
 
   const { data: trips = [] } = useTrips(Number(id));
+
+  const selectedTrip = trips.find(
+    (trip) => trip.id === selectedTripId
+  ) ?? null;
 
   async function pickImage() {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -102,144 +110,227 @@ export default function AddMemoryScreen() {
       );
 
       Alert.alert('Error', 'Could not create memory.');
-    } 
+    }
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.backLink}>← Back</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Add Memory</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        placeholderTextColor="#64748b"
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Description"
-        placeholderTextColor="#64748b"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={5}
-      />
-
-      {Platform.OS === 'web' ? (
-        <TextInput
-          style={styles.input}
-          value={memoryDate.toISOString().split('T')[0]}
-          onChangeText={(text) => {
-            setMemoryDate(new Date(text));
-          }}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#64748b"
-        />
-      ) : (
-        <>
-          <Pressable
-            style={styles.dateInput}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.dateText}>
-              {memoryDate.toDateString()}
-            </Text>
-          </Pressable>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={memoryDate}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-
-                if (selectedDate) {
-                  setMemoryDate(selectedDate);
-                }
-              }}
-            />
-          )}
-        </>
-      )}
-
-      <LocationSearch
-        locationName={locationName}
-        latitude={latitude}
-        longitude={longitude}
-        onChangeLocationName={setLocationName}
-        onChangeLatitude={setLatitude}
-        onChangeLongitude={setLongitude}
-      />
-
-      {trips.length > 0 && (
-        <>
-          <Text style={styles.label}>Trip</Text>
-
+    <AppScreen padded={false}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
           <TouchableOpacity
-            style={styles.input}
-            onPress={() => setSelectedTripId(null)}
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-            <Text style={{ color: selectedTripId ? '#64748b' : '#FFFFFF' }}>
-              No Trip
-            </Text>
+            <AppText variant="bodyStrong">← Back</AppText>
           </TouchableOpacity>
 
-          {trips.map((trip) => (
-            <TouchableOpacity
-              key={trip.id}
-              style={styles.input}
-              onPress={() => setSelectedTripId(trip.id)}
+          <View style={styles.header}>
+            <AppText variant="h1">Add Memory</AppText>
+
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={styles.subtitle}
             >
-              <Text
-                style={{
-                  color:
-                    selectedTripId === trip.id
-                      ? '#FFFFFF'
-                      : '#64748b',
-                  fontWeight:
-                    selectedTripId === trip.id
-                      ? '800'
-                      : '400',
+              Capture a moment from this timeline.
+            </AppText>
+          </View>
+
+          <AppCard style={styles.card}>
+            <SectionHeader
+              title="Memory details"
+              subtitle="Add the story, date, and anything you want to remember."
+            />
+
+            <AppText variant="caption" color={colors.textMuted}>
+              Title
+            </AppText>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Memory title"
+              placeholderTextColor={colors.textSubtle}
+              value={title}
+              onChangeText={setTitle}
+            />
+
+            <AppText variant="caption" color={colors.textMuted}>
+              Description
+            </AppText>
+
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="What happened?"
+              placeholderTextColor={colors.textSubtle}
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={5}
+            />
+
+            <AppText variant="caption" color={colors.textMuted}>
+              Date
+            </AppText>
+
+            {Platform.OS === 'web' ? (
+              <TextInput
+                style={styles.input}
+                value={memoryDate.toISOString().split('T')[0]}
+                onChangeText={(text) => {
+                  setMemoryDate(new Date(text));
                 }}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={colors.textSubtle}
+              />
+            ) : (
+              <>
+                <Pressable
+                  style={styles.dateInput}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <AppText variant="body" color={colors.text}>
+                    {memoryDate.toDateString()}
+                  </AppText>
+                </Pressable>
+
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={memoryDate}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+
+                      if (selectedDate) {
+                        setMemoryDate(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </AppCard>
+
+          <AppCard style={styles.card}>
+            <SectionHeader
+              title="Location"
+              subtitle="Search a place to show this memory on the map."
+            />
+
+            <LocationSearch
+              locationName={locationName}
+              latitude={latitude}
+              longitude={longitude}
+              onChangeLocationName={setLocationName}
+              onChangeLatitude={setLatitude}
+              onChangeLongitude={setLongitude}
+            />
+          </AppCard>
+
+          {trips.length > 0 && (
+            <AppCard style={styles.card}>
+              <SectionHeader
+                title="Trip"
+                subtitle="Optionally attach this memory to a trip."
+              />
+
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() =>
+                  setShowTripDropdown(
+                    (currentValue) => !currentValue
+                  )
+                }
               >
-                {selectedTripId === trip.id ? '✓ ' : ''}
-                {trip.title}
-              </Text>
+                <AppText
+                  variant="body"
+                  color={colors.text}
+                >
+                  {selectedTrip
+                    ? selectedTrip.title
+                    : 'Select Trip'}
+                </AppText>
+
+                <AppText
+                  variant="bodySmall"
+                  color={colors.textMuted}
+                >
+                  {showTripDropdown ? '▲' : '▼'}
+                </AppText>
+              </TouchableOpacity>
+
+              {showTripDropdown && (
+                <View style={styles.dropdownMenu}>
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setSelectedTripId(null);
+                      setShowTripDropdown(false);
+                    }}
+                  >
+                    <AppText
+                      variant="body"
+                      color={colors.text}
+                    >
+                      No Trip
+                    </AppText>
+                  </TouchableOpacity>
+
+                  {trips.map((trip) => (
+                    <TouchableOpacity
+                      key={trip.id}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setSelectedTripId(trip.id);
+                        setShowTripDropdown(false);
+                      }}
+                    >
+                      <AppText
+                        variant="body"
+                        color={colors.text}
+                      >
+                        {trip.title}
+                      </AppText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+              )}
+            </AppCard>
+          )}
+
+          <AppCard style={styles.card}>
+            <SectionHeader
+              title="Photos"
+              subtitle="Add one or more photos to this memory."
+            />
+
+            <TouchableOpacity
+              style={styles.imageButton}
+              onPress={pickImage}
+            >
+              <AppText variant="bodyStrong" color={colors.primary}>
+                {images.length > 0
+                  ? `${images.length} Photos Selected ✓`
+                  : 'Select Photos'}
+              </AppText>
             </TouchableOpacity>
-          ))}
-        </>
-      )}
+          </AppCard>
 
-      <TouchableOpacity
-        style={styles.imageButton}
-        onPress={pickImage}
-      >
-        <Text style={styles.imageButtonText}>
-          {images.length > 0
-            ? `${images.length} Photos Selected ✓`
-            : 'Select Photos'}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleCreateMemory}
-      >
-        <Text style={styles.buttonText}>
-          Save Memory
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCreateMemory}
+          >
+            <AppText variant="bodyStrong" color={colors.primary}>
+              Save Memory
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </AppScreen>
   );
 }

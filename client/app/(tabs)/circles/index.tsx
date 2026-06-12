@@ -17,12 +17,12 @@ import { PageHeader } from '@/components/ui/PageHeader';
 
 import { useRestoreCircle } from '@/hooks/circles/useRestoreCircle';
 import { api } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { circlesScreenStyles as styles } from '@/styles/circlesScreenStyles';
 
 import type { Circle } from '@/types/circle';
-import { useAuth } from '@/context/AuthContext';
 
 export default function CirclesScreen() {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -110,32 +110,26 @@ export default function CirclesScreen() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-        paddingTop: 80,
-        paddingHorizontal: spacing.lg,
-      }}
-    >
-    <PageHeader
-      title="Your Circles"
-      subtitle="Shared spaces for the people who matter most."
-    />
-
-      <AppButton
-        title="Create Circle"
-        onPress={handleCreateCircle}
-        style={{ marginBottom: spacing.lg }}
-      />
-
+    <View style={styles.screen}>
       <FlatList
         data={activeCircles}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}
+        contentContainerStyle={styles.contentContainer}
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <PageHeader
+              title="Your Circles"
+              subtitle="Shared spaces for the people who matter most."
+            />
+
+            <AppButton
+              title="+ New Circle"
+              onPress={handleCreateCircle}
+              style={styles.createButton}
+            />
+          </View>
+        }
         renderItem={({ item }) => (
           <CircleCard
             name={item.name}
@@ -144,11 +138,11 @@ export default function CirclesScreen() {
           />
         )}
         ListEmptyComponent={
-          <AppCard>
+          <AppCard style={styles.emptyCard}>
             <AppText
               variant="bodySmall"
               color={colors.textMuted}
-              style={{ textAlign: 'center' }}
+              style={styles.emptyText}
             >
               No circles yet. Create your first shared space.
             </AppText>
@@ -156,11 +150,11 @@ export default function CirclesScreen() {
         }
         ListFooterComponent={
           archivedCircles.length > 0 ? (
-            <View style={{ marginTop: spacing.lg }}>
+            <View style={styles.archivedSection}>
               <AppText
                 variant="h3"
                 color={colors.textMuted}
-                style={{ marginBottom: spacing.md }}
+                style={styles.archivedTitle}
               >
                 Archived Circles
               </AppText>
@@ -171,12 +165,7 @@ export default function CirclesScreen() {
                   activeOpacity={0.9}
                   onPress={() => handleRestoreCircle(circle)}
                 >
-                  <AppCard
-                    style={{
-                      marginBottom: spacing.md,
-                      backgroundColor: colors.surfaceMuted,
-                    }}
-                  >
+                  <AppCard style={styles.archivedCard}>
                     <AppText variant="bodyStrong">
                       {circle.name}
                     </AppText>
@@ -184,7 +173,7 @@ export default function CirclesScreen() {
                     <AppText
                       variant="bodySmall"
                       color={colors.textMuted}
-                      style={{ marginTop: spacing.xs }}
+                      style={styles.archivedSubtitle}
                     >
                       Tap to restore
                     </AppText>

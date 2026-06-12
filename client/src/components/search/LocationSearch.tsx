@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
 
 import {
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
+import { AppText } from '@/components/ui/AppText';
+
 import { addMemoryStyles } from '@/styles/addMemoryStyles';
 import { locationSearchStyles as styles } from '@/styles/locationSearchStyles';
 
-import type {
-  LocationSuggestion,
-} from '@/types/location';
+import { colors } from '@/theme/colors';
 
-import {
-  searchLocations,
-} from '@/services/location';
+import type { LocationSuggestion } from '@/types/location';
+
+import { searchLocations } from '@/services/location';
 
 type Props = {
   locationName: string;
@@ -35,30 +34,17 @@ export function LocationSearch({
   onChangeLatitude,
   onChangeLongitude,
 }: Props) {
-  const [suggestions, setSuggestions] = useState<
-    LocationSuggestion[]
-  >([]);
-
-  const [isSearching, setIsSearching] =
-    useState(false);
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    const trimmedLocation =
-      locationName.trim();
+    const trimmedLocation = locationName.trim();
 
-    /**
-     * Don't search until the user
-     * has entered a few characters.
-     */
     if (trimmedLocation.length < 3) {
       setSuggestions([]);
       return;
     }
 
-    /**
-     * Debounce typing so we don't
-     * call Mapbox on every keystroke.
-     */
     const timeoutId = setTimeout(() => {
       handleSearch(trimmedLocation);
     }, 400);
@@ -66,21 +52,15 @@ export function LocationSearch({
     return () => clearTimeout(timeoutId);
   }, [locationName]);
 
-  async function handleSearch(
-    query: string
-  ) {
+  async function handleSearch(query: string) {
     try {
       setIsSearching(true);
 
-      const results =
-        await searchLocations(query);
+      const results = await searchLocations(query);
 
       setSuggestions(results);
     } catch (error) {
-      console.log(
-        'Location search error:',
-        error
-      );
+      console.log('Location search error:', error);
 
       setSuggestions([]);
     } finally {
@@ -88,126 +68,80 @@ export function LocationSearch({
     }
   }
 
-  function handleLocationTextChange(
-    text: string
-  ) {
+  function handleLocationTextChange(text: string) {
     onChangeLocationName(text);
-
-    /**
-     * Clear coordinates whenever the
-     * user edits the text.
-     *
-     * Prevents saving coordinates
-     * from a previously selected place.
-     */
     onChangeLatitude('');
     onChangeLongitude('');
   }
 
-  function handleSelectSuggestion(
-    suggestion: LocationSuggestion
-  ) {
-    /**
-     * Save the location name.
-     */
-    onChangeLocationName(
-      suggestion.name
-    );
-
-    /**
-     * Save coordinates silently.
-     * User never sees these fields.
-     */
-    onChangeLatitude(
-      String(suggestion.latitude)
-    );
-
-    onChangeLongitude(
-      String(suggestion.longitude)
-    );
-
-    /**
-     * Hide the dropdown after selection.
-     */
+  function handleSelectSuggestion(suggestion: LocationSuggestion) {
+    onChangeLocationName(suggestion.name);
+    onChangeLatitude(String(suggestion.latitude));
+    onChangeLongitude(String(suggestion.longitude));
     setSuggestions([]);
   }
 
-  const hasLocationText =
-    locationName.trim().length > 0;
-
-  const hasCoordinates =
-    !!latitude && !!longitude;
+  const hasLocationText = locationName.trim().length > 0;
+  const hasCoordinates = !!latitude && !!longitude;
 
   return (
     <View>
-      <Text style={addMemoryStyles.label}>
+      <AppText variant="caption" color={colors.textMuted}>
         Location
-      </Text>
+      </AppText>
 
       <TextInput
         value={locationName}
-        onChangeText={
-          handleLocationTextChange
-        }
+        onChangeText={handleLocationTextChange}
         placeholder="Search city, place, or destination"
-        placeholderTextColor="#8A8A8A"
+        placeholderTextColor={colors.textSubtle}
         style={addMemoryStyles.input}
       />
 
       {isSearching && (
-        <Text style={styles.helperText}>
+        <AppText
+          variant="bodySmall"
+          color={colors.textMuted}
+          style={styles.helperText}
+        >
           Searching locations...
-        </Text>
+        </AppText>
       )}
 
       {suggestions.length > 0 && (
-        <View
-          style={
-            styles.suggestionsContainer
-          }
-        >
-          {suggestions.map(
-            (suggestion) => (
-              <TouchableOpacity
-                key={suggestion.id}
-                style={
-                  styles.suggestion
-                }
-                onPress={() =>
-                  handleSelectSuggestion(
-                    suggestion
-                  )
-                }
-              >
-                <Text
-                  style={
-                    styles.suggestionText
-                  }
-                >
-                  📍 {suggestion.name}
-                </Text>
-              </TouchableOpacity>
-            )
-          )}
+        <View style={styles.suggestionsContainer}>
+          {suggestions.map((suggestion) => (
+            <TouchableOpacity
+              key={suggestion.id}
+              style={styles.suggestion}
+              onPress={() => handleSelectSuggestion(suggestion)}
+            >
+              <AppText variant="bodySmall" style={styles.suggestionText}>
+                📍 {suggestion.name}
+              </AppText>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
 
-      {hasLocationText &&
-        !hasCoordinates &&
-        !isSearching && (
-          <Text
-            style={styles.helperText}
-          >
-            You can save this as typed,
-            or choose a suggestion to
-            place it on the map.
-          </Text>
-        )}
+      {hasLocationText && !hasCoordinates && !isSearching && (
+        <AppText
+          variant="bodySmall"
+          color={colors.textMuted}
+          style={styles.helperText}
+        >
+          You can save this as typed, or choose a suggestion to place it on the map.
+        </AppText>
+      )}
 
       {hasCoordinates && (
-        <Text style={styles.helperText}>
+        <AppText
+          variant="bodySmall"
+          color={colors.textMuted}
+          style={styles.helperText}
+        >
           Location selected for map.
-        </Text>
+        </AppText>
       )}
     </View>
   );

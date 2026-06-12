@@ -1,28 +1,35 @@
 import { StyleSheet } from 'react-native';
 
-export const locationSearchStyles = StyleSheet.create({
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
 
+export const locationSearchStyles = StyleSheet.create({
   suggestionsContainer: {
-    backgroundColor: '#1e293b',
-    borderRadius: 12,
-    marginTop: 8,
+    marginTop: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     overflow: 'hidden',
   },
 
   suggestion: {
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: colors.border,
   },
 
   suggestionText: {
-    color: '#ffffff',
+    color: colors.text,
     fontSize: 16,
+    lineHeight: 22,
   },
 
   helperText: {
-    color: '#94a3b8',
-    fontSize: 12,
-    marginTop: 8,
+    color: colors.textMuted,
+    fontSize: 13,
+    marginTop: spacing.sm,
+    lineHeight: 18,
   },
 });

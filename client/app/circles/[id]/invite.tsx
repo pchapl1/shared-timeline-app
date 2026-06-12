@@ -1,23 +1,27 @@
 import { useState } from 'react';
 
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
   Alert,
   FlatList,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { AppScreen } from '@/components/ui/layout/AppScreen';
+import { AppText } from '@/components/ui/AppText';
+
 import {
   createCircleInvite,
   searchUsers,
-} from '../../../src/services/api';
+} from '@/services/api';
 
-import { useAuth } from '../../../src/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
+
+import { colors } from '@/theme/colors';
+import { inviteMemberStyles as styles } from '@/styles/inviteMemberStyles';
 
 type UserSearchResult = {
   id: number;
@@ -94,47 +98,66 @@ export default function InviteMemberScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>
-          Loading...
-        </Text>
-      </View>
+      <AppScreen padded={false}>
+        <View style={styles.loadingContainer}>
+          <AppText variant="body" color={colors.textMuted}>
+            Loading...
+          </AppText>
+        </View>
+      </AppScreen>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() =>
-          router.push({
-            pathname: '/circles/[id]',
-            params: {
-              id: id?.toString(),
-            },
-          })
-        }
-      >
-        <Text style={styles.backLink}>← Back</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Invite Member</Text>
-
-      <Text style={styles.label}>Search Users</Text>
-
-      <TextInput
-        style={styles.input}
-        value={query}
-        onChangeText={handleSearch}
-        placeholder="Search username or email"
-        placeholderTextColor="#64748b"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-
+    <AppScreen padded={false}>
       <FlatList
         data={results}
         keyExtractor={(item) => item.id.toString()}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        ListHeaderComponent={
+          <View style={styles.content}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() =>
+                router.push({
+                  pathname: '/circles/[id]',
+                  params: {
+                    id: id?.toString(),
+                  },
+                })
+              }
+            >
+              <AppText variant="bodyStrong">← Back</AppText>
+            </TouchableOpacity>
+
+            <View style={styles.header}>
+              <AppText variant="h1">Invite Member</AppText>
+
+              <AppText
+                variant="bodySmall"
+                color={colors.textMuted}
+                style={styles.subtitle}
+              >
+                Search for a user and invite them into this circle.
+              </AppText>
+            </View>
+
+            <TextInput
+              style={styles.input}
+              value={query}
+              onChangeText={handleSearch}
+              placeholder="Search username or email"
+              placeholderTextColor={colors.textSubtle}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View style={styles.divider} />
+          </View>
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
@@ -143,98 +166,39 @@ export default function InviteMemberScreen() {
             ]}
             onPress={() => handleInvite(item.id)}
             disabled={isSubmitting}
+            activeOpacity={0.85}
           >
-            <Text style={styles.username}>
-              {item.username}
-            </Text>
+            <View style={styles.avatar}>
+              <AppText variant="bodyStrong" color={colors.primary}>
+                {item.username.charAt(0).toUpperCase()}
+              </AppText>
+            </View>
 
-            <Text style={styles.email}>
-              {item.email}
-            </Text>
+            <View style={styles.userInfo}>
+              <AppText variant="bodyStrong">
+                {item.username}
+              </AppText>
+
+              <AppText variant="bodySmall" color={colors.textMuted}>
+                {item.email}
+              </AppText>
+            </View>
+
+            <AppText variant="bodySmall" color={colors.primary}>
+              Invite
+            </AppText>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          query.length >= 2 ? (
-            <Text style={styles.emptyText}>
-              No users found.
-            </Text>
-          ) : (
-            <Text style={styles.emptyText}>
-              Type at least 2 characters to search.
-            </Text>
-          )
+          <View style={styles.emptyContainer}>
+            <AppText variant="bodySmall" color={colors.textMuted}>
+              {query.length >= 2
+                ? 'No users found.'
+                : '🔍 Search for a username or email'}
+            </AppText>
+          </View>
         }
       />
-    </View>
+    </AppScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-  },
-
-  backLink: {
-    color: '#60a5fa',
-    fontSize: 16,
-    marginBottom: 24,
-  },
-
-  title: {
-    color: '#ffffff',
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 32,
-  },
-
-  label: {
-    color: '#cbd5e1',
-    fontSize: 16,
-    marginBottom: 8,
-  },
-
-  input: {
-    backgroundColor: '#1e293b',
-    color: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 24,
-  },
-
-  userCard: {
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-
-  cardDisabled: {
-    opacity: 0.6,
-  },
-
-  username: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  email: {
-    color: '#94a3b8',
-    marginTop: 4,
-  },
-
-  emptyText: {
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 32,
-  },
-
-  loadingText: {
-    color: '#ffffff',
-    fontSize: 18,
-  },
-});

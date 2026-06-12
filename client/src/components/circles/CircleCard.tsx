@@ -7,7 +7,7 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppText } from '@/components/ui/AppText';
 
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { circleCardStyles as styles } from '@/styles/circleCardStyles';
 
 type Props = {
   name: string;
@@ -15,57 +15,50 @@ type Props = {
   onPress: () => void;
 };
 
+function formatCircleType(circleType: string) {
+  return circleType
+    .replace('_', ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export function CircleCard({
   name,
   circleType,
   onPress,
 }: Props) {
+  const initial = name.charAt(0).toUpperCase();
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={onPress}
+      style={styles.pressable}
     >
-      <AppCard
-        style={{
-          marginBottom: spacing.md,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.md,
-          }}
-        >
-          <View
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              backgroundColor: colors.primary,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <AppText
-              variant="h3"
-              color={colors.textInverse}
-            >
-              {name.charAt(0).toUpperCase()}
+      <AppCard style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.avatar}>
+            <AppText variant="h3" color={colors.textInverse}>
+              {initial}
             </AppText>
           </View>
 
-          <View style={{ flex: 1 }}>
-            <AppText variant="h3">
+          <View style={styles.content}>
+            <AppText
+              variant="h3"
+              numberOfLines={1}
+              style={styles.title}
+            >
               {name}
             </AppText>
 
-            <AppText
-              variant="bodySmall"
-              color={colors.textMuted}
-            >
-              {circleType}
-            </AppText>
+            <View style={styles.badge}>
+              <AppText
+                variant="caption"
+                color={colors.primary}
+              >
+                {formatCircleType(circleType)}
+              </AppText>
+            </View>
           </View>
         </View>
       </AppCard>

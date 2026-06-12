@@ -1,55 +1,64 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
+
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { shadows } from '@/theme/shadows';
+import { spacing } from '@/theme/spacing';
 
 export const memoryDetailStyles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
 
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
+  scrollContent: {
+    paddingBottom: spacing.xxxl,
   },
 
-  loadingText: {
-    color: colors.text,
-    fontSize: 18,
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  heroSection: {
+    position: 'relative',
+    backgroundColor: colors.surfaceMuted,
   },
 
   backButton: {
-    color: colors.primaryLight,
-    fontSize: 16,
-    marginTop: 70,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
+    position: 'absolute',
+    top: spacing.lg,
+    left: spacing.lg,
+    zIndex: 10,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
   },
 
   heroImage: {
     width: '100%',
-    height: 340,
+    height: 300,
   },
 
   photoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    paddingHorizontal: 12,
+    gap: spacing.xs,
+    padding: spacing.sm,
+    paddingTop: spacing.xxxl,
   },
 
   gridImageWrapper: {
-    width: '48.8%',
+    width: '49%',
     height: 180,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     overflow: 'hidden',
+    backgroundColor: colors.surfaceMuted,
   },
 
   gridImage: {
@@ -57,144 +66,133 @@ export const memoryDetailStyles = StyleSheet.create({
     height: '100%',
   },
 
-  imagePlaceholder: {
-    width: '100%',
-    height: 260,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
+  photoCountBadge: {
+    position: 'absolute',
+    right: spacing.lg,
+    bottom: spacing.lg,
+    backgroundColor: colors.modalButton,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
   },
 
-  placeholderText: {
-    color: colors.subtleText,
-    fontSize: 16,
-    fontWeight: '600',
+  imagePlaceholder: {
+    height: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surfaceMuted,
   },
 
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
 
-  title: {
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 12,
+  memoryCard: {
+    marginTop: 0,
   },
 
-  metaRow: {
+  creatorRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 18,
-  },
-
-  username: {
-    color: colors.primaryLight,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-
-  dot: {
-    color: colors.border,
-    marginHorizontal: spacing.sm,
-  },
-
-  timestamp: {
-    color: colors.muted,
-    fontSize: 14,
-  },
-
-  location: {
-    color: colors.primaryLight,
-    fontSize: 16,
+    gap: spacing.md,
     marginBottom: spacing.lg,
   },
 
-  description: {
-    color: colors.subtleText,
-    fontSize: 18,
-    lineHeight: 30,
+  creatorText: {
+    flex: 1,
   },
-  commentsSection: {
-  marginTop: 32,
-},
 
-commentsTitle: {
-  color: colors.text,
-  fontSize: 20,
-  fontWeight: '700',
-  marginBottom: 16,
-},
+  title: {
+    marginBottom: spacing.sm,
+  },
 
-commentCard: {
-  backgroundColor: colors.card,
-  borderRadius: 14,
-  padding: 14,
-  marginBottom: 12,
-  borderWidth: 1,
-  borderColor: colors.border,
-},
+  locationRow: {
+    marginTop: spacing.xs,
+  },
 
-commentUsername: {
-  color: colors.primaryLight,
-  fontSize: 14,
-  fontWeight: '700',
-  marginBottom: 6,
-},
+  memoryActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
+  },
 
-commentContent: {
-  color: colors.text,
-  fontSize: 15,
-  lineHeight: 22,
-},
+  inlineActionButton: {
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+  },
 
-emptyCommentsText: {
-  color: colors.muted,
-  fontSize: 15,
-  marginBottom: 16,
-},
+  inlineDangerButton: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full,
+  },
 
-commentInputRow: {
-  flexDirection: 'row',
-  alignItems: 'flex-end',
-  gap: 10,
-  marginTop: 8,
-},
+  section: {
+    marginTop: spacing.xl,
+  },
 
-commentInput: {
-  flex: 1,
-  minHeight: 44,
-  maxHeight: 120,
-  backgroundColor: colors.card,
-  color: colors.text,
-  borderRadius: 12,
-  paddingHorizontal: 14,
-  paddingVertical: 10,
-  borderWidth: 1,
-  borderColor: colors.border,
-},
+  description: {
+    lineHeight: 26,
+  },
 
-commentButton: {
-  backgroundColor: colors.primary,
-  paddingHorizontal: 16,
-  paddingVertical: 12,
-  borderRadius: 12,
-},
+  commentCard: {
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
 
-commentButtonText: {
-  color: colors.text,
-  fontSize: 14,
-  fontWeight: '700',
-},
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
 
-deleteCommentButton: {
-  alignSelf: 'flex-start',
-  marginTop: 8,
-},
+  commentHeaderText: {
+    flex: 1,
+  },
 
-deleteCommentText: {
-  color: colors.danger,
-  fontSize: 13,
-  fontWeight: '700',
-},
+  commentContent: {
+    lineHeight: 20,
+  },
+
+  deleteCommentButton: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.sm,
+  },
+
+  emptyComments: {
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+
+  commentComposer: {
+    marginTop: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+
+  commentInput: {
+    minHeight: 40,
+    color: colors.text,
+    fontSize: 16,
+    lineHeight: 20,
+    marginBottom: spacing.sm,
+  },
+
+  sendButton: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
 });

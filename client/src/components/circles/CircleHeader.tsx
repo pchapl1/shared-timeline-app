@@ -9,8 +9,8 @@ import { AvatarStack } from '@/components/ui/AvatarStack';
 import { StatsRow } from '@/components/ui/StatsRow';
 
 import { colors } from '@/theme/colors';
-import { radius } from '@/theme/radius';
-import { spacing } from '@/theme/spacing';
+
+import { circleHeaderStyles as styles } from '@/styles/circleHeaderStyles';
 
 import type { Circle } from '@/types/circle';
 
@@ -40,19 +40,14 @@ export function CircleHeader({
     label: member.username,
   }));
 
+  const circleInitial = circle.name.charAt(0).toUpperCase();
+
   if (variant === 'compact') {
     return (
-      <View style={{ marginBottom: spacing.md }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: spacing.md,
-            marginBottom: spacing.md,
-          }}
-        >
+      <View style={styles.compactContainer}>
+        <View style={styles.compactTopRow}>
           <TouchableOpacity
+            style={styles.compactBackButton}
             onPress={() => router.push('/(tabs)/circles')}
           >
             <AppText variant="bodySmall" color={colors.primary}>
@@ -63,7 +58,7 @@ export function CircleHeader({
           <AppText
             variant="h3"
             numberOfLines={1}
-            style={{ flex: 1, textAlign: 'right' }}
+            style={styles.compactTitle}
           >
             {circle.name}
           </AppText>
@@ -75,62 +70,53 @@ export function CircleHeader({
   }
 
   return (
-    <View style={{ marginBottom: spacing.lg }}>
-      <TouchableOpacity
-        onPress={() => router.push('/(tabs)/circles')}
-        hitSlop={12}
-        style={{
-          marginTop: 44,
-          marginBottom: spacing.md,
-          paddingVertical: 8,
-        }}
-      >
-        <AppText variant="bodySmall" color={colors.primary}>
-          ← Back to circles
-        </AppText>
-      </TouchableOpacity>
-
-      <AppCard style={{ padding: 0, overflow: 'hidden' }}>
-        <View
-          style={{
-            minHeight: 150,
-            padding: spacing.lg,
-            backgroundColor: colors.primarySoft,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-            justifyContent: 'flex-end',
-          }}
+    <View style={styles.container}>
+      <View style={styles.topActions}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push('/(tabs)/circles')}
+          hitSlop={12}
         >
-          <View
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: radius.full,
-              backgroundColor: colors.primary,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: spacing.md,
-              borderWidth: 4,
-              borderColor: colors.surface,
-            }}
-          >
+          <AppText variant="bodyStrong">← Back</AppText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.manageLink}
+          onPress={() =>
+            router.push({
+              pathname: '/circles/[id]/edit',
+              params: { id: String(circle.id) },
+            })
+          }
+        >
+          <AppText variant="bodySmall" color={colors.primary}>
+            Manage
+          </AppText>
+        </TouchableOpacity>
+      </View>
+
+      <AppCard style={styles.card}>
+        <View style={styles.hero}>
+          <View style={styles.avatar}>
             <AppText variant="h1" color={colors.textInverse}>
-              {circle.name.charAt(0).toUpperCase()}
+              {circleInitial}
             </AppText>
           </View>
 
-          <AppText variant="h1">{circle.name}</AppText>
+          <View style={styles.titleBlock}>
+            <AppText variant="h1" numberOfLines={2}>
+              {circle.name}
+            </AppText>
 
-          <AppText
-            variant="bodySmall"
-            color={colors.textMuted}
-            style={{ marginTop: spacing.xs }}
-          >
-            {formatCircleType(circle.circle_type)}
-          </AppText>
+            <View style={styles.typeBadge}>
+              <AppText variant="caption" color={colors.primary}>
+                {formatCircleType(circle.circle_type)}
+              </AppText>
+            </View>
+          </View>
         </View>
 
-        <View style={{ padding: spacing.lg }}>
+        <View style={styles.body}>
           <StatsRow
             items={[
               {
@@ -146,34 +132,26 @@ export function CircleHeader({
                 value: circle.trip_count,
               },
             ]}
-            style={{ marginBottom: spacing.lg }}
+            style={styles.stats}
           />
 
-          {avatarItems.length > 0 && (
-            <AvatarStack
-              items={avatarItems}
-              size={38}
-              style={{
-                marginBottom: spacing.lg,
-                alignSelf: 'center',
-              }}
+          {/* <View style={styles.manageButtonContainer}>
+            <AppButton
+              title="Manage Circle"
+              variant="secondary"
+              style={styles.manageButton}
+              onPress={() =>
+                router.push({
+                  pathname: '/circles/[id]/edit',
+                  params: { id: String(circle.id) },
+                })
+              }
             />
-          )}
-
-          <AppButton
-            title="Manage Circle"
-            variant="secondary"
-            onPress={() =>
-              router.push({
-                pathname: '/circles/[id]/edit',
-                params: { id: String(circle.id) },
-              })
-            }
-          />
+          </View> */}
         </View>
       </AppCard>
 
-      <View style={{ marginTop: spacing.lg }}>
+      <View style={styles.tabs}>
         <CircleTabs circleId={circle.id} activeTab={activeTab} />
       </View>
     </View>

@@ -5,7 +5,7 @@ import { radius } from '@/theme/radius';
 import { shadows } from '@/theme/shadows';
 import { spacing } from '@/theme/spacing';
 
-export const addMemoryStyles = StyleSheet.create({
+export const addTripStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -77,6 +77,10 @@ export const addMemoryStyles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
+  
+  fieldSpacer: {
+    marginTop: spacing.md,
+    },
 
   tripPill: {
     backgroundColor: colors.surfaceMuted,
