@@ -15,6 +15,35 @@ type Props = {
   onPress?: () => void;
 };
 
+function formatDateRange(
+  startDate: string,
+  endDate?: string | null
+) {
+  const start = new Date(startDate);
+
+  const startFormatted =
+    start.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  if (!endDate) {
+    return startFormatted;
+  }
+
+  const end = new Date(endDate);
+
+  const endFormatted =
+    end.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  return `${startFormatted} – ${endFormatted}`;
+}
+
 export function TripCard({ trip, onPress }: Props) {
   const memoryCount = trip.memory_count ?? 0;
 
@@ -46,14 +75,14 @@ export function TripCard({ trip, onPress }: Props) {
             )}
 
             <AppText
-              variant="caption"
-              color={colors.textSubtle}
+              variant="bodySmall"
+              color={colors.textMuted}
               style={styles.date}
             >
-              {trip.start_date}
-              {trip.end_date
-                ? ` → ${trip.end_date}`
-                : ''}
+              {formatDateRange(
+                trip.start_date,
+                trip.end_date
+              )}
             </AppText>
 
             {!!trip.description && (
@@ -61,21 +90,23 @@ export function TripCard({ trip, onPress }: Props) {
                 variant="bodySmall"
                 color={colors.textMuted}
                 style={styles.description}
+                numberOfLines={2}
               >
                 {trip.description}
               </AppText>
             )}
 
-            <AppText
-              variant="bodyStrong"
-              color={colors.primary}
-              style={styles.memoryCount}
-            >
-              {memoryCount}{' '}
-              {memoryCount === 1
-                ? 'Memory'
-                : 'Memories'}
-            </AppText>
+            <View style={styles.memoryBadge}>
+              <AppText
+                variant="caption"
+                color={colors.primary}
+              >
+                📸 {memoryCount}{' '}
+                {memoryCount === 1
+                  ? 'Memory'
+                  : 'Memories'}
+              </AppText>
+            </View>
           </View>
         </View>
       </AppCard>

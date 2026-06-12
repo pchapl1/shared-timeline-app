@@ -28,18 +28,6 @@ export const circleHeaderStyles = StyleSheet.create({
     ...shadows.sm,
     },
 
-  backButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    // marginTop: 44,
-    // marginBottom: spacing.md,
-    ...shadows.sm,
-  },
 
   card: {
     padding: 0,
@@ -111,10 +99,6 @@ export const circleHeaderStyles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
     marginBottom: spacing.md,
-  },
-
-  compactBackButton: {
-    paddingVertical: spacing.xs,
   },
 
   compactTitle: {

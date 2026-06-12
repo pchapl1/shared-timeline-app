@@ -27,14 +27,21 @@ export const tripCardStyles = StyleSheet.create({
   },
 
   date: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
 
   description: {
     marginTop: spacing.xs,
   },
 
-  memoryCount: {
+  memoryBadge: {
+    alignSelf: 'flex-start',
     marginTop: spacing.md,
+
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+
+    borderRadius: 999,
+    backgroundColor: colors.primarySoft,
   },
 });

@@ -2,10 +2,9 @@ import { TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { CircleTabs } from '@/components/circles/CircleTabs';
-import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppText } from '@/components/ui/AppText';
-import { AvatarStack } from '@/components/ui/AvatarStack';
+import { BackButton } from '@/components/ui/BackButton';
 import { StatsRow } from '@/components/ui/StatsRow';
 
 import { colors } from '@/theme/colors';
@@ -35,25 +34,15 @@ export function CircleHeader({
   activeTab,
   variant = 'full',
 }: Props) {
-  const avatarItems = circle.members.map((member) => ({
-    id: member.id,
-    label: member.username,
-  }));
-
   const circleInitial = circle.name.charAt(0).toUpperCase();
 
   if (variant === 'compact') {
     return (
       <View style={styles.compactContainer}>
         <View style={styles.compactTopRow}>
-          <TouchableOpacity
-            style={styles.compactBackButton}
+          <BackButton
             onPress={() => router.push('/(tabs)/circles')}
-          >
-            <AppText variant="bodySmall" color={colors.primary}>
-              ← Back
-            </AppText>
-          </TouchableOpacity>
+          />
 
           <AppText
             variant="h3"
@@ -72,13 +61,9 @@ export function CircleHeader({
   return (
     <View style={styles.container}>
       <View style={styles.topActions}>
-        <TouchableOpacity
-          style={styles.backButton}
+        <BackButton
           onPress={() => router.push('/(tabs)/circles')}
-          hitSlop={12}
-        >
-          <AppText variant="bodyStrong">← Back</AppText>
-        </TouchableOpacity>
+        />
 
         <TouchableOpacity
           style={styles.manageLink}
@@ -134,20 +119,6 @@ export function CircleHeader({
             ]}
             style={styles.stats}
           />
-
-          {/* <View style={styles.manageButtonContainer}>
-            <AppButton
-              title="Manage Circle"
-              variant="secondary"
-              style={styles.manageButton}
-              onPress={() =>
-                router.push({
-                  pathname: '/circles/[id]/edit',
-                  params: { id: String(circle.id) },
-                })
-              }
-            />
-          </View> */}
         </View>
       </AppCard>
 

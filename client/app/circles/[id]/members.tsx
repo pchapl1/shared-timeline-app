@@ -61,7 +61,6 @@ export default function CircleMembersScreen() {
               <ListItem
                 key={member.id}
                 title={member.username}
-                subtitle={role}
                 leftContent={
                   <IconBubble
                     icon={
@@ -74,8 +73,25 @@ export default function CircleMembersScreen() {
                     }
                   />
                 }
-                style={{ marginBottom: spacing.md }}
-              />
+                rightContent={
+                  <View
+                    style={{
+                      backgroundColor: colors.primarySoft,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 999,
+                    }}
+    >
+      <AppText
+        variant="caption"
+        color={colors.primary}
+      >
+        {role}
+      </AppText>
+    </View>
+  }
+  style={{ marginBottom: spacing.md }}
+/>
             );
           })}
         </View>

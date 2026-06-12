@@ -72,7 +72,7 @@ export default function CircleTripsScreen() {
         )}
 
         <AppButton
-          title="Add Trip"
+          title="New Trip"
           onPress={() =>
             router.push({
               pathname: '/circles/[id]/add-trip',
