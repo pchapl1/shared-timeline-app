@@ -1,16 +1,22 @@
 import { useMemo } from 'react';
 
 import { useCircleMemories } from '@/hooks/useCircleMemories';
+import { useTrips } from '@/hooks/trips/useTrips';
 
-import type { MapMemory } from '@/types/map';
+import type { MapMemory, MapTrip } from '@/types/map';
 import type { Memory } from '@/types/memory';
 
 export function useCircleMapMemories(circleId: number) {
   const {
     data,
-    isLoading,
+    isLoading: isMemoriesLoading,
     refetch,
   } = useCircleMemories(circleId);
+
+  const {
+    data: trips = [],
+    isLoading: isTripsLoading,
+  } = useTrips(circleId);
 
   const memories = useMemo<Memory[]>(() => {
     return data?.pages.flatMap((page) => page.results) ?? [];
@@ -18,11 +24,7 @@ export function useCircleMapMemories(circleId: number) {
 
   const mapMemories = useMemo<MapMemory[]>(() => {
     return memories
-      .filter(
-        (memory) =>
-          memory.latitude &&
-          memory.longitude
-      )
+      .filter((memory) => memory.latitude && memory.longitude)
       .map((memory) => ({
         id: memory.id,
         title: memory.title,
@@ -31,9 +33,21 @@ export function useCircleMapMemories(circleId: number) {
       }));
   }, [memories]);
 
+  const mapTrips = useMemo<MapTrip[]>(() => {
+    return trips
+      .filter((trip) => trip.latitude && trip.longitude)
+      .map((trip) => ({
+        id: trip.id,
+        title: trip.title,
+        latitude: Number(trip.latitude),
+        longitude: Number(trip.longitude),
+      }));
+  }, [trips]);
+
   return {
     mapMemories,
-    isLoading,
+    mapTrips,
+    isLoading: isMemoriesLoading || isTripsLoading,
     refetch,
   };
 }

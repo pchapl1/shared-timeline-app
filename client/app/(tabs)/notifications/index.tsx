@@ -1,13 +1,21 @@
-import { Text, View, FlatList, TouchableOpacity } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
+
+import { FlatList, TouchableOpacity, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+import { PageHeader } from '@/components/ui/PageHeader';
+
 import { useNotifications } from '@/hooks/useNotifications';
 import { markNotificationRead } from '@/services/notifications';
-import type { Notification } from '@/types/notification';
 import { notificationStyles as styles } from '@/styles/notificationStyles';
+
+import { colors } from '@/theme/colors';
+
+import type { Notification } from '@/types/notification';
 
 function getNotificationText(notification: Notification) {
   if (notification.notification_type === 'memory_comment') {
@@ -27,6 +35,26 @@ function getNotificationText(notification: Notification) {
   }
 
   return `${notification.actor_username} sent you a notification`;
+}
+
+function getNotificationIcon(notification: Notification) {
+  if (notification.notification_type === 'memory_comment') {
+    return '💬';
+  }
+
+  if (notification.notification_type === 'memory_reaction') {
+    return '❤️';
+  }
+
+  if (notification.notification_type === 'circle_invite') {
+    return '📨';
+  }
+
+  if (notification.notification_type === 'member_joined') {
+    return '👋';
+  }
+
+  return '🔔';
 }
 
 export default function NotificationsScreen() {
@@ -111,20 +139,36 @@ export default function NotificationsScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.emptyText}>
-          Loading notifications...
-        </Text>
+        <PageHeader
+          title="Notifications"
+          subtitle="Updates from your circles and memories."
+        />
+
+        <AppCard>
+          <AppText
+            variant="bodySmall"
+            color={colors.textMuted}
+            style={{ textAlign: 'center' }}
+          >
+            Loading notifications...
+          </AppText>
+        </AppCard>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notifications</Text>
+      <PageHeader
+        title="Notifications"
+        subtitle="Updates from your circles and memories."
+      />
 
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
@@ -132,50 +176,83 @@ export default function NotificationsScreen() {
         }}
         onEndReachedThreshold={0.4}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No notifications yet.
-          </Text>
+          <AppCard>
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={{ textAlign: 'center' }}
+            >
+              No notifications yet.
+            </AppText>
+          </AppCard>
         }
         ListFooterComponent={
           isFetchingNextPage ? (
-            <Text style={styles.emptyText}>
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={styles.footerText}
+            >
               Loading more notifications...
-            </Text>
+            </AppText>
           ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.9}
             onPress={() => handleNotificationPress(item)}
           >
-            <View
+            <AppCard
               style={[
                 styles.card,
-                !item.is_read ? styles.unreadCard : undefined,
+                !item.is_read && styles.unreadCard,
               ]}
             >
-              <Text style={styles.cardTitle}>
-                {getNotificationText(item)}
-              </Text>
+              <View style={styles.cardRow}>
+                <View style={styles.iconBubble}>
+                  <AppText variant="h3">
+                    {getNotificationIcon(item)}
+                  </AppText>
+                </View>
 
-              {item.memory_title ? (
-                <Text style={styles.memoryTitle}>
-                  {item.memory_title}
-                </Text>
-              ) : null}
+                <View style={styles.cardContent}>
+                  <AppText variant="bodyStrong">
+                    {getNotificationText(item)}
+                  </AppText>
 
-              {item.circle_name ? (
-                <Text style={styles.circleName}>
-                  {item.circle_name}
-                </Text>
-              ) : null}
+                  {!!item.memory_title && (
+                    <AppText
+                      variant="bodySmall"
+                      color={colors.textMuted}
+                      style={styles.detailText}
+                    >
+                      {item.memory_title}
+                    </AppText>
+                  )}
 
-              <Text style={styles.timestamp}>
-                {formatDistanceToNow(new Date(item.created_at), {
-                  addSuffix: true,
-                })}
-              </Text>
-            </View>
+                  {!!item.circle_name && (
+                    <AppText
+                      variant="bodySmall"
+                      color={colors.primary}
+                      style={styles.detailText}
+                    >
+                      {item.circle_name}
+                    </AppText>
+                  )}
+
+                  <AppText
+                    variant="caption"
+                    color={colors.textSubtle}
+                    style={styles.timestamp}
+                  >
+                    {formatDistanceToNow(
+                      new Date(item.created_at),
+                      { addSuffix: true }
+                    )}
+                  </AppText>
+                </View>
+              </View>
+            </AppCard>
           </TouchableOpacity>
         )}
       />

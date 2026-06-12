@@ -152,7 +152,22 @@ export default function TripDetailScreen() {
             ))
             )}
           </View>
-
+        <TouchableOpacity
+          style={tripCardStyles.card}
+          onPress={() =>
+            router.push({
+              pathname: '/circles/[id]/add-memory',
+              params: {
+                id,
+                tripId: String(trip.id),
+              },
+            })
+          }
+        >
+          <Text style={tripCardStyles.title}>
+            Add Memory to Trip
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={tripCardStyles.card}
           onPress={() =>

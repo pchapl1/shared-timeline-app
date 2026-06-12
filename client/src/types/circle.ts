@@ -13,5 +13,8 @@ export type Circle = {
   circle_type: string;
   start_date: string;
   members: CircleMember[];
+  member_count: number;
+  memory_count: number;
+  trip_count: number;
   is_archived: boolean;
 };

@@ -1,37 +1,49 @@
 import { StyleSheet } from 'react-native';
 
-import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { shadows } from '@/theme/shadows';
+import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
 
 export const memoryCardStyles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
     overflow: 'hidden',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.md,
   },
 
   image: {
     width: '100%',
-    height: 220,
+    height: 240,
   },
 
   galleryImage: {
     width: 340,
-    height: 220,
+    height: 240,
   },
 
   imagePlaceholder: {
-    height: 180,
-    backgroundColor: colors.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  height: 150,
+  backgroundColor: colors.primarySoft,
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderBottomWidth: 1,
+  borderBottomColor: colors.border,
+},
+
+  placeholderIcon: {
+  fontSize: 28,
+  marginBottom: spacing.xs,
+},
 
   placeholderText: {
-    color: colors.subtleText,
-    fontSize: 16,
-    fontWeight: '600',
+    ...typography.bodyStrong,
+    color: colors.primary,
   },
 
   pagination: {
@@ -47,75 +59,78 @@ export const memoryCardStyles = StyleSheet.create({
   paginationDot: {
     width: 7,
     height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.muted,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(255,255,255,0.55)',
   },
 
   paginationDotActive: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.surface,
+    width: 18,
   },
 
   content: {
-    padding: 18,
+    padding: spacing.lg,
   },
 
   title: {
+    ...typography.h3,
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
 
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    flexWrap: 'wrap',
+    marginBottom: spacing.sm,
   },
 
   username: {
-    color: colors.primaryLight,
-    fontSize: 14,
-    fontWeight: '600',
+    ...typography.bodySmall,
+    color: colors.primary,
+    fontWeight: '700',
   },
 
   dot: {
-    color: colors.border,
+    color: colors.textSubtle,
     marginHorizontal: spacing.sm,
   },
 
   date: {
-    color: colors.muted,
-    fontSize: 14,
+    ...typography.bodySmall,
+    color: colors.textMuted,
   },
 
   location: {
-    color: colors.primaryLight,
-    fontSize: 14,
-    marginBottom: 12,
+    ...typography.bodySmall,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
   },
 
   description: {
-    color: colors.subtleText,
-    fontSize: 16,
-    lineHeight: 24,
+    ...typography.body,
+    color: colors.textMuted,
   },
 
   engagementRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.md,
     marginTop: spacing.md,
   },
 
-  reactionButton: {
+  engagementPill: {
+    minHeight: 36,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceMuted,
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     gap: spacing.xs,
   },
 
   reactionIcon: {
-    fontSize: 22,
+    fontSize: 18,
   },
 
   reactionIconActive: {
@@ -123,40 +138,30 @@ export const memoryCardStyles = StyleSheet.create({
   },
 
   reactionText: {
-    color: colors.subtleText,
-    fontSize: 15,
-    fontWeight: '600',
+    ...typography.caption,
+    color: colors.textMuted,
   },
 
   commentCountText: {
-    color: colors.subtleText,
-    fontSize: 14,
-    fontWeight: '600',
+    ...typography.caption,
+    color: colors.textMuted,
   },
 
   commentPreview: {
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
 
   commentPreviewUser: {
-    color: colors.primaryLight,
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 4,
+    ...typography.caption,
+    color: colors.primary,
+    marginBottom: spacing.xs,
   },
 
   commentPreviewText: {
-    color: colors.subtleText,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-
-  metaText: {
-    color: colors.subtleText,
-    fontSize: 14,
-    fontWeight: '600',
+    ...typography.bodySmall,
+    color: colors.textMuted,
   },
 });

@@ -1,8 +1,16 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { CircleTabs } from '@/components/circles/CircleTabs';
-import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+import { AvatarStack } from '@/components/ui/AvatarStack';
+import { StatsRow } from '@/components/ui/StatsRow';
+
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
 
 import type { Circle } from '@/types/circle';
 
@@ -12,73 +20,162 @@ type Props = {
   variant?: 'full' | 'compact';
 };
 
+function formatCircleType(circleType?: string) {
+  if (!circleType) {
+    return 'Shared Circle';
+  }
+
+  return circleType
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export function CircleHeader({
   circle,
   activeTab,
   variant = 'full',
 }: Props) {
+  const avatarItems = circle.members.map((member) => ({
+    id: member.id,
+    label: member.username,
+  }));
+
   if (variant === 'compact') {
     return (
-      <View style={styles.compactHeader}>
-        <View style={styles.compactHeaderTop}>
+      <View style={{ marginBottom: spacing.md }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: spacing.md,
+            marginBottom: spacing.md,
+          }}
+        >
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/circles')}
           >
-            <Text style={styles.backLink}>← Back</Text>
+            <AppText variant="bodySmall" color={colors.primary}>
+              ← Back
+            </AppText>
           </TouchableOpacity>
 
-          <Text
-            style={styles.compactHeaderTitle}
+          <AppText
+            variant="h3"
             numberOfLines={1}
+            style={{ flex: 1, textAlign: 'right' }}
           >
             {circle.name}
-          </Text>
+          </AppText>
         </View>
 
-        <CircleTabs
-          circleId={circle.id}
-          activeTab={activeTab}
-        />
+        <CircleTabs circleId={circle.id} activeTab={activeTab} />
       </View>
     );
   }
 
   return (
-    <View>
+    <View style={{ marginBottom: spacing.lg }}>
       <TouchableOpacity
         onPress={() => router.push('/(tabs)/circles')}
+        hitSlop={12}
+        style={{
+          marginTop: 44,
+          marginBottom: spacing.md,
+          paddingVertical: 8,
+        }}
       >
-        <Text style={styles.backLink}>← Back</Text>
+        <AppText variant="bodySmall" color={colors.primary}>
+          ← Back to circles
+        </AppText>
       </TouchableOpacity>
 
-      <Text style={styles.title}>{circle.name}</Text>
+      <AppCard style={{ padding: 0, overflow: 'hidden' }}>
+        <View
+          style={{
+            minHeight: 150,
+            padding: spacing.lg,
+            backgroundColor: colors.primarySoft,
+            borderTopLeftRadius: radius.xl,
+            borderTopRightRadius: radius.xl,
+            justifyContent: 'flex-end',
+          }}
+        >
+          <View
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: radius.full,
+              backgroundColor: colors.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: spacing.md,
+              borderWidth: 4,
+              borderColor: colors.surface,
+            }}
+          >
+            <AppText variant="h1" color={colors.textInverse}>
+              {circle.name.charAt(0).toUpperCase()}
+            </AppText>
+          </View>
 
-      <Text style={styles.subtitle}>{circle.circle_type}</Text>
+          <AppText variant="h1">{circle.name}</AppText>
 
-      <Text style={styles.date}>
-        Started: {circle.start_date}
-      </Text>
+          <AppText
+            variant="bodySmall"
+            color={colors.textMuted}
+            style={{ marginTop: spacing.xs }}
+          >
+            {formatCircleType(circle.circle_type)}
+          </AppText>
+        </View>
 
-      <TouchableOpacity
-        style={styles.inviteButton}
-        onPress={() =>
-          router.push({
-            pathname: '/circles/[id]/edit',
-            params: {
-              id: String(circle.id),
-            },
-          })
-        }
-      >
-        <Text style={styles.inviteButtonText}>
-          Edit Circle
-        </Text>
-      </TouchableOpacity>
+        <View style={{ padding: spacing.lg }}>
+          <StatsRow
+            items={[
+              {
+                label: 'Members',
+                value: circle.member_count,
+              },
+              {
+                label: 'Memories',
+                value: circle.memory_count,
+              },
+              {
+                label: 'Trips',
+                value: circle.trip_count,
+              },
+            ]}
+            style={{ marginBottom: spacing.lg }}
+          />
 
-      <CircleTabs
-        circleId={circle.id}
-        activeTab={activeTab}
-      />
+          {avatarItems.length > 0 && (
+            <AvatarStack
+              items={avatarItems}
+              size={38}
+              style={{
+                marginBottom: spacing.lg,
+                alignSelf: 'center',
+              }}
+            />
+          )}
+
+          <AppButton
+            title="Manage Circle"
+            variant="secondary"
+            onPress={() =>
+              router.push({
+                pathname: '/circles/[id]/edit',
+                params: { id: String(circle.id) },
+              })
+            }
+          />
+        </View>
+      </AppCard>
+
+      <View style={{ marginTop: spacing.lg }}>
+        <CircleTabs circleId={circle.id} activeTab={activeTab} />
+      </View>
     </View>
   );
 }

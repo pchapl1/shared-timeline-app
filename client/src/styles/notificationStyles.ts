@@ -1,59 +1,58 @@
 import { StyleSheet } from 'react-native';
 
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
+
 export const notificationStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: colors.background,
     paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.lg,
   },
 
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 24,
+  listContent: {
+    paddingBottom: 120,
   },
 
   card: {
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
 
   unreadCard: {
-    borderWidth: 1,
-    borderColor: '#60a5fa',
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
 
-  cardTitle: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 6,
+  cardRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
   },
 
-  memoryTitle: {
-    color: '#cbd5e1',
-    fontSize: 14,
-    marginBottom: 4,
+  iconBubble: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  circleName: {
-    color: '#60a5fa',
-    fontSize: 14,
-    marginBottom: 4,
+  cardContent: {
+    flex: 1,
+  },
+
+  detailText: {
+    marginTop: spacing.xs,
   },
 
   timestamp: {
-    color: '#94a3b8',
-    fontSize: 12,
+    marginTop: spacing.sm,
   },
 
-  emptyText: {
-    color: '#94a3b8',
+  footerText: {
     textAlign: 'center',
-    marginTop: 40,
+    marginTop: spacing.md,
   },
 });

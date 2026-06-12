@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 
 import { Image } from 'expo-image';
-
 import { useLocalSearchParams, router } from 'expo-router';
 
-import { CircleTabs } from '@/components/circles/CircleTabs';
+import { CircleHeader } from '@/components/circles/CircleHeader';
+import { FloatingActionButton } from '@/components/ui/FloatingActionButton';
+
 import { useCircle } from '@/hooks/circles/useCircle';
 import { useCircleMemories } from '@/hooks/useCircleMemories';
+
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
 
 import { useAuth } from '../../../src/context/AuthContext';
@@ -23,7 +25,6 @@ import { MemoryCard } from '../../../src/components/memories/MemoryCard';
 import { colors } from '../../../src/theme/colors';
 
 import type { Memory } from '../../../src/types/memory';
-import { CircleHeader } from '@/components/circles/CircleHeader';
 
 function groupMemoriesByMonth(memories: Memory[]) {
   const grouped: Record<string, Memory[]> = {};
@@ -97,6 +98,25 @@ export default function CircleDetailScreen() {
     }
   }
 
+  function goToAddMemory() {
+    router.push({
+      pathname: '/circles/[id]/add-memory',
+      params: {
+        id: id.toString(),
+      },
+    });
+  }
+
+  function goToMemory(memoryId: number) {
+    router.push({
+      pathname: '/circles/[id]/memories/[memoryId]',
+      params: {
+        id: id.toString(),
+        memoryId: memoryId.toString(),
+      },
+    });
+  }
+
   if (
     authLoading ||
     isCircleLoading ||
@@ -105,8 +125,12 @@ export default function CircleDetailScreen() {
     !circle
   ) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loading}>Loading circle...</Text>
+      <View style={styles.screen}>
+        <View style={styles.contentContainer}>
+          <Text style={styles.loading}>
+            Loading circle...
+          </Text>
+        </View>
       </View>
     );
   }
@@ -140,23 +164,23 @@ export default function CircleDetailScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.text}
+            tintColor={colors.primary}
           />
         }
+        showsVerticalScrollIndicator={false}
       >
-
         <CircleHeader
           circle={circle}
           activeTab="timeline"
         />
 
-
-
         <View style={styles.section}>
           {memories.length === 0 ? (
-            <Text style={styles.emptyText}>
-              Memories will appear here.
-            </Text>
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>
+                Memories will appear here.
+              </Text>
+            </View>
           ) : (
             Object.entries(groupedMemories).map(
               ([groupTitle, groupMemories]) => (
@@ -172,32 +196,14 @@ export default function CircleDetailScreen() {
                     <TouchableOpacity
                       key={memory.id}
                       activeOpacity={0.9}
-                      onPress={() => {
-                        router.push({
-                          pathname:
-                            '/circles/[id]/memories/[memoryId]',
-                          params: {
-                            id: id.toString(),
-                            memoryId: memory.id.toString(),
-                          },
-                        });
-                      }}
+                      onPress={() => goToMemory(memory.id)}
                     >
                       <MemoryCard
                         memory={memory}
                         onPhotoPress={(photoUrl) =>
                           setSelectedPhoto(photoUrl)
                         }
-                        onPress={() =>
-                          router.push({
-                            pathname:
-                              '/circles/[id]/memories/[memoryId]',
-                            params: {
-                              id: id.toString(),
-                              memoryId: memory.id.toString(),
-                            },
-                          })
-                        }
+                        onPress={() => goToMemory(memory.id)}
                       />
                     </TouchableOpacity>
                   ))}
@@ -214,19 +220,10 @@ export default function CircleDetailScreen() {
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() =>
-          router.push({
-            pathname: '/circles/[id]/add-memory',
-            params: {
-              id: id.toString(),
-            },
-          })
-        }
-      >
-        <Text style={styles.floatingButtonText}>＋</Text>
-      </TouchableOpacity>
+      <FloatingActionButton
+        label="＋"
+        onPress={goToAddMemory}
+      />
 
       <Modal
         visible={!!selectedPhoto}
@@ -239,7 +236,9 @@ export default function CircleDetailScreen() {
             style={styles.closeButton}
             onPress={() => setSelectedPhoto(null)}
           >
-            <Text style={styles.closeButtonText}>✕</Text>
+            <Text style={styles.closeButtonText}>
+              ✕
+            </Text>
           </TouchableOpacity>
 
           {selectedPhoto && (

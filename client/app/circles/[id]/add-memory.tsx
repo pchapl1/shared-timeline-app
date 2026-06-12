@@ -29,14 +29,19 @@ import { useTrips } from '@/hooks/trips/useTrips';
 
 export default function AddMemoryScreen() {
 
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tripId } = useLocalSearchParams<{
+    id: string;
+    tripId?: string;
+  }>();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [locationName, setLocationName] = useState('');
-  const [selectedTripId, setSelectedTripId] = useState<number | null>(null);
+  const [selectedTripId, setSelectedTripId] = useState<number | null>(
+    tripId ? Number(tripId) : null
+  );
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 

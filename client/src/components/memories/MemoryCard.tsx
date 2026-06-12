@@ -26,8 +26,13 @@ type Props = {
   onPress?: () => void;
 };
 
-export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
-  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+export function MemoryCard({
+  memory,
+  onPhotoPress,
+  onPress,
+}: Props) {
+  const [activePhotoIndex, setActivePhotoIndex] =
+    useState(0);
   const [isReacting, setIsReacting] = useState(false);
 
   const queryClient = useQueryClient();
@@ -81,7 +86,9 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
     event: NativeSyntheticEvent<NativeScrollEvent>
   ) {
     const offsetX = event.nativeEvent.contentOffset.x;
-    const nextIndex = Math.round(offsetX / GALLERY_IMAGE_WIDTH);
+    const nextIndex = Math.round(
+      offsetX / GALLERY_IMAGE_WIDTH
+    );
 
     setActivePhotoIndex(nextIndex);
   }
@@ -185,6 +192,8 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
         </TouchableOpacity>
       ) : (
         <View style={styles.imagePlaceholder}>
+          <Text style={styles.placeholderIcon}>🖼️</Text>
+
           <Text style={styles.placeholderText}>
             Photo Coming Soon
           </Text>
@@ -203,7 +212,9 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
 
           <Text style={styles.date}>
             {formatDistanceToNow(
-              new Date(memory.created_at ?? memory.memory_date),
+              new Date(
+                memory.created_at ?? memory.memory_date
+              ),
               { addSuffix: true }
             )}
           </Text>
@@ -211,7 +222,7 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
 
         {!!memory.location_name && (
           <Text style={styles.location}>
-            {memory.location_name}
+            📍 {memory.location_name}
           </Text>
         )}
 
@@ -223,7 +234,7 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
 
         <View style={styles.engagementRow}>
           <TouchableOpacity
-            style={styles.reactionButton}
+            style={styles.engagementPill}
             activeOpacity={0.8}
             onPress={handleToggleReaction}
             disabled={isReacting}
@@ -242,9 +253,14 @@ export function MemoryCard({ memory, onPhotoPress, onPress }: Props) {
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.commentCountText}>
-            💬 {memory.comment_count ?? memory.comments?.length ?? 0}
-          </Text>
+          <View style={styles.engagementPill}>
+            <Text style={styles.commentCountText}>
+              💬{' '}
+              {memory.comment_count ??
+                memory.comments?.length ??
+                0}
+            </Text>
+          </View>
         </View>
 
         {latestComment && (

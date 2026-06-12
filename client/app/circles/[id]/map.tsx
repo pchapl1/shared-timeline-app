@@ -21,6 +21,7 @@ export default function CircleMapScreen() {
 
   const {
     mapMemories,
+    mapTrips,
     isLoading: isMapLoading,
   } = useCircleMapMemories(circleId);
 
@@ -40,10 +41,11 @@ export default function CircleMapScreen() {
         variant='compact'
       />
 
-      <CircleMap
-        circleId={circleId}
-        memories={mapMemories}
-      />
+    <CircleMap
+      circleId={circleId}
+      memories={mapMemories}
+      trips={mapTrips}
+    />
     </View>
   );
 }

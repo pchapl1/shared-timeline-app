@@ -47,7 +47,34 @@ class CircleSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    member_count = serializers.IntegerField(
+        source='members.count',
+        read_only=True
+    )
+
+    memory_count = serializers.IntegerField(
+        source='memories.count',
+        read_only=True
+    )
+
+    trip_count = serializers.IntegerField(
+        source='trips.count',
+        read_only=True
+    )
+
     class Meta:
         model = Circle
-        fields = '__all__'
+        fields = [
+            'id',
+            'name',
+            'circle_type',
+            'start_date',
+            'members',
+            'invites',
+            'member_count',
+            'memory_count',
+            'trip_count',
+            'is_archived',
+            'created_by',
+        ]
         read_only_fields = ['created_by']

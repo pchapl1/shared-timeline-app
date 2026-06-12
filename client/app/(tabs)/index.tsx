@@ -1,9 +1,15 @@
-import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { FlatList, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { formatDistanceToNow } from 'date-fns';
 
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+import { PageHeader } from '@/components/ui/PageHeader';
+
 import { activityStyles as styles } from '@/styles/activityStyles';
 import { useActivities } from '@/hooks/useActivities';
+import { colors } from '@/theme/colors';
+
 import type { Activity } from '@/types/activity';
 
 function getActivityText(activity: Activity) {
@@ -24,6 +30,26 @@ function getActivityText(activity: Activity) {
   }
 
   return `${activity.actor_username} did something`;
+}
+
+function getActivityIcon(activity: Activity) {
+  if (activity.activity_type === 'memory_created') {
+    return '📸';
+  }
+
+  if (activity.activity_type === 'comment_created') {
+    return '💬';
+  }
+
+  if (activity.activity_type === 'reaction_created') {
+    return '❤️';
+  }
+
+  if (activity.activity_type === 'member_joined') {
+    return '👋';
+  }
+
+  return '✨';
 }
 
 export default function ActivityScreen() {
@@ -72,18 +98,36 @@ export default function ActivityScreen() {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.emptyText}>Loading activity...</Text>
+        <PageHeader
+          title="Activity"
+          subtitle="Recent updates from your circles."
+        />
+
+        <AppCard>
+          <AppText
+            variant="bodySmall"
+            color={colors.textMuted}
+            style={{ textAlign: 'center' }}
+          >
+            Loading activity...
+          </AppText>
+        </AppCard>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Activity</Text>
+      <PageHeader
+        title="Activity"
+        subtitle="Recent updates from your circles."
+      />
 
       <FlatList
         data={activities}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
@@ -91,43 +135,78 @@ export default function ActivityScreen() {
         }}
         onEndReachedThreshold={0.4}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No activity yet.</Text>
+          <AppCard>
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={{ textAlign: 'center' }}
+            >
+              No activity yet.
+            </AppText>
+          </AppCard>
         }
         ListFooterComponent={
           isFetchingNextPage ? (
-            <Text style={styles.emptyText}>
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={styles.footerText}
+            >
               Loading more activity...
-            </Text>
+            </AppText>
           ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={0.9}
             onPress={() => handleActivityPress(item)}
           >
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>
-                {getActivityText(item)}
-              </Text>
+            <AppCard style={styles.card}>
+              <View style={styles.cardRow}>
+                <View style={styles.iconBubble}>
+                  <AppText variant="h3">
+                    {getActivityIcon(item)}
+                  </AppText>
+                </View>
 
-              {item.memory_title ? (
-                <Text style={styles.memoryTitle}>
-                  {item.memory_title}
-                </Text>
-              ) : null}
+                <View style={styles.cardContent}>
+                  <AppText variant="bodyStrong">
+                    {getActivityText(item)}
+                  </AppText>
 
-              {item.circle_name ? (
-                <Text style={styles.circleName}>
-                  {item.circle_name}
-                </Text>
-              ) : null}
+                  {!!item.memory_title && (
+                    <AppText
+                      variant="bodySmall"
+                      color={colors.textMuted}
+                      style={styles.detailText}
+                    >
+                      {item.memory_title}
+                    </AppText>
+                  )}
 
-              <Text style={styles.timestamp}>
-                {formatDistanceToNow(new Date(item.created_at), {
-                  addSuffix: true,
-                })}
-              </Text>
-            </View>
+                  {!!item.circle_name && (
+                    <AppText
+                      variant="bodySmall"
+                      color={colors.primary}
+                      style={styles.detailText}
+                    >
+                      {item.circle_name}
+                    </AppText>
+                  )}
+
+                  <AppText
+                    variant="caption"
+                    color={colors.textSubtle}
+                    style={styles.timestamp}
+                  >
+                    {formatDistanceToNow(
+                      new Date(item.created_at),
+                      { addSuffix: true }
+                    )}
+                  </AppText>
+                </View>
+              </View>
+            </AppCard>
           </TouchableOpacity>
         )}
       />

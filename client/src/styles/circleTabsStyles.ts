@@ -1,34 +1,49 @@
 import { StyleSheet } from 'react-native';
 
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
+import { spacing } from '@/theme/spacing';
+import { shadows } from '@/theme/shadows';
+
 export const circleTabsStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginTop: 14,
-    marginBottom: 24,
-    padding: 4,
-    borderRadius: 999,
-    gap: 6,
-    backgroundColor: '#1F2937',
+    padding: 6,
+    marginTop: spacing.md,
+    marginBottom: spacing.xl,
+
+    backgroundColor: colors.surface,
+    borderRadius: radius.full,
+
+    borderWidth: 1,
+    borderColor: colors.border,
+
+    ...shadows.sm,
   },
 
   tab: {
     flex: 1,
-    paddingVertical: 11,
-    borderRadius: 999,
+
+    paddingVertical: 12,
+
+    borderRadius: radius.full,
+
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   activeTab: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.primarySoft,
   },
 
   tabText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#9CA3AF',
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textMuted,
   },
 
   activeTabText: {
-    color: '#111827',
+    color: colors.primary,
+    fontWeight: '700',
   },
 });

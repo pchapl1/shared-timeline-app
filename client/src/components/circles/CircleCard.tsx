@@ -1,9 +1,13 @@
 import {
-  View,
-  Text,
-  StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
+
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 type Props = {
   name: string;
@@ -18,39 +22,53 @@ export function CircleCard({
 }: Props) {
   return (
     <TouchableOpacity
-      style={styles.card}
-      activeOpacity={0.85}
+      activeOpacity={0.9}
       onPress={onPress}
     >
-      <Text style={styles.cardTitle}>
-        {name}
-      </Text>
+      <AppCard
+        style={{
+          marginBottom: spacing.md,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+          }}
+        >
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: colors.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <AppText
+              variant="h3"
+              color={colors.textInverse}
+            >
+              {name.charAt(0).toUpperCase()}
+            </AppText>
+          </View>
 
-      <Text style={styles.cardSubtitle}>
-        {circleType}
-      </Text>
+          <View style={{ flex: 1 }}>
+            <AppText variant="h3">
+              {name}
+            </AppText>
+
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+            >
+              {circleType}
+            </AppText>
+          </View>
+        </View>
+      </AppCard>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#1e293b',
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-
-  cardTitle: {
-    color: '#ffffff',
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-
-  cardSubtitle: {
-    color: '#94a3b8',
-    fontSize: 14,
-    textTransform: 'capitalize',
-  },
-});

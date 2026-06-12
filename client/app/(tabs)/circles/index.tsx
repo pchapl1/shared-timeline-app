@@ -2,25 +2,27 @@ import { useCallback, useState } from 'react';
 
 import {
   Alert,
-  View,
-  Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
-import {
-  Link,
-  router,
-  useFocusEffect,
-} from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
-import { api } from '../../../src/services/api';
-import { useAuth } from '../../../src/context/AuthContext';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppCard } from '@/components/ui/AppCard';
+import { AppText } from '@/components/ui/AppText';
 import { CircleCard } from '@/components/circles/CircleCard';
-import { useRestoreCircle } from '@/hooks/circles/useRestoreCircle';
+import { PageHeader } from '@/components/ui/PageHeader';
 
-import type { Circle } from '../../../src/types/circle';
+import { useRestoreCircle } from '@/hooks/circles/useRestoreCircle';
+import { api } from '@/services/api';
+
+import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
+
+import type { Circle } from '@/types/circle';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CirclesScreen() {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -72,11 +74,16 @@ export default function CirclesScreen() {
           text: 'Restore',
           onPress: async () => {
             try {
-              await restoreCircleMutation.mutateAsync(circle.id);
+              await restoreCircleMutation.mutateAsync(
+                circle.id
+              );
 
               fetchCircles();
             } catch (error: any) {
-              console.log("RESTORE CIRCLE ERROR: ",error.response.data || error);
+              console.log(
+                'RESTORE CIRCLE ERROR: ',
+                error.response?.data || error
+              );
 
               Alert.alert(
                 'Error',
@@ -98,17 +105,37 @@ export default function CirclesScreen() {
     });
   }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Circles</Text>
+  function handleCreateCircle() {
+    router.push('/create-circle');
+  }
 
-      <Link href="/create-circle" style={styles.createLink}>
-        Create Circle
-      </Link>
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingTop: 80,
+        paddingHorizontal: spacing.lg,
+      }}
+    >
+    <PageHeader
+      title="Your Circles"
+      subtitle="Shared spaces for the people who matter most."
+    />
+
+      <AppButton
+        title="Create Circle"
+        onPress={handleCreateCircle}
+        style={{ marginBottom: spacing.lg }}
+      />
 
       <FlatList
         data={activeCircles}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 120,
+        }}
         renderItem={({ item }) => (
           <CircleCard
             name={item.name}
@@ -117,30 +144,51 @@ export default function CirclesScreen() {
           />
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No circles yet.
-          </Text>
+          <AppCard>
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={{ textAlign: 'center' }}
+            >
+              No circles yet. Create your first shared space.
+            </AppText>
+          </AppCard>
         }
         ListFooterComponent={
           archivedCircles.length > 0 ? (
-            <View style={styles.archivedSection}>
-              <Text style={styles.archivedTitle}>
+            <View style={{ marginTop: spacing.lg }}>
+              <AppText
+                variant="h3"
+                color={colors.textMuted}
+                style={{ marginBottom: spacing.md }}
+              >
                 Archived Circles
-              </Text>
+              </AppText>
 
               {archivedCircles.map((circle) => (
                 <TouchableOpacity
                   key={circle.id}
-                  style={styles.archivedCard}
+                  activeOpacity={0.9}
                   onPress={() => handleRestoreCircle(circle)}
                 >
-                  <Text style={styles.archivedCardTitle}>
-                    {circle.name}
-                  </Text>
+                  <AppCard
+                    style={{
+                      marginBottom: spacing.md,
+                      backgroundColor: colors.surfaceMuted,
+                    }}
+                  >
+                    <AppText variant="bodyStrong">
+                      {circle.name}
+                    </AppText>
 
-                  <Text style={styles.archivedCardSubtitle}>
-                    Tap to restore
-                  </Text>
+                    <AppText
+                      variant="bodySmall"
+                      color={colors.textMuted}
+                      style={{ marginTop: spacing.xs }}
+                    >
+                      Tap to restore
+                    </AppText>
+                  </AppCard>
                 </TouchableOpacity>
               ))}
             </View>
@@ -150,60 +198,3 @@ export default function CirclesScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    paddingTop: 80,
-    paddingHorizontal: 24,
-  },
-
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 24,
-  },
-
-  createLink: {
-    color: '#60a5fa',
-    fontSize: 16,
-    marginBottom: 24,
-  },
-
-  emptyText: {
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 40,
-  },
-
-  archivedSection: {
-    marginTop: 24,
-    paddingBottom: 40,
-  },
-
-  archivedTitle: {
-    color: '#94a3b8',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-
-  archivedCard: {
-    backgroundColor: '#1e293b',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-
-  archivedCardTitle: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-
-  archivedCardSubtitle: {
-    color: '#94a3b8',
-    marginTop: 4,
-  },
-});
