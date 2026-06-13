@@ -60,10 +60,6 @@ export default function TripDetailScreen() {
   }`;
 
   function handleDeleteTrip() {
-    if (!trip) {
-      return;
-    }
-
     Alert.alert(
       'Delete Trip',
       `Are you sure you want to delete "${trip.title}"?`,
@@ -141,22 +137,25 @@ export default function TripDetailScreen() {
                 <AppText
                   variant="bodySmall"
                   color={colors.primary}
-                  numberOfLines={1}
                 >
                   📍 {trip.destination_name}
                 </AppText>
               </View>
             )}
 
-            <View style={styles.datePill}>
-              <AppText variant="bodySmall" color={colors.primary}>
-                {dateRange}
-              </AppText>
-            </View>
-            <View style={styles.memoryCountRow}>
-              <AppText variant="bodyStrong" color={colors.primary}>
-                {memoryCount} {memoryCount === 1 ? 'Memory' : 'Memories'}
-              </AppText>
+            <View style={styles.tripMetaRow}>
+              <View style={styles.datePill}>
+                <AppText variant="bodySmall" color={colors.primary}>
+                  {dateRange}
+                </AppText>
+              </View>
+
+              <View style={styles.memoryCountPill}>
+                <AppText variant="bodySmall" color={colors.primary}>
+                  {memoryCount}{' '}
+                  {memoryCount === 1 ? 'Memory' : 'Memories'}
+                </AppText>
+              </View>
             </View>
           </AppCard>
 
@@ -174,7 +173,7 @@ export default function TripDetailScreen() {
               }
             >
               <AppText variant="bodySmall" color={colors.primary}>
-                Add Memory
+                + Memory
               </AppText>
             </TouchableOpacity>
 
@@ -205,29 +204,11 @@ export default function TripDetailScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* <View style={styles.statRow}>
-            <AppCard style={styles.statCard}>
-              <AppText variant="h2">{memoryCount}</AppText>
-              <AppText variant="caption" color={colors.textMuted}>
-                Memories
-              </AppText>
-            </AppCard>
-
-            <AppCard style={styles.statCard}>
-              <AppText variant="h2">
-                {trip.end_date ? 'Multi' : '1'}
-              </AppText>
-              <AppText variant="caption" color={colors.textMuted}>
-                Day Trip
-              </AppText>
-            </AppCard>
-          </View> */}
-
           {!!trip.description && (
             <View style={styles.section}>
               <SectionHeader title="About this trip" />
 
-              <AppCard>
+              <AppCard style={styles.descriptionCard}>
                 <AppText
                   variant="body"
                   color={colors.textMuted}
@@ -240,22 +221,28 @@ export default function TripDetailScreen() {
           )}
 
           <View style={styles.section}>
-            <SectionHeader
-              title="Trip Memories"
-            />
+            <SectionHeader title="Trip Memories" />
 
             {tripMemories.length === 0 ? (
-              <View style={styles.emptyMemories}>
-                <AppText variant="h3">🧳</AppText>
+              <AppCard>
+                <View style={styles.emptyMemories}>
+                  <AppText variant="h3">🧳</AppText>
 
-                <AppText variant="bodyStrong" color={colors.textMuted}>
-                  No memories linked yet.
-                </AppText>
+                  <AppText
+                    variant="bodyStrong"
+                    color={colors.textMuted}
+                  >
+                    No memories linked yet.
+                  </AppText>
 
-                <AppText variant="bodySmall" color={colors.textSubtle}>
-                  Memories assigned to this trip will appear here.
-                </AppText>
-              </View>
+                  <AppText
+                    variant="bodySmall"
+                    color={colors.textSubtle}
+                  >
+                    Memories assigned to this trip will appear here.
+                  </AppText>
+                </View>
+              </AppCard>
             ) : (
               <View style={styles.memoryList}>
                 {tripMemories.map((memory) => (

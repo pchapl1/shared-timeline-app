@@ -17,7 +17,7 @@ export const inviteMemberStyles = StyleSheet.create({
 
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.xl,
   },
 
   loadingContainer: {
@@ -27,25 +27,47 @@ export const inviteMemberStyles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  backButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
+  heroIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: spacing.xs,
     marginBottom: spacing.lg,
     ...shadows.sm,
   },
 
+  heroEmoji: {
+    fontSize: 40,
+  },
+
   header: {
-    marginBottom: spacing.lg,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+
+  title: {
+    textAlign: 'center',
   },
 
   subtitle: {
-    marginTop: spacing.xs,
-    lineHeight: 20,
+    marginTop: spacing.sm,
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+
+  searchCard: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
+    ...shadows.md,
   },
 
   input: {
@@ -59,11 +81,9 @@ export const inviteMemberStyles = StyleSheet.create({
     fontSize: 16,
   },
 
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+  resultsHeader: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
   },
 
   userCard: {
@@ -98,8 +118,91 @@ export const inviteMemberStyles = StyleSheet.create({
     gap: 2,
   },
 
+  invitePill: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+
+  invitedPill: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
   emptyContainer: {
-    paddingTop: spacing.lg,
+    marginHorizontal: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.lg,
     alignItems: 'center',
+    ...shadows.sm,
+  },
+
+  footer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+    backgroundColor: colors.background,
+  },
+
+  continueButton: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    minHeight: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
+  },
+  stepLabel: {
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+
+  progressText: {
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+
+  invitedSection: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    ...shadows.sm,
+  },
+
+  invitedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+
+  skipText: {
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+
+  invitedAvatar: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.full,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+
+  invitedName: {
+    flex: 1,
   },
 });

@@ -17,27 +17,43 @@ export const createCircleStyles = StyleSheet.create({
 
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.xl,
   },
 
-  backButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
+
+  heroIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.xxl,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
     marginBottom: spacing.lg,
     ...shadows.sm,
   },
 
+  heroEmoji: {
+    fontSize: 40,
+  },
+
   header: {
-    marginBottom: spacing.lg,
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+
+  title: {
+    textAlign: 'center',
+  },
+
+  subtitle: {
+    marginTop: spacing.sm,
+    textAlign: 'center',
+    maxWidth: 280,
   },
 
   card: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
     padding: spacing.md,
   },
 
@@ -45,9 +61,9 @@ export const createCircleStyles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
-    height: 52,
+    height: 54,
     color: colors.text,
     fontSize: 16,
     marginTop: spacing.xs,
@@ -58,9 +74,9 @@ export const createCircleStyles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
-    height: 52,
+    height: 54,
     justifyContent: 'center',
     marginTop: spacing.xs,
   },
@@ -75,40 +91,42 @@ export const createCircleStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
-    height: 52,
+    height: 54,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.xs,
     marginBottom: spacing.md,
-    },
+  },
 
-    dropdownMenu: {
+  dropdownMenu: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
     marginBottom: spacing.md,
-    },
+  },
 
-    dropdownItem: {
+  dropdownItem: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    },
+  },
+
+  dropdownItemLast: {
+    borderBottomWidth: 0,
+  },
 
   button: {
     backgroundColor: colors.primary,
     borderRadius: radius.full,
-    paddingVertical: spacing.md,
+    minHeight: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    },
-  dropdownItemLast: {
-    borderBottomWidth: 0,
-    },
+    ...shadows.sm,
+  },
 
   buttonDisabled: {
     opacity: 0.6,

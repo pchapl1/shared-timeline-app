@@ -6,7 +6,6 @@ import { useUnreadNotificationCount } from '@/hooks/useUnreadNotificationCount';
 import { useAuth } from '@/context/AuthContext';
 
 import { colors } from '@/theme/colors';
-import { radius } from '@/theme/radius';
 import { shadows } from '@/theme/shadows';
 
 export default function TabsLayout() {
@@ -27,60 +26,61 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          height: 84,
-          paddingTop: 8,
-          paddingBottom: 24,
-
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-
-          position: 'relative',
-          borderRadius: 0,
-          left: undefined,
-          right: undefined,
-          bottom: undefined,
-
-          ...shadows.sm,
-        },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSubtle,
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '700',
+        },
+        tabBarStyle: {
+          height: 86,
+          paddingTop: 8,
+          paddingBottom: 24,
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          ...shadows.sm,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Activity',
-          tabBarLabel: 'Activity',
+          title: 'Home',
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color }) => null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="timeline/index"
+        options={{
+          title: 'Timeline',
+          tabBarLabel: 'Timeline',
+          tabBarIcon: ({ color }) => null,
         }}
       />
 
       <Tabs.Screen
         name="circles/index"
         options={{
-          title: 'Circles',
-          tabBarLabel: 'Circles',
+          title: 'Create',
+          tabBarLabel: '+',
+          tabBarIcon: ({ color }) => null,
+        }}
+        listeners={{
+          tabPress: (event) => {
+            event.preventDefault();
+          },
         }}
       />
 
       <Tabs.Screen
-        name="notifications/index"
+        name="map/index"
         options={{
-          title: 'Notifications',
-          tabBarLabel: 'Notifications',
-          tabBarBadge:
-            unreadNotificationCount > 0
-              ? unreadNotificationCount
-              : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: colors.primary,
-            color: colors.textInverse,
-          },
+          title: 'Map',
+          tabBarLabel: 'Map',
+          tabBarIcon: ({ color }) => null,
         }}
       />
 
@@ -89,6 +89,18 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="notifications/index"
+        options={{
+          href: null,
+          tabBarBadge:
+            unreadNotificationCount > 0
+              ? unreadNotificationCount
+              : undefined,
         }}
       />
 

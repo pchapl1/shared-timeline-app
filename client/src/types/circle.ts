@@ -12,6 +12,8 @@ export type Circle = {
   name: string;
   circle_type: string;
   start_date: string;
+  avatar: string | null;
+  cover_photo: string | null;
   members: CircleMember[];
   member_count: number;
   memory_count: number;

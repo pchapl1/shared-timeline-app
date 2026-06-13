@@ -4,6 +4,7 @@ import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
+import { shadows } from '@/theme/shadows';
 
 export const circleTimelineStyles = StyleSheet.create({
   screen: {
@@ -24,36 +25,6 @@ export const circleTimelineStyles = StyleSheet.create({
   loading: {
     ...typography.body,
     color: colors.textMuted,
-  },
-
-  section: {
-    marginTop: 0,
-  },
-
-  timelineGroup: {
-    marginBottom: spacing.lg,
-  },
-
-  timelineGroupTitle: {
-    ...typography.caption,
-    color: colors.textSubtle,
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-  },
-
-  emptyCard: {
-    padding: spacing.xl,
-    borderRadius: radius.xl,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-  },
-
-  emptyText: {
-    ...typography.bodySmall,
-    color: colors.textMuted,
-    textAlign: 'center',
   },
 
   photoModal: {
@@ -85,5 +56,40 @@ export const circleTimelineStyles = StyleSheet.create({
     color: colors.textInverse,
     fontSize: 24,
     fontWeight: '700',
+  },
+
+  aboutCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.sm,
+  },
+
+  aboutText: {
+    ...typography.body,
+    color: colors.text,
+    lineHeight: 24,
+    marginBottom: spacing.xl,
+  },
+
+  aboutRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+
+  aboutLabel: {
+    ...typography.bodyStrong,
+    color: colors.text,
+  },
+
+  aboutValue: {
+    ...typography.body,
+    color: colors.textMuted,
   },
 });

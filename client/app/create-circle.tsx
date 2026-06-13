@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { AppScreen } from '@/components/ui/layout/AppScreen';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppText } from '@/components/ui/AppText';
+import { BackButton } from '@/components/ui/BackButton';
 
 import { api } from '@/services/api';
 
@@ -42,63 +43,52 @@ export default function CreateCircleScreen() {
       ?.label ?? 'Friends';
 
   function openCircleTypePicker() {
-    Alert.alert(
-      'Select Circle Type',
-      '',
-      [
-        {
-          text: 'Couple',
-          onPress: () => setCircleType('couple'),
-        },
-        {
-          text: 'Friends',
-          onPress: () => setCircleType('friends'),
-        },
-        {
-          text: 'Family',
-          onPress: () => setCircleType('family'),
-        },
-        {
-          text: 'Travel Group',
-          onPress: () => setCircleType('travel_group'),
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    Alert.alert('Select Circle Type', '', [
+      { text: 'Couple', onPress: () => setCircleType('couple') },
+      { text: 'Friends', onPress: () => setCircleType('friends') },
+      { text: 'Family', onPress: () => setCircleType('family') },
+      {
+        text: 'Travel Group',
+        onPress: () => setCircleType('travel_group'),
+      },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   }
 
   async function handleCreateCircle() {
-    const trimmedName = name.trim();
+  const trimmedName = name.trim();
 
-    if (!trimmedName) {
-      Alert.alert('Missing name', 'Please add a circle name.');
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      await api.post('/circles/', {
-        name: trimmedName,
-        circle_type: circleType,
-        start_date: startDate.toISOString().split('T')[0],
-      });
-
-      router.replace('/circles');
-    } catch (error: any) {
-      console.error(
-        'Create circle error:',
-        error.response?.data || error
-      );
-
-      Alert.alert('Error', 'Could not create circle.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  if (!trimmedName) {
+    Alert.alert('Missing name', 'Please add a circle name.');
+    return;
   }
+
+  try {
+    setIsSubmitting(true);
+
+    const response = await api.post('/circles/', {
+      name: trimmedName,
+      circle_type: circleType,
+      start_date: startDate.toISOString().split('T')[0],
+    });
+
+    router.replace({
+      pathname: '/circles/[id]/invite',
+      params: {
+        id: response.data.id.toString(),
+      },
+    });
+  } catch (error: any) {
+    console.error(
+      'Create circle error:',
+      error.response?.data || error
+    );
+
+    Alert.alert('Error', 'Could not create circle.');
+  } finally {
+    setIsSubmitting(false);
+  }
+}
 
   return (
     <AppScreen padded={false}>
@@ -108,15 +98,26 @@ export default function CreateCircleScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <TouchableOpacity
-            style={styles.backButton}
+          <BackButton
             onPress={() => router.back()}
-          >
-            <AppText variant="bodyStrong">← Back</AppText>
-          </TouchableOpacity>
+          />
+          <View style={styles.heroIcon}>
+            <AppText style={styles.heroEmoji}>✨</AppText>
+          </View>
 
           <View style={styles.header}>
-            <AppText variant="h1">Create Circle</AppText>
+            <AppText variant="h1" style={styles.title}>
+              Start a new Circle
+            </AppText>
+
+            <AppText
+              variant="body"
+              color={colors.textMuted}
+              style={styles.subtitle}
+            >
+              A circle is your shared space for memories, trips,
+              milestones, and the people who matter.
+            </AppText>
           </View>
 
           <AppCard style={styles.card}>
@@ -209,9 +210,7 @@ export default function CreateCircleScreen() {
             activeOpacity={0.85}
           >
             <AppText variant="bodyStrong" color={colors.textInverse}>
-              {isSubmitting
-                ? 'Creating Circle...'
-                : 'Create Circle'}
+              {isSubmitting ? 'Creating Circle...' : 'Create Circle'}
             </AppText>
           </TouchableOpacity>
         </View>

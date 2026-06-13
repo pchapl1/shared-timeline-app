@@ -9,7 +9,9 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image';
+import { buildCircleFormData } from '@/services/circles';
 import {
   router,
   useLocalSearchParams,
@@ -66,6 +68,35 @@ export default function EditCircleScreen() {
   const [showDatePicker, setShowDatePicker] =
     useState(false);
 
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [coverPhotoUri, setCoverPhotoUri] = useState<string | null>(null);
+
+  async function pickAvatar() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setAvatarUri(result.assets[0].uri);
+    }
+  }
+
+  async function pickCoverPhoto() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setCoverPhotoUri(result.assets[0].uri);
+    }
+  }
+
   useEffect(() => {
     if (!circle) {
       return;
@@ -90,18 +121,19 @@ export default function EditCircleScreen() {
     }
 
     try {
-      await updateCircleMutation.mutateAsync({
+      const formData = buildCircleFormData({
         name: trimmedName,
         circle_type: circleType,
-        start_date:
-          startDate.toISOString().split('T')[0],
+        start_date: startDate.toISOString().split('T')[0],
+        avatarUri,
+        coverPhotoUri,
       });
+
+      await updateCircleMutation.mutateAsync(formData);
 
       router.replace(`/circles/${id}`);
     } catch (error: any) {
-      console.error(
-        error.response?.data || error
-      );
+      console.error(error.response?.data || error);
 
       Alert.alert(
         'Error',
@@ -179,6 +211,69 @@ export default function EditCircleScreen() {
       <Text style={styles.title}>
         Edit Circle
       </Text>
+      <Text style={styles.label}>
+        Cover Photo
+      </Text>
+
+      {coverPhotoUri && (
+        <Image
+          source={{ uri: coverPhotoUri }}
+          style={{
+            width: '100%',
+            height: 160,
+            borderRadius: 16,
+            marginBottom: 12,
+          }}
+          contentFit="cover"
+        />
+      )}
+
+      <TouchableOpacity
+        style={styles.imageButton}
+        onPress={pickCoverPhoto}
+      >
+        <Text>
+          {coverPhotoUri
+            ? 'Change Cover Photo'
+            : 'Select Cover Photo'}
+        </Text>
+      </TouchableOpacity>
+
+      <Text
+        style={[
+          styles.label,
+          {
+            marginTop: 24,
+          },
+        ]}
+      >
+        Avatar
+      </Text>
+
+      {avatarUri && (
+        <Image
+          source={{ uri: avatarUri }}
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            marginBottom: 12,
+            alignSelf: 'center',
+          }}
+          contentFit="cover"
+        />
+      )}
+
+      <TouchableOpacity
+        style={styles.imageButton}
+        onPress={pickAvatar}
+      >
+        <Text>
+          {avatarUri
+            ? 'Change Avatar'
+            : 'Select Avatar'}
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.label}>
         Circle Name

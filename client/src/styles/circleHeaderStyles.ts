@@ -7,86 +7,104 @@ import { spacing } from '@/theme/spacing';
 
 export const circleHeaderStyles = StyleSheet.create({
   container: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
+  },
+
+  cover: {
+    height: 240,
+    marginHorizontal: -24,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    overflow: 'hidden',
+    backgroundColor: colors.primary,
+  },
+  coverImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+
+  coverOverlay: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: 52,
   },
 
   topActions: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 50,
-    marginBottom: spacing.sm,
-    },
-
-  manageLink: {
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.sm,
-    },
-
-
-  card: {
-    padding: 0,
-    overflow: 'hidden',
-  },
-
-  hero: {
-    padding: spacing.lg,
-    backgroundColor: colors.primarySoft,
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
   },
 
-  avatar: {
-    width: 56,
-    height: 56,
+  topIconButton: {
+    width: 40,
+    height: 40,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  profileCard: {
+    marginTop: -24,
+    marginHorizontal: 0,
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: 44,
+    paddingBottom: spacing.sm,
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
+  },
+
+  avatarWrap: {
+    position: 'absolute',
+    top: -48,
+    alignSelf: 'center',
+    marginBottom: 0,
+  },
+
+  mainAvatar: {
+    ...shadows.md,
+  },
+
+  mainAvatarImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     borderWidth: 4,
     borderColor: colors.surface,
-    },
-
-  titleBlock: {
-    flex: 1,
   },
 
-  typeBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    marginTop: spacing.xs,
+  title: {
+    textAlign: 'center',
+    marginBottom: 2,
   },
 
-  body: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-  },
-
-  stats: {
+  memberCount: {
     marginBottom: spacing.sm,
   },
 
-  manageButtonContainer: {
-    alignItems: 'center',
+  avatarStack: {
+    marginBottom: 16,
   },
 
-  manageButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+  actionsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: spacing.md,
+  },
+
+  actionItem: {
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 
   tabs: {
-    marginTop: spacing.sm,
+    width: '100%',
+    marginTop: 2,
+    backgroundColor: colors.surface,
   },
 
   compactContainer: {
@@ -104,5 +122,20 @@ export const circleHeaderStyles = StyleSheet.create({
   compactTitle: {
     flex: 1,
     textAlign: 'right',
+  },
+
+  cameraButton: {
+    position: 'absolute',
+    right: -6,
+    bottom: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
   },
 });

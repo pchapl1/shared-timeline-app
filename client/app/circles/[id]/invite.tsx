@@ -12,6 +12,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { AppScreen } from '@/components/ui/layout/AppScreen';
 import { AppText } from '@/components/ui/AppText';
+import { BackButton } from '@/components/ui/BackButton';
+import { OnboardingProgress } from '@/components/ui/OnboardingProgress';
 
 import {
   createCircleInvite,
@@ -36,29 +38,46 @@ export default function InviteMemberScreen() {
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<UserSearchResult[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [invitedUsers, setInvitedUsers] = useState<UserSearchResult[]>([]);
+  const [submittingUserId, setSubmittingUserId] =
+    useState<number | null>(null);
 
-  async function handleInvite(userId: number) {
-    if (isLoading || !tokens || !id) {
+
+  function goToCircle() {
+    if (!id) {
+      return;
+    }
+
+    router.replace({
+      pathname: '/circles/[id]',
+      params: {
+        id: id.toString(),
+      },
+    });
+  }
+
+  async function handleInvite(user: UserSearchResult) {
+    const alreadyInvited = invitedUsers.some(
+      (invitedUser) => invitedUser.id === user.id
+    );
+
+    if (isLoading || !tokens || !id || alreadyInvited) {
       return;
     }
 
     try {
-      setIsSubmitting(true);
+      setSubmittingUserId(user.id);
 
-      await createCircleInvite(Number(id), userId);
+      await createCircleInvite(Number(id), user.id);
 
-      Alert.alert(
-        'Invite sent',
-        'The invite was created successfully.'
-      );
+      setInvitedUsers((currentUsers) => [
+        ...currentUsers,
+        user,
+      ]);
 
-      router.push({
-        pathname: '/circles/[id]',
-        params: {
-          id: id.toString(),
-        },
-      });
+      setQuery('');
+      setResults([]);
+      
     } catch (error: any) {
       console.error(
         'Error creating invite:',
@@ -67,11 +86,10 @@ export default function InviteMemberScreen() {
 
       Alert.alert(
         'Invite not sent',
-        error.response?.data?.error ||
-          'Could not send invite.'
+        error.response?.data?.error || 'Could not send invite.'
       );
     } finally {
-      setIsSubmitting(false);
+      setSubmittingUserId(null);
     }
   }
 
@@ -118,86 +136,194 @@ export default function InviteMemberScreen() {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         ListHeaderComponent={
-          <View style={styles.content}>
+          <>
+            <View style={styles.content}>
+              <BackButton onPress={goToCircle} />
+
+              <OnboardingProgress
+                currentStep={2}
+                steps={[
+                  { label: 'Circle' },
+                  { label: 'Invite' },
+                  { label: 'Done' },
+                ]}
+              />
+
+              <View style={styles.heroIcon}>
+                <AppText style={styles.heroEmoji}>✨</AppText>
+              </View>
+
+
+              <View style={styles.header}>
+                <AppText variant="h1" style={styles.title}>
+                  Invite people
+                </AppText>
+
+                <AppText
+                  variant="body"
+                  color={colors.textMuted}
+                  style={styles.subtitle}
+                >
+                  Start building your circle by inviting friends,
+                  family, or anyone sharing this timeline.
+                </AppText>
+              </View>
+            </View>
+
+            <View style={styles.searchCard}>
+              <AppText variant="caption" color={colors.textMuted}>
+                Search Users
+              </AppText>
+
+              <TextInput
+                style={styles.input}
+                value={query}
+                onChangeText={handleSearch}
+                placeholder="Search username or email"
+                placeholderTextColor={colors.textSubtle}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            {query.length >= 2 && results.length > 0 ? (
+              <View style={styles.resultsHeader}>
+                <AppText variant="caption" color={colors.textMuted}>
+                  Results
+                </AppText>
+              </View>
+            ) : null}
+          </>
+        }
+        renderItem={({ item }) => {
+          const isInvited = invitedUsers.some(
+            (user) => user.id === item.id
+          );
+          const isSubmitting = submittingUserId === item.id;
+
+          return (
             <TouchableOpacity
-              style={styles.backButton}
-              onPress={() =>
-                router.push({
-                  pathname: '/circles/[id]',
-                  params: {
-                    id: id?.toString(),
-                  },
-                })
-              }
+              style={[
+                styles.userCard,
+                isSubmitting && styles.cardDisabled,
+              ]}
+              onPress={() => handleInvite(item)}
+              disabled={isSubmitting || isInvited}
+              activeOpacity={0.85}
             >
-              <AppText variant="bodyStrong">← Back</AppText>
+              <View style={styles.avatar}>
+                <AppText variant="bodyStrong" color={colors.primary}>
+                  {item.username.charAt(0).toUpperCase()}
+                </AppText>
+              </View>
+
+              <View style={styles.userInfo}>
+                <AppText variant="bodyStrong">
+                  {item.username}
+                </AppText>
+
+                <AppText variant="bodySmall" color={colors.textMuted}>
+                  {item.email}
+                </AppText>
+              </View>
+
+              <View
+                style={
+                  isInvited
+                    ? styles.invitedPill
+                    : styles.invitePill
+                }
+              >
+                <AppText
+                  variant="caption"
+                  color={
+                    isInvited ? colors.textMuted : colors.primary
+                  }
+                >
+                  {isInvited
+                    ? 'Invited ✓'
+                    : isSubmitting
+                      ? 'Sending...'
+                      : 'Invite'}
+                </AppText>
+              </View>
             </TouchableOpacity>
-
-            <View style={styles.header}>
-              <AppText variant="h1">Invite Member</AppText>
-
+          );
+        }}
+        ListEmptyComponent={
+          query.length >= 2 ? (
+            <View style={styles.emptyContainer}>
               <AppText
                 variant="bodySmall"
                 color={colors.textMuted}
-                style={styles.subtitle}
+                style={{ textAlign: 'center' }}
               >
-                Search for a user and invite them into this circle.
+                No users found.
               </AppText>
             </View>
-
-            <TextInput
-              style={styles.input}
-              value={query}
-              onChangeText={handleSearch}
-              placeholder="Search username or email"
-              placeholderTextColor={colors.textSubtle}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <View style={styles.divider} />
-          </View>
+          ) : null
         }
-        renderItem={({ item }) => (
+        ListFooterComponent={
+        <View style={styles.footer}>
+
+          {invitedUsers.length > 0 && (
+            <View style={styles.invitedSection}>
+              <AppText
+                variant="caption"
+                color={colors.textMuted}
+              >
+                INVITED ({invitedUsers.length})
+              </AppText>
+
+
+
+
+              {invitedUsers.map((user) => (
+                <View key={user.id} style={styles.invitedRow}>
+                  <View style={styles.invitedAvatar}>
+                    <AppText variant="caption" color={colors.primary}>
+                      {user.username.charAt(0).toUpperCase()}
+                    </AppText>
+                  </View>
+
+                  <AppText variant="bodyStrong" style={styles.invitedName}>
+                    {user.username}
+                  </AppText>
+                </View>
+              ))}
+
+
+
+            </View>
+          )}
+
           <TouchableOpacity
-            style={[
-              styles.userCard,
-              isSubmitting && styles.cardDisabled,
-            ]}
-            onPress={() => handleInvite(item.id)}
-            disabled={isSubmitting}
-            activeOpacity={0.85}
+            onPress={goToCircle}
           >
-            <View style={styles.avatar}>
-              <AppText variant="bodyStrong" color={colors.primary}>
-                {item.username.charAt(0).toUpperCase()}
-              </AppText>
-            </View>
-
-            <View style={styles.userInfo}>
-              <AppText variant="bodyStrong">
-                {item.username}
-              </AppText>
-
-              <AppText variant="bodySmall" color={colors.textMuted}>
-                {item.email}
-              </AppText>
-            </View>
-
-            <AppText variant="bodySmall" color={colors.primary}>
-              Invite
+            <AppText
+              variant="bodySmall"
+              color={colors.textMuted}
+              style={styles.skipText}
+            >
+              Skip for now
             </AppText>
           </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <AppText variant="bodySmall" color={colors.textMuted}>
-              {query.length >= 2
-                ? 'No users found.'
-                : '🔍 Search for a username or email'}
+
+          <TouchableOpacity
+            style={styles.continueButton}
+            onPress={goToCircle}
+            activeOpacity={0.85}
+          >
+            <AppText
+              variant="bodyStrong"
+              color={colors.textInverse}
+            >
+              Continue to Circle
             </AppText>
-          </View>
-        }
+          </TouchableOpacity>
+
+        </View>
+      }
       />
     </AppScreen>
   );

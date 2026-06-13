@@ -13,11 +13,13 @@ from .serializers import (
     CircleInviteSerializer,
 )
 from notifications.services import create_notification
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 class CircleViewSet(viewsets.ModelViewSet):
     serializer_class = CircleSerializer
-
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
     def get_queryset(self):
         queryset = Circle.objects.filter(
             members__user=self.request.user

@@ -21,6 +21,18 @@ class Circle(models.Model):
 
     is_archived = models.BooleanField(default=False)
 
+    avatar = models.ImageField(
+        upload_to='circles/avatars/',
+        null=True,
+        blank=True
+    )
+
+    cover_photo = models.ImageField(
+        upload_to='circles/covers/',
+        null=True,
+        blank=True
+    )
+
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -1,0 +1,7 @@
+===== app/circles/[id]/index.tsx =====
+
+
+===== src/styles/circleTimelineStyles.ts =====
+
+
+===== src/components/circles =====

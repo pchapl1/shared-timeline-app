@@ -69,6 +69,8 @@ class CircleSerializer(serializers.ModelSerializer):
             'name',
             'circle_type',
             'start_date',
+            'avatar',
+            'cover_photo',
             'members',
             'invites',
             'member_count',

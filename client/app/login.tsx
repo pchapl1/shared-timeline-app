@@ -1,15 +1,20 @@
 import { useState } from 'react';
-import { router } from 'expo-router';
 
 import {
-  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  View,
 } from 'react-native';
 
+import { router } from 'expo-router';
+
 import { useAuth } from '@/context/AuthContext';
+
+import { loginStyles as styles } from '@/styles/loginStyles';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -34,95 +39,76 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-
-      <TextInput
-        placeholder="Username"
-        placeholderTextColor="#94a3b8"
-        style={styles.input}
-        autoCapitalize="none"
-        value={username}
-        onChangeText={setUsername}
-      />
-
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#94a3b8"
-        style={styles.input}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+        <View style={styles.hero}>
+          <View style={styles.logoBubble}>
+            <Text style={styles.logoText}>✨</Text>
+          </View>
 
-      <TouchableOpacity
-        onPress={() => router.push('/register')}
-      >
-        <Text style={styles.registerText}>
-          Need an account? Register
-        </Text>
-      </TouchableOpacity>
+          <Text style={styles.title}>Timeline</Text>
 
-      {message ? (
-        <Text style={styles.message}>{message}</Text>
-      ) : null}
-    </View>
+          <Text style={styles.subtitle}>
+            Capture life. Together.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.label}>USERNAME</Text>
+
+          <TextInput
+            placeholder="philchaplin"
+            placeholderTextColor="#94A3B8"
+            style={styles.input}
+            autoCapitalize="none"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <Text style={styles.label}>PASSWORD</Text>
+
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#94A3B8"
+            style={styles.input}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.buttonText}>Log In</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.switchButton}
+            onPress={() => router.push('/register')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.switchText}>
+              New here?{' '}
+              <Text style={styles.switchTextStrong}>
+                Create an account
+              </Text>
+            </Text>
+          </TouchableOpacity>
+
+          {message ? (
+            <Text style={styles.message}>{message}</Text>
+          ) : null}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#0f172a',
-  },
-
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 32,
-  },
-
-  input: {
-    backgroundColor: '#1e293b',
-    color: '#ffffff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-
-  button: {
-    backgroundColor: '#2563eb',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  registerText: {
-    color: '#93c5fd',
-    marginTop: 18,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-
-  message: {
-    color: '#f97316',
-    marginTop: 12,
-    textAlign: 'center',
-  },
-});

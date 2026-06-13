@@ -72,11 +72,10 @@ export const tripDetailStyles = StyleSheet.create({
 
   tripActions: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.sm,
-    marginTop: spacing.sm,
-    marginBottom: spacing.xl,
-    },
+    marginTop: spacing.xs,
+    marginBottom: spacing.lg,
+  },
 
   inlineActionButton: {
     backgroundColor: colors.primarySoft,
@@ -98,6 +97,10 @@ export const tripDetailStyles = StyleSheet.create({
 
   description: {
     lineHeight: 26,
+  },
+
+  descriptionCard: {
+    paddingVertical: spacing.md,
   },
 
   emptyMemories: {
