@@ -67,16 +67,16 @@ export const timelineMemoryRowStyles = StyleSheet.create({
     marginTop: 2,
   },
 
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
-  },
+thumbnail: {
+  width: 72,
+  height: 72,
+  borderRadius: radius.md,
+  backgroundColor: colors.surfaceMuted,
+},
 
-  thumbnailWrapper: {
-  width: 80,
-  height: 80,
+thumbnailWrapper: {
+  width: 72,
+  height: 72,
   borderRadius: radius.md,
   overflow: 'hidden',
   backgroundColor: colors.surfaceMuted,
@@ -100,4 +100,10 @@ photoCountText: {
   fontSize: 14,
   fontWeight: '800',
 },
+
+metaText: {
+  marginTop: spacing.xs,
+  opacity: 0.60,
+},
+
 });

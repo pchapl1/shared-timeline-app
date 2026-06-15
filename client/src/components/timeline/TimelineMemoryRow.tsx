@@ -11,15 +11,21 @@ import type { Memory } from '@/types/memory';
 
 type Props = {
   memory: Memory;
+  circleName?: string;
   onPress: (memory: Memory) => void;
 };
 
-export function TimelineMemoryRow({ memory, onPress }: Props) {
+export function TimelineMemoryRow({ memory, circleName, onPress }: Props) {
   const photos = memory.photos?.length
     ? memory.photos.map((photo) => photo.image)
     : memory.photo
       ? [memory.photo]
       : [];
+
+  const shortCircleName =
+    circleName && circleName.length > 18
+      ? `${circleName.slice(0, 18)}...`
+      : circleName;
 
   return (
     <TouchableOpacity
@@ -58,6 +64,18 @@ export function TimelineMemoryRow({ memory, onPress }: Props) {
                   numberOfLines={1}
                 >
                   {memory.location_name.split(',')[0]}
+                </AppText>
+              )}
+
+              {(memory.created_by?.username || circleName) && (
+                <AppText
+                  variant="caption"
+                  color={colors.textSubtle}
+                  style={styles.metaText}
+                  numberOfLines={1}
+                >
+                  {memory.created_by?.username ?? 'Someone'}
+                  {shortCircleName ? ` · ${shortCircleName}` : ''}
                 </AppText>
               )}
             </View>

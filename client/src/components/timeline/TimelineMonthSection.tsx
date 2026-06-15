@@ -10,11 +10,13 @@ import type { TimelineMonth } from '@/types/timeline';
 
 type Props = {
   month: TimelineMonth;
+  circleNameById: Record<number, string>;
   onMemoryPress: (memory: Memory) => void;
 };
 
 export function TimelineMonthSection({
   month,
+  circleNameById,
   onMemoryPress,
 }: Props) {
   return (
@@ -27,6 +29,7 @@ export function TimelineMonthSection({
         <TimelineMemoryRow
           key={memory.id}
           memory={memory}
+          circleName={circleNameById[memory.circle]}
           onPress={onMemoryPress}
         />
       ))}

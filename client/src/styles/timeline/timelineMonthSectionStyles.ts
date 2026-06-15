@@ -9,7 +9,7 @@ export const timelineMonthSectionStyles = StyleSheet.create({
   },
 
   monthLabel: {
-    marginBottom: spacing.md,
+    marginBottom: 24,
     color: colors.text,
   },
 });
