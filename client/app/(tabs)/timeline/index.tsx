@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
+import { TimelineFilterPanel } from '@/components/timeline/TimelineFilterPanel';
 import { TimelineHeader } from '@/components/timeline/TimelineHeader';
 import { TimelineMonthSection } from '@/components/timeline/TimelineMonthSection';
 import { TimelineSearchBar } from '@/components/timeline/TimeLineSearchBar';
@@ -15,8 +16,10 @@ import { colors } from '@/theme/colors';
 import { timelineScreenStyles as styles } from '@/styles/timeline/timelineScreenStyles';
 
 import { groupMemoriesByMonth } from '@/utils/timeline/groupMemoriesByMonth';
+import { getMemoryImage } from '@/utils/timeline/getMemoryImage';
 
 import type { Memory } from '@/types/memory';
+import type { TimelinePhotoFilter } from '@/components/timeline/TimelineFilterPanel';
 
 function memoryMatchesSearch(
   memory: Memory,
@@ -42,9 +45,37 @@ function memoryMatchesSearch(
   return searchableText.includes(normalizedQuery);
 }
 
+function memoryMatchesPhotoFilter(
+  memory: Memory,
+  photoFilter: TimelinePhotoFilter
+) {
+  if (photoFilter === 'all') {
+    return true;
+  }
+
+  return Boolean(getMemoryImage(memory));
+}
+
+function memoryMatchesCircleFilter(
+  memory: Memory,
+  selectedCircleId: number | null
+) {
+  if (selectedCircleId === null) {
+    return true;
+  }
+
+  return memory.circle === selectedCircleId;
+}
+
 export default function TimelineScreen() {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [photoFilter, setPhotoFilter] =
+    useState<TimelinePhotoFilter>('all');
+  const [selectedCircleId, setSelectedCircleId] =
+    useState<number | null>(null);
 
   const { data: memories = [], isLoading: isMemoriesLoading } =
     useMemories();
@@ -63,14 +94,22 @@ export default function TimelineScreen() {
   }, [circles]);
 
   const filteredMemories = useMemo(() => {
-    return memories.filter((memory) =>
-      memoryMatchesSearch(
-        memory,
-        searchQuery,
-        circleNameById[memory.circle]
-      )
-    );
-  }, [memories, searchQuery, circleNameById]);
+    return memories.filter((memory) => {
+      const circleName = circleNameById[memory.circle];
+
+      return (
+        memoryMatchesSearch(memory, searchQuery, circleName) &&
+        memoryMatchesPhotoFilter(memory, photoFilter) &&
+        memoryMatchesCircleFilter(memory, selectedCircleId)
+      );
+    });
+  }, [
+    memories,
+    searchQuery,
+    circleNameById,
+    photoFilter,
+    selectedCircleId,
+  ]);
 
   const timelineMonths = useMemo(
     () => groupMemoriesByMonth(filteredMemories),
@@ -91,9 +130,16 @@ export default function TimelineScreen() {
     setIsSearchVisible((current) => !current);
   }
 
+  function handleFilterPress() {
+    setIsFilterVisible((current) => !current);
+  }
+
   function handleClearSearch() {
     setSearchQuery('');
   }
+
+  const hasActiveFilters =
+    photoFilter !== 'all' || selectedCircleId !== null;
 
   if (isMemoriesLoading || isCirclesLoading) {
     return (
@@ -115,7 +161,7 @@ export default function TimelineScreen() {
     <View style={styles.container}>
       <TimelineHeader
         onSearchPress={handleSearchPress}
-        onFilterPress={() => {}}
+        onFilterPress={handleFilterPress}
       />
 
       {isSearchVisible && (
@@ -126,6 +172,16 @@ export default function TimelineScreen() {
         />
       )}
 
+      {isFilterVisible && (
+        <TimelineFilterPanel
+          photoFilter={photoFilter}
+          selectedCircleId={selectedCircleId}
+          circles={circles}
+          onChangePhotoFilter={setPhotoFilter}
+          onChangeCircleFilter={setSelectedCircleId}
+        />
+      )}
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -133,7 +189,9 @@ export default function TimelineScreen() {
         {timelineMonths.length === 0 ? (
           <View style={styles.emptyCard}>
             <AppText variant="bodyStrong">
-              {searchQuery ? 'No memories found.' : 'No memories yet.'}
+              {searchQuery || hasActiveFilters
+                ? 'No memories found.'
+                : 'No memories yet.'}
             </AppText>
 
             <AppText
@@ -141,8 +199,8 @@ export default function TimelineScreen() {
               color={colors.textMuted}
               style={styles.subtitle}
             >
-              {searchQuery
-                ? 'Try searching for a title, place, person, or circle.'
+              {searchQuery || hasActiveFilters
+                ? 'Try changing your search or filters.'
                 : 'Add your first memory to start building your timeline.'}
             </AppText>
           </View>
