@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
 
 import { useLocalSearchParams } from 'expo-router';
@@ -9,7 +10,6 @@ import { useAuth } from '@/context/AuthContext';
 
 import { colors } from '@/theme/colors';
 import { circleTimelineStyles as styles } from '@/styles/circleTimelineStyles';
-import { useEffect } from 'react';
 
 function formatCircleType(circleType?: string) {
   if (!circleType) {
@@ -44,6 +44,17 @@ export default function CircleDetailScreen() {
     refetch: refetchCircle,
   } = useCircle(id);
 
+  useEffect(() => {
+    if (!circle) {
+      return;
+    }
+
+    console.log('circle images:', {
+      cover_photo: circle.cover_photo,
+      avatar: circle.avatar,
+    });
+  }, [circle]);
+
   if (authLoading || isCircleLoading || !tokens || !circle) {
     return (
       <View style={styles.screen}>
@@ -53,12 +64,7 @@ export default function CircleDetailScreen() {
       </View>
     );
   }
-  useEffect(() => {
-    console.log('circle images:', {
-      cover_photo: circle?.cover_photo,
-      avatar: circle?.avatar,
-    });
-  }, [circle]);
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -96,17 +102,23 @@ export default function CircleDetailScreen() {
 
           <View style={styles.aboutRow}>
             <Text style={styles.aboutLabel}>Members</Text>
-            <Text style={styles.aboutValue}>{circle.member_count}</Text>
+            <Text style={styles.aboutValue}>
+              {circle.member_count}
+            </Text>
           </View>
 
           <View style={styles.aboutRow}>
             <Text style={styles.aboutLabel}>Memories</Text>
-            <Text style={styles.aboutValue}>{circle.memory_count}</Text>
+            <Text style={styles.aboutValue}>
+              {circle.memory_count}
+            </Text>
           </View>
 
           <View style={styles.aboutRow}>
             <Text style={styles.aboutLabel}>Trips</Text>
-            <Text style={styles.aboutValue}>{circle.trip_count}</Text>
+            <Text style={styles.aboutValue}>
+              {circle.trip_count}
+            </Text>
           </View>
         </View>
       </ScrollView>
