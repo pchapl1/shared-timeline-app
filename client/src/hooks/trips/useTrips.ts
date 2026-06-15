@@ -2,10 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getTrips } from '@/services/trips';
 
-export function useTrips(circleId: number) {
+export function useTrips(circleId?: number) {
   return useQuery({
-    queryKey: ['trips', circleId],
+    queryKey: circleId ? ['trips', circleId] : ['trips'],
     queryFn: () => getTrips(circleId),
-    enabled: !!circleId,
   });
 }

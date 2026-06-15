@@ -1,15 +1,11 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+
+import { SharedMap } from '@/components/maps/SharedMap';
 
 export default function MapScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      <Text>Map</Text>
+    <View style={{ flex: 1 }}>
+      <SharedMap />
     </View>
   );
 }

@@ -1,8 +1,9 @@
 import { api } from './api';
 
-import type { Trip } from '@/types/trip';
-
-import type { UpdateTripPayload } from '@/types/trip';
+import type {
+  Trip,
+  UpdateTripPayload,
+} from '@/types/trip';
 
 type PaginatedTripsResponse = {
   count: number;
@@ -11,12 +12,26 @@ type PaginatedTripsResponse = {
   results: Trip[];
 };
 
-export async function getTrips(circleId: number) {
-  const response = await api.get<PaginatedTripsResponse>(
+function normalizeTrips(response: Trip[] | PaginatedTripsResponse) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  return response.results;
+}
+
+export async function getTrips(circleId?: number) {
+  const response = await api.get<Trip[] | PaginatedTripsResponse>(
     '/trips/'
   );
 
-  return response.data.results.filter(
+  const trips = normalizeTrips(response.data);
+
+  if (!circleId) {
+    return trips;
+  }
+
+  return trips.filter(
     (trip) => Number(trip.circle) === Number(circleId)
   );
 }

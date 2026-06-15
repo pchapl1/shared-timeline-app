@@ -27,7 +27,7 @@ export const bottomTabBarStyles = StyleSheet.create({
 
   tabItem: {
     flex: 1,
-    height: 60,
+    height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,

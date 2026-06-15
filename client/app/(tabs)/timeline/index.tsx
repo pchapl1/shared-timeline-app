@@ -7,7 +7,7 @@ import { AppText } from '@/components/ui/AppText';
 import { TimelineFilterPanel } from '@/components/timeline/TimelineFilterPanel';
 import { TimelineHeader } from '@/components/timeline/TimelineHeader';
 import { TimelineMonthSection } from '@/components/timeline/TimelineMonthSection';
-import { TimelineSearchBar } from '@/components/timeline/TimeLineSearchBar';
+import { TimelineSearchBar } from '@/components/timeline/TimelineSearchBar';
 
 import { useMemories } from '@/hooks/memories/useMemories';
 import { useCircles } from '@/hooks/circles/useCircles';
