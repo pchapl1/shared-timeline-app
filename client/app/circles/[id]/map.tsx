@@ -9,7 +9,7 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { useCircle } from '@/hooks/circles/useCircle';
 import { useCircleMapMemories } from '@/hooks/useCircleMapMemories';
 
-import { circleMapStyles as styles } from '@/styles/circleMapStyles';
+import { circleMapStyles as styles } from '@/styles/circles/circleMapStyles';
 
 export default function CircleMapScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

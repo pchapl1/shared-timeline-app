@@ -1,68 +1,113 @@
 import { useState } from 'react';
+import { Alert, ScrollView, View } from 'react-native';
 
-import {
-  Alert,
-  Platform,
-  Pressable,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { AppScreen } from '@/components/ui/layout/AppScreen';
-import { AppCard } from '@/components/ui/AppCard';
-import { AppText } from '@/components/ui/AppText';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { LocationSearch } from '@/components/search/LocationSearch';
+import { BackButton } from '@/components/ui/BackButton';
+
+import { CreationFooter } from '@/components/creation/CreationFooter';
+import { CreationHeader } from '@/components/creation/CreationHeader';
+import { CreationProgress } from '@/components/creation/CreationProgress';
+import { CreationSuccess } from '@/components/creation/CreationSuccess';
+
+import { CreateTripDestinationStep } from '@/components/trips/create/CreateTripDestinationStep';
+import { CreateTripDatesStep } from '@/components/trips/create/CreateTripDatesStep';
+import { CreateTripReviewStep } from '@/components/trips/create/CreateTripReviewStep';
+import { CreateTripSuccessStep } from '@/components/trips/create/CreateTripSuccessStep';
 
 import { useCreateTrip } from '@/hooks/trips/useCreateTrip';
 
-import { colors } from '@/theme/colors';
-import { addTripStyles as styles } from '@/styles/addTripStyles';
+import { creationFlowStyles as styles } from '@/styles/creation/creationFlowStyles';
+
+const steps = [
+  { label: 'Destination' },
+  { label: 'Dates' },
+  { label: 'Review' },
+  { label: 'Created' },
+];
+
+type WizardStep = 1 | 2 | 3 | 4;
 
 export default function AddTripScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-
   const circleId = Number(id);
+
+  const [currentStep, setCurrentStep] = useState<WizardStep>(1);
+  const [createdTripId, setCreatedTripId] = useState<number | null>(
+    null
+  );
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [showStartDatePicker, setShowStartDatePicker] =
-    useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] =
-    useState(false);
+
   const [destinationName, setDestinationName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  const [showStartDatePicker, setShowStartDatePicker] =
+    useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] =
+    useState(false);
+
   const createTripMutation = useCreateTrip(circleId);
 
-  async function handleCreateTrip() {
-    const trimmedTitle = title.trim();
-
-    if (!trimmedTitle) {
-      Alert.alert('Missing title', 'Please add a trip title.');
+  function goBackStep() {
+    if (currentStep === 1) {
+      router.back();
       return;
     }
 
+    setCurrentStep((step) => (step - 1) as WizardStep);
+  }
+
+  function validateDestinationStep() {
+    if (!title.trim()) {
+      Alert.alert('Missing trip name', 'Please add a trip name.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateDatesStep() {
     if (endDate && endDate < startDate) {
       Alert.alert(
         'Invalid dates',
         'End date cannot be before start date.'
       );
+      return false;
+    }
+
+    return true;
+  }
+
+  function handleNext() {
+    if (currentStep === 1 && !validateDestinationStep()) {
+      return;
+    }
+
+    if (currentStep === 2 && !validateDatesStep()) {
+      return;
+    }
+
+    if (currentStep < 3) {
+      setCurrentStep((step) => (step + 1) as WizardStep);
+    }
+  }
+
+  async function handleCreateTrip() {
+    if (!validateDestinationStep() || !validateDatesStep()) {
       return;
     }
 
     try {
-      await createTripMutation.mutateAsync({
+      const createdTrip = await createTripMutation.mutateAsync({
         circle: circleId,
-        title: trimmedTitle,
+        title: title.trim(),
         description,
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate
@@ -73,10 +118,8 @@ export default function AddTripScreen() {
         longitude: longitude || undefined,
       });
 
-      router.replace({
-        pathname: '/circles/[id]/trips',
-        params: { id },
-      });
+      setCreatedTripId(createdTrip.id);
+      setCurrentStep(4);
     } catch (error: any) {
       console.error(
         'Create trip error:',
@@ -87,6 +130,28 @@ export default function AddTripScreen() {
     }
   }
 
+  function goToTrips() {
+    router.replace({
+      pathname: '/circles/[id]/trips',
+      params: { id },
+    });
+  }
+
+  function goToTripDetail() {
+    if (!createdTripId) {
+      goToTrips();
+      return;
+    }
+
+    router.replace({
+      pathname: '/circles/[id]/trips/[tripId]',
+      params: {
+        id,
+        tripId: String(createdTripId),
+      },
+    });
+  }
+
   return (
     <AppScreen padded={false}>
       <ScrollView
@@ -95,200 +160,104 @@ export default function AddTripScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <AppText variant="bodyStrong">← Back</AppText>
-          </TouchableOpacity>
+          {currentStep !== 4 && <BackButton onPress={goBackStep} />}
 
-          <View style={styles.header}>
-            <AppText variant="h1">Add Trip</AppText>
+          { currentStep !== 4 && (<CreationHeader title="Create Trip"/>)}
+                    
+          {currentStep !== 4 && (
+            <CreationProgress
+              steps={steps}
+              currentStep={currentStep}
+            />
+          )}
 
-            <AppText
-              variant="bodySmall"
-              color={colors.textMuted}
-              style={styles.subtitle}
+          {currentStep === 1 && (
+            <>
+              <CreationHeader
+                title="Where are you going?"
+                subtitle="Destination"
+              />
+
+              <CreateTripDestinationStep
+                title={title}
+                description={description}
+                destinationName={destinationName}
+                latitude={latitude}
+                longitude={longitude}
+                onTitleChange={setTitle}
+                onDescriptionChange={setDescription}
+                onDestinationNameChange={setDestinationName}
+                onLatitudeChange={setLatitude}
+                onLongitudeChange={setLongitude}
+              />
+
+              <CreationFooter
+                primaryLabel="Continue"
+                onPrimaryPress={handleNext}
+              />
+            </>
+          )}
+
+          {currentStep === 2 && (
+            <>
+              <CreationHeader
+                title="When are you traveling?"
+                subtitle="Choose your trip dates."
+              />
+
+              <CreateTripDatesStep
+                startDate={startDate}
+                endDate={endDate}
+                showStartDatePicker={showStartDatePicker}
+                showEndDatePicker={showEndDatePicker}
+                setShowStartDatePicker={setShowStartDatePicker}
+                setShowEndDatePicker={setShowEndDatePicker}
+                setStartDate={setStartDate}
+                setEndDate={setEndDate}
+              />
+
+              <CreationFooter
+                secondaryLabel="Back"
+                onSecondaryPress={goBackStep}
+                primaryLabel="Review"
+                onPrimaryPress={handleNext}
+              />
+            </>
+          )}
+
+          {currentStep === 3 && (
+          <>
+            <CreationHeader title="Ready to create?" />
+
+            <CreateTripReviewStep
+              title={title}
+              description={description}
+              destinationName={destinationName}
+              startDate={startDate}
+              endDate={endDate}
+            />
+
+            <CreationFooter
+              secondaryLabel="Back"
+              onSecondaryPress={goBackStep}
+              primaryLabel="Create Trip"
+              onPrimaryPress={handleCreateTrip}
+              isLoading={createTripMutation.isPending}
+            />
+          </>
+        )}
+
+          {currentStep === 4 && (
+            <CreationSuccess
+              title="Trip Created"
+              primaryLabel="Go to Trip"
+              onPrimaryPress={goToTripDetail}
+              secondaryLabel="View All Trips"
+              onSecondaryPress={goToTrips}
             >
-              Plan a trip and connect memories to it later.
-            </AppText>
-          </View>
-
-          <AppCard style={styles.card}>
-            <SectionHeader
-              title="Trip details"
-              subtitle="Give this trip a name, dates, and a short description."
-            />
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Trip Title
-            </AppText>
-
-            <TextInput
-              style={styles.input}
-              placeholder="London 2026"
-              placeholderTextColor={colors.textSubtle}
-              value={title}
-              onChangeText={setTitle}
-            />
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Description
-            </AppText>
-
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="What is this trip about?"
-              placeholderTextColor={colors.textSubtle}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={5}
-            />
-          </AppCard>
-
-          <AppCard style={styles.card}>
-            <SectionHeader
-              title="Dates"
-              subtitle="Set when this trip starts and optionally when it ends."
-            />
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Start Date
-            </AppText>
-
-            {Platform.OS === 'web' ? (
-              <TextInput
-                style={styles.input}
-                value={startDate.toISOString().split('T')[0]}
-                onChangeText={(text) => {
-                  const parsedDate = new Date(text);
-
-                  if (!Number.isNaN(parsedDate.getTime())) {
-                    setStartDate(parsedDate);
-                  }
-                }}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.textSubtle}
-              />
-            ) : (
-              <>
-                <Pressable
-                  style={styles.dateInput}
-                  onPress={() => setShowStartDatePicker(true)}
-                >
-                  <AppText variant="body" color={colors.text}>
-                    {startDate.toDateString()}
-                  </AppText>
-                </Pressable>
-
-                {showStartDatePicker && (
-                  <DateTimePicker
-                    value={startDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowStartDatePicker(false);
-
-                      if (selectedDate) {
-                        setStartDate(selectedDate);
-                      }
-                    }}
-                  />
-                )}
-              </>
-            )}
-
-            <View style={styles.fieldSpacer}>
-              <AppText variant="caption" color={colors.textMuted}>
-                End Date
-              </AppText>
-            </View>
-
-            {Platform.OS === 'web' ? (
-              <TextInput
-                style={styles.input}
-                value={
-                  endDate
-                    ? endDate.toISOString().split('T')[0]
-                    : ''
-                }
-                onChangeText={(text) => {
-                  if (!text.trim()) {
-                    setEndDate(null);
-                    return;
-                  }
-
-                  const parsedDate = new Date(text);
-
-                  if (!Number.isNaN(parsedDate.getTime())) {
-                    setEndDate(parsedDate);
-                  }
-                }}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.textSubtle}
-              />
-            ) : (
-              <>
-                <Pressable
-                  style={styles.dateInput}
-                  onPress={() => setShowEndDatePicker(true)}
-                >
-                  <AppText
-                    variant="body"
-                    color={endDate ? colors.text : colors.textSubtle}
-                  >
-                    {endDate
-                      ? endDate.toDateString()
-                      : 'Select end date'}
-                  </AppText>
-                </Pressable>
-
-                {showEndDatePicker && (
-                  <DateTimePicker
-                    value={endDate ?? startDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                      setShowEndDatePicker(false);
-
-                      if (selectedDate) {
-                        setEndDate(selectedDate);
-                      }
-                    }}
-                  />
-                )}
-              </>
-            )}
-          </AppCard>
-
-          <AppCard style={styles.card}>
-            <SectionHeader
-              title="Destination"
-              subtitle="Search a destination to place this trip on the map."
-            />
-
-            <LocationSearch
-              locationName={destinationName}
-              latitude={latitude}
-              longitude={longitude}
-              onChangeLocationName={setDestinationName}
-              onChangeLatitude={setLatitude}
-              onChangeLongitude={setLongitude}
-            />
-          </AppCard>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleCreateTrip}
-            disabled={createTripMutation.isPending}
-          >
-            <AppText variant="bodyStrong" color={colors.primary}>
-              {createTripMutation.isPending
-                ? 'Saving Trip...'
-                : 'Save Trip'}
-            </AppText>
-          </TouchableOpacity>
+              <CreateTripSuccessStep tripName={title.trim()} />
+            </CreationSuccess>
+          )}
         </View>
       </ScrollView>
     </AppScreen>

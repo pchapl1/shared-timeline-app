@@ -36,6 +36,9 @@ function getItemSortDate(item: MapDisplayItem) {
     ? new Date(item.dateLabel).getTime()
     : 0;
 }
+function isString(value: string | null | undefined): value is string {
+  return Boolean(value);
+}
 
 export function buildMapItems({
   memories,
@@ -89,8 +92,11 @@ export function buildMapItems({
             subtitle: trip.destination_name,
             latitude: Number(trip.latitude),
             longitude: Number(trip.longitude),
-            imageUrl: null,
-            imageUrls: [],
+            imageUrl: trip.preview_photos?.[0]?.image ?? null,
+            imageUrls:
+              trip.preview_photos
+                ?.map((photo) => photo.image)
+                .filter(isString) ?? [],
             dateLabel: trip.start_date,
             endDateLabel: trip.end_date,
             countLabel: trip.memory_count

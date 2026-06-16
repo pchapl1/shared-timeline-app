@@ -9,6 +9,8 @@ export type Trip = {
 
   memory_count?: number;
 
+  preview_photos?: TripPreviewPhoto[];
+
   start_date: string;
 
   end_date?: string | null;
@@ -26,6 +28,11 @@ export type Trip = {
   created_at: string;
 
   updated_at: string;
+};
+
+export type TripPreviewPhoto = {
+  id: number;
+  image: string | null;
 };
 
 export type UpdateTripPayload = Partial<

@@ -20,7 +20,7 @@ import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
 import { colors } from '@/theme/colors';
-import { circlesScreenStyles as styles } from '@/styles/circlesScreenStyles';
+import { circlesScreenStyles as styles } from '@/styles/circles/circlesScreenStyles';
 
 import type { Circle } from '@/types/circle';
 

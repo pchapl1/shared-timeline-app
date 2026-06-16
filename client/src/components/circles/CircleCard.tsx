@@ -7,7 +7,7 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppText } from '@/components/ui/AppText';
 
 import { colors } from '@/theme/colors';
-import { circleCardStyles as styles } from '@/styles/circleCardStyles';
+import { circleCardStyles as styles } from '@/styles/circles/circleCardStyles';
 
 type Props = {
   name: string;

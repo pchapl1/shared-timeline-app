@@ -21,7 +21,7 @@ import { BackButton } from '@/components/ui/BackButton';
 import { api } from '@/services/api';
 
 import { colors } from '@/theme/colors';
-import { createCircleStyles as styles } from '@/styles/createCircleStyles';
+import { createCircleStyles as styles } from '@/styles/circles/createCircleStyles';
 
 const circleTypeOptions = [
   { label: 'Couple', value: 'couple' },

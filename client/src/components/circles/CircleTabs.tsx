@@ -1,13 +1,12 @@
 import { Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
 
-import { circleTabsStyles as styles } from '@/styles/circleTabsStyles';
+import { circleTabsStyles as styles } from '@/styles/circles/circleTabsStyles';
 
-type CircleTab = 'about' | 'members' | 'albums' | 'stats';
+export type CircleTab = 'about' | 'members' | 'albums' | 'stats';
 
 type Props = {
-  circleId: number;
   activeTab: CircleTab;
+  onChangeTab: (tab: CircleTab) => void;
 };
 
 const tabs: CircleTab[] = ['about', 'members', 'albums', 'stats'];
@@ -19,26 +18,7 @@ function getTabLabel(tab: CircleTab) {
   return 'Stats';
 }
 
-export function CircleTabs({ circleId, activeTab }: Props) {
-  function navigateToTab(tab: CircleTab) {
-    if (tab === 'about') {
-      router.push(`/circles/${circleId}`);
-      return;
-    }
-
-    if (tab === 'albums') {
-      router.push(`/circles/${circleId}/trips`);
-      return;
-    }
-
-    if (tab === 'stats') {
-      router.push(`/circles/${circleId}/map`);
-      return;
-    }
-
-    router.push(`/circles/${circleId}/${tab}`);
-  }
-
+export function CircleTabs({ activeTab, onChangeTab }: Props) {
   return (
     <View style={styles.container}>
       {tabs.map((tab) => {
@@ -48,7 +28,7 @@ export function CircleTabs({ circleId, activeTab }: Props) {
           <TouchableOpacity
             key={tab}
             style={[styles.tab, isActive && styles.activeTab]}
-            onPress={() => navigateToTab(tab)}
+            onPress={() => onChangeTab(tab)}
             activeOpacity={0.85}
           >
             <Text

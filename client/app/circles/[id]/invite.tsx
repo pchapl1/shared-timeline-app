@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 
 import { router, useLocalSearchParams } from 'expo-router';
+import { Search, UserPlus } from 'lucide-react-native';
 
 import { AppScreen } from '@/components/ui/layout/AppScreen';
 import { AppText } from '@/components/ui/AppText';
 import { BackButton } from '@/components/ui/BackButton';
-import { OnboardingProgress } from '@/components/ui/OnboardingProgress';
 
 import {
   createCircleInvite,
@@ -23,7 +23,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 
 import { colors } from '@/theme/colors';
-import { inviteMemberStyles as styles } from '@/styles/inviteMemberStyles';
+import { inviteMemberStyles as styles } from '@/styles/circles/inviteMemberStyles';
 
 type UserSearchResult = {
   id: number;
@@ -42,17 +42,12 @@ export default function InviteMemberScreen() {
   const [submittingUserId, setSubmittingUserId] =
     useState<number | null>(null);
 
-
   function goToCircle() {
-    if (!id) {
-      return;
-    }
+    if (!id) return;
 
     router.replace({
       pathname: '/circles/[id]',
-      params: {
-        id: id.toString(),
-      },
+      params: { id: id.toString() },
     });
   }
 
@@ -77,7 +72,6 @@ export default function InviteMemberScreen() {
 
       setQuery('');
       setResults([]);
-      
     } catch (error: any) {
       console.error(
         'Error creating invite:',
@@ -107,7 +101,6 @@ export default function InviteMemberScreen() {
 
     try {
       const data = await searchUsers(text);
-
       setResults(data);
     } catch (error) {
       console.error(error);
@@ -137,59 +130,66 @@ export default function InviteMemberScreen() {
         contentContainerStyle={styles.contentContainer}
         ListHeaderComponent={
           <>
-            <View style={styles.content}>
+            <View style={styles.header}>
               <BackButton onPress={goToCircle} />
 
-              <OnboardingProgress
-                currentStep={2}
-                steps={[
-                  { label: 'Circle' },
-                  { label: 'Invite' },
-                  { label: 'Done' },
-                ]}
-              />
+              <View style={styles.titleRow}>
+                <View style={styles.titleIcon}>
+                  <UserPlus
+                    size={22}
+                    strokeWidth={2.4}
+                    color={colors.primary}
+                  />
+                </View>
 
-              <View style={styles.heroIcon}>
-                <AppText style={styles.heroEmoji}>✨</AppText>
-              </View>
+                <View style={styles.titleContent}>
+                  <AppText variant="h1" style={styles.title}>
+                    Invite Members
+                  </AppText>
 
-
-              <View style={styles.header}>
-                <AppText variant="h1" style={styles.title}>
-                  Invite people
-                </AppText>
-
-                <AppText
-                  variant="body"
-                  color={colors.textMuted}
-                  style={styles.subtitle}
-                >
-                  Start building your circle by inviting friends,
-                  family, or anyone sharing this timeline.
-                </AppText>
+                  <AppText
+                    variant="bodySmall"
+                    color={colors.textMuted}
+                    style={styles.subtitle}
+                  >
+                    Search for people by username or email and send an invite.
+                  </AppText>
+                </View>
               </View>
             </View>
 
             <View style={styles.searchCard}>
-              <AppText variant="caption" color={colors.textMuted}>
-                Search Users
+              <AppText
+                variant="caption"
+                color={colors.textMuted}
+                style={styles.searchLabel}
+              >
+                Search users
               </AppText>
 
-              <TextInput
-                style={styles.input}
-                value={query}
-                onChangeText={handleSearch}
-                placeholder="Search username or email"
-                placeholderTextColor={colors.textSubtle}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <View style={styles.inputWrap}>
+                <Search
+                  size={18}
+                  strokeWidth={2.2}
+                  color={colors.textSubtle}
+                />
+
+                <TextInput
+                  style={styles.input}
+                  value={query}
+                  onChangeText={handleSearch}
+                  placeholder="Username or email"
+                  placeholderTextColor={colors.textSubtle}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
             </View>
 
             {query.length >= 2 && results.length > 0 ? (
-              <View style={styles.resultsHeader}>
+              <View style={styles.sectionHeader}>
                 <AppText variant="caption" color={colors.textMuted}>
-                  Results
+                  RESULTS
                 </AppText>
               </View>
             ) : null}
@@ -222,7 +222,11 @@ export default function InviteMemberScreen() {
                   {item.username}
                 </AppText>
 
-                <AppText variant="bodySmall" color={colors.textMuted}>
+                <AppText
+                  variant="bodySmall"
+                  color={colors.textMuted}
+                  numberOfLines={1}
+                >
                   {item.email}
                 </AppText>
               </View>
@@ -241,7 +245,7 @@ export default function InviteMemberScreen() {
                   }
                 >
                   {isInvited
-                    ? 'Invited ✓'
+                    ? 'Invited'
                     : isSubmitting
                       ? 'Sending...'
                       : 'Invite'}
@@ -256,7 +260,7 @@ export default function InviteMemberScreen() {
               <AppText
                 variant="bodySmall"
                 color={colors.textMuted}
-                style={{ textAlign: 'center' }}
+                style={styles.emptyText}
               >
                 No users found.
               </AppText>
@@ -264,66 +268,50 @@ export default function InviteMemberScreen() {
           ) : null
         }
         ListFooterComponent={
-        <View style={styles.footer}>
+          <View style={styles.footer}>
+            {invitedUsers.length > 0 && (
+              <View style={styles.invitedSection}>
+                <AppText
+                  variant="caption"
+                  color={colors.textMuted}
+                  style={styles.invitedTitle}
+                >
+                  INVITED ({invitedUsers.length})
+                </AppText>
 
-          {invitedUsers.length > 0 && (
-            <View style={styles.invitedSection}>
-              <AppText
-                variant="caption"
-                color={colors.textMuted}
-              >
-                INVITED ({invitedUsers.length})
-              </AppText>
+                {invitedUsers.map((user) => (
+                  <View key={user.id} style={styles.invitedRow}>
+                    <View style={styles.invitedAvatar}>
+                      <AppText variant="caption" color={colors.primary}>
+                        {user.username.charAt(0).toUpperCase()}
+                      </AppText>
+                    </View>
 
-
-
-
-              {invitedUsers.map((user) => (
-                <View key={user.id} style={styles.invitedRow}>
-                  <View style={styles.invitedAvatar}>
-                    <AppText variant="caption" color={colors.primary}>
-                      {user.username.charAt(0).toUpperCase()}
+                    <AppText
+                      variant="bodyStrong"
+                      style={styles.invitedName}
+                    >
+                      {user.username}
                     </AppText>
                   </View>
+                ))}
+              </View>
+            )}
 
-                  <AppText variant="bodyStrong" style={styles.invitedName}>
-                    {user.username}
-                  </AppText>
-                </View>
-              ))}
-
-
-
-            </View>
-          )}
-
-          <TouchableOpacity
-            onPress={goToCircle}
-          >
-            <AppText
-              variant="bodySmall"
-              color={colors.textMuted}
-              style={styles.skipText}
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={goToCircle}
+              activeOpacity={0.85}
             >
-              Skip for now
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={goToCircle}
-            activeOpacity={0.85}
-          >
-            <AppText
-              variant="bodyStrong"
-              color={colors.textInverse}
-            >
-              Continue to Circle
-            </AppText>
-          </TouchableOpacity>
-
-        </View>
-      }
+              <AppText
+                variant="bodyStrong"
+                color={colors.textInverse}
+              >
+                Done
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        }
       />
     </AppScreen>
   );

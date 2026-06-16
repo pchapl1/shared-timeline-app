@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import {
+  StyleProp,
   TextInput,
+  TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
@@ -24,6 +27,9 @@ type Props = {
   onChangeLocationName: (value: string) => void;
   onChangeLatitude: (value: string) => void;
   onChangeLongitude: (value: string) => void;
+  containerStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
+  labelStyle?: StyleProp<TextStyle>;
 };
 
 export function LocationSearch({
@@ -33,6 +39,9 @@ export function LocationSearch({
   onChangeLocationName,
   onChangeLatitude,
   onChangeLongitude,
+  containerStyle,
+  inputStyle,
+  labelStyle,
 }: Props) {
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -85,8 +94,12 @@ export function LocationSearch({
   const hasCoordinates = !!latitude && !!longitude;
 
   return (
-    <View>
-      <AppText variant="caption" color={colors.textMuted}>
+    <View style={containerStyle}>
+      <AppText
+        variant="caption"
+        color={colors.textMuted}
+        style={labelStyle}
+      >
         Location
       </AppText>
 
@@ -95,7 +108,7 @@ export function LocationSearch({
         onChangeText={handleLocationTextChange}
         placeholder="Search city, place, or destination"
         placeholderTextColor={colors.textSubtle}
-        style={addMemoryStyles.input}
+        style={[addMemoryStyles.input, inputStyle]}
       />
 
       {isSearching && (

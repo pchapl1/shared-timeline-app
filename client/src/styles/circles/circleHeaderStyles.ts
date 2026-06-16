@@ -7,17 +7,16 @@ import { spacing } from '@/theme/spacing';
 
 export const circleHeaderStyles = StyleSheet.create({
   container: {
-    marginBottom: spacing.xs,
+    marginBottom: 0,
   },
 
   cover: {
-    height: 240,
+    height: 220,
     marginHorizontal: -24,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
     overflow: 'hidden',
     backgroundColor: colors.primary,
   },
+
   coverImage: {
     position: 'absolute',
     width: '100%',
@@ -37,31 +36,31 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   topIconButton: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadows.sm,
   },
 
   profileCard: {
-    marginTop: -24,
+    marginTop: -36,
     marginHorizontal: 0,
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingTop: 44,
-    paddingBottom: spacing.sm,
+    paddingTop: 34,
+    paddingBottom: 0,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 48,
-    borderTopRightRadius: 48,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
   },
 
   avatarWrap: {
     position: 'absolute',
-    top: -48,
+    top: -44,
     alignSelf: 'center',
-    marginBottom: 0,
   },
 
   mainAvatar: {
@@ -69,41 +68,50 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   mainAvatarImage: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 4,
     borderColor: colors.surface,
   },
 
   title: {
     textAlign: 'center',
+    marginTop: spacing.xs,
     marginBottom: 2,
+    fontSize: 26,
+    lineHeight: 32,
   },
 
   memberCount: {
-    marginBottom: spacing.sm,
-  },
-
-  avatarStack: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
 
   actionsRow: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginBottom: spacing.md,
+    justifyContent: 'space-around',
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.lg,
   },
 
   actionItem: {
     alignItems: 'center',
     gap: spacing.xs,
+    minWidth: 58,
+  },
+
+  actionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   tabs: {
     width: '100%',
-    marginTop: 2,
     backgroundColor: colors.surface,
   },
 
@@ -126,8 +134,8 @@ export const circleHeaderStyles = StyleSheet.create({
 
   cameraButton: {
     position: 'absolute',
-    right: -6,
-    bottom: 6,
+    right: -4,
+    bottom: 4,
     width: 28,
     height: 28,
     borderRadius: 14,

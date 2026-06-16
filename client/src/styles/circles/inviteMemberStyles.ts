@@ -15,11 +15,6 @@ export const inviteMemberStyles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
 
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-
   loadingContainer: {
     flex: 1,
     backgroundColor: colors.background,
@@ -27,36 +22,38 @@ export const inviteMemberStyles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  heroIcon: {
-    width: 88,
-    height: 88,
-    borderRadius: radius.xxl,
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
+
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginTop: spacing.lg,
+  },
+
+  titleIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: spacing.xs,
-    marginBottom: spacing.lg,
-    ...shadows.sm,
   },
 
-  heroEmoji: {
-    fontSize: 40,
-  },
-
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
+  titleContent: {
+    flex: 1,
   },
 
   title: {
-    textAlign: 'center',
+    marginBottom: spacing.xs,
   },
 
   subtitle: {
-    marginTop: spacing.sm,
-    textAlign: 'center',
-    maxWidth: 280,
+    maxWidth: 320,
   },
 
   searchCard: {
@@ -67,21 +64,32 @@ export const inviteMemberStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.lg,
-    ...shadows.md,
+    ...shadows.sm,
   },
 
-  input: {
+  searchLabel: {
+    marginBottom: spacing.sm,
+  },
+
+  inputWrap: {
+    height: 52,
+    borderRadius: radius.lg,
     backgroundColor: colors.surfaceMuted,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
-    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+
+  input: {
+    flex: 1,
     color: colors.text,
     fontSize: 16,
   },
 
-  resultsHeader: {
+  sectionHeader: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },
@@ -145,33 +153,17 @@ export const inviteMemberStyles = StyleSheet.create({
     ...shadows.sm,
   },
 
+  emptyText: {
+    textAlign: 'center',
+  },
+
   footer: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.xl,
     paddingBottom: spacing.xl,
-    backgroundColor: colors.background,
-  },
-
-  continueButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-    minHeight: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.sm,
-  },
-  stepLabel: {
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-
-  progressText: {
-    textAlign: 'center',
-    marginBottom: spacing.lg,
   },
 
   invitedSection: {
-    marginHorizontal: spacing.lg,
     marginBottom: spacing.lg,
     backgroundColor: colors.surface,
     borderRadius: radius.xl,
@@ -181,15 +173,14 @@ export const inviteMemberStyles = StyleSheet.create({
     ...shadows.sm,
   },
 
+  invitedTitle: {
+    marginBottom: spacing.sm,
+  },
+
   invitedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.sm,
-  },
-
-  skipText: {
-    textAlign: 'center',
-    marginBottom: spacing.md,
   },
 
   invitedAvatar: {
@@ -204,5 +195,14 @@ export const inviteMemberStyles = StyleSheet.create({
 
   invitedName: {
     flex: 1,
+  },
+
+  doneButton: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    minHeight: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.sm,
   },
 });

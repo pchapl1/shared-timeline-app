@@ -94,7 +94,7 @@ export function MapPreviewCard({ item, onPress }: Props) {
             </AppText>
 
             <AppText variant="bodySmall" color={colors.textMuted}>
-              {formatDateLabel(item)}
+              {item.type === 'trip' ? 'Trip' : 'Memory'} • {formatDateLabel(item)}
             </AppText>
           </View>
 

@@ -1,18 +1,20 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 
-import { useMemories } from '@/hooks/memories/useMemories';
-import { useTrips } from '@/hooks/trips/useTrips';
+import { useSharedMapData } from '@/hooks/maps/useSharedMapData';
+import { useMapRegion } from '@/hooks/maps/useMapRegion';
 
 import {
-  buildMapItems,
-  groupMapItems,
-} from '@/utils/maps/buildGlobalMapItems';
+  getPrimaryItem,
+  isMarkerCluster,
+} from '@/hooks/maps/useMapSelection';
+
 import { calculateMapRegion } from '@/utils/maps/calculateMapRegion';
 
+import { MapClusterPreviewCard } from './MapClusterPreviewCard';
 import { MapFloatingControls } from './MapFloatingControls';
 import { MapPhotoMarker } from './MapPhotoMarker';
 import { MapPreviewCard } from './MapPreviewCard';
@@ -22,29 +24,16 @@ import { sharedMapStyles as styles } from '@/styles/maps/sharedMapStyles';
 
 import type {
   MapDisplayItem,
-  MapFilter,
   MapMarkerGroup,
 } from '@/types/map';
 
 type MapType = 'standard' | 'satellite';
 
-function getPrimaryItem(group: MapMarkerGroup) {
-  return group.items[0];
-}
-
 export function SharedMap() {
   const mapRef = useRef<MapView>(null);
 
-  const [filter] = useState<MapFilter>('all');
-
   const [mapType, setMapType] =
     useState<MapType>('standard');
-
-  const [currentDelta, setCurrentDelta] =
-    useState(4);
-
-  const [currentRegion, setCurrentRegion] =
-    useState<Region | null>(null);
 
   const [isSearchOpen, setIsSearchOpen] =
     useState(false);
@@ -55,64 +44,27 @@ export function SharedMap() {
   const [selectedItem, setSelectedItem] =
     useState<MapDisplayItem | null>(null);
 
-  const { data: memories = [] } = useMemories();
-  const { data: trips = [] } = useTrips();
+  const [selectedCluster, setSelectedCluster] =
+    useState<MapMarkerGroup | null>(null);
 
-  const allMapItems = useMemo(
-    () =>
-      buildMapItems({
-        memories,
-        trips,
-        filter,
-        searchQuery: '',
-      }),
-    [memories, trips, filter]
-  );
+  const [currentDelta, setCurrentDelta] = useState(4);
 
-  const searchedMapItems = useMemo(
-    () =>
-      buildMapItems({
-        memories,
-        trips,
-        filter,
-        searchQuery,
-      }),
-    [memories, trips, filter, searchQuery]
-  );
+  const {
+    allMapItems,
+    searchedMapItems,
+    markerGroups,
+  } = useSharedMapData({
+    currentDelta,
+    searchQuery,
+  });
 
-  const markerGroups = useMemo(
-    () => groupMapItems(allMapItems, currentDelta),
-    [allMapItems, currentDelta]
-  );
+  const {
+    currentRegion,
+    initialRegion,
+    handleRegionChangeComplete,
+  } = useMapRegion(allMapItems);
 
-  const initialRegion = useMemo(() => {
-    const preferredItem =
-      allMapItems.find(
-        (item) =>
-          item.type === 'memory' &&
-          item.imageUrl
-      ) ??
-      allMapItems.find(
-        (item) => item.type === 'memory'
-      ) ??
-      allMapItems[0];
-
-    if (!preferredItem) {
-      return {
-        latitude: 39.5,
-        longitude: -98.5795,
-        latitudeDelta: 3,
-        longitudeDelta: 3,
-      };
-    }
-
-    return {
-      latitude: preferredItem.latitude,
-      longitude: preferredItem.longitude,
-      latitudeDelta: 4,
-      longitudeDelta: 4,
-    };
-  }, [allMapItems]);
+  // const actualRegion = useMapRegion(allMapItems);
 
   function animateToItem(
     item: MapDisplayItem,
@@ -132,35 +84,48 @@ export function SharedMap() {
     );
   }
 
-  function handleMarkerPress(
-    group: MapMarkerGroup
-  ) {
+  function handleMarkerPress(group: MapMarkerGroup) {
+    if (isMarkerCluster(group)) {
+      setSelectedItem(null);
+      setSelectedCluster(group);
+
+      mapRef.current?.animateToRegion(
+        {
+          latitude: group.latitude,
+          longitude: group.longitude,
+          latitudeDelta: Math.min(currentDelta, 1.5),
+          longitudeDelta: Math.min(currentDelta, 1.5),
+        },
+        300
+      );
+
+      return;
+    }
+
+    setSelectedCluster(null);
     animateToItem(getPrimaryItem(group));
   }
 
-  function handleSearchResultPress(
-    item: MapDisplayItem
-  ) {
+  function handleSearchResultPress(item: MapDisplayItem) {
     setIsSearchOpen(false);
     setSearchQuery('');
+    setSelectedCluster(null);
 
-    animateToItem(item, 6);
+    animateToItem(item, 4);
   }
 
   function handleMapPress() {
     setSelectedItem(null);
     setIsSearchOpen(false);
+    setSelectedCluster(null);
   }
 
   function handlePreviewPress() {
-    if (!selectedItem) {
-      return;
-    }
+    if (!selectedItem) return;
 
     if (selectedItem.type === 'memory') {
       router.push({
-        pathname:
-          '/circles/[id]/memories/[memoryId]',
+        pathname: '/circles/[id]/memories/[memoryId]',
         params: {
           id: String(selectedItem.circleId),
           memoryId: String(selectedItem.id),
@@ -171,8 +136,7 @@ export function SharedMap() {
     }
 
     router.push({
-      pathname:
-        '/circles/[id]/trips/[tripId]',
+      pathname: '/circles/[id]/trips/[tripId]',
       params: {
         id: String(selectedItem.circleId),
         tripId: String(selectedItem.id),
@@ -182,25 +146,22 @@ export function SharedMap() {
 
   function handleMapTypePress() {
     setMapType((current) =>
-      current === 'standard'
-        ? 'satellite'
-        : 'standard'
+      current === 'standard' ? 'satellite' : 'standard'
     );
 
     setIsSearchOpen(false);
   }
 
-  function handleSearchPress() {
-    setIsSearchOpen(true);
-  }
-
   function handleZoomIn() {
-    const baseRegion = currentRegion ?? initialRegion;
+    const baseRegion =
+      currentRegion ?? initialRegion;
 
     const nextDelta = Math.max(
-      baseRegion.latitudeDelta * 0.6,
+      baseRegion.latitudeDelta * 0.45,
       0.01
     );
+
+    setCurrentDelta(nextDelta);
 
     mapRef.current?.animateToRegion(
       {
@@ -209,17 +170,20 @@ export function SharedMap() {
         latitudeDelta: nextDelta,
         longitudeDelta: nextDelta,
       },
-      250
+      180
     );
   }
 
   function handleZoomOut() {
-    const baseRegion = currentRegion ?? initialRegion;
+    const baseRegion =
+      currentRegion ?? initialRegion;
 
     const nextDelta = Math.min(
-      baseRegion.latitudeDelta * 1.6,
+      baseRegion.latitudeDelta * 2.1,
       80
     );
+
+    setCurrentDelta(nextDelta);
 
     mapRef.current?.animateToRegion(
       {
@@ -228,14 +192,12 @@ export function SharedMap() {
         latitudeDelta: nextDelta,
         longitudeDelta: nextDelta,
       },
-      250
+      180
     );
   }
 
   function handleFitAll() {
-    if (!allMapItems.length) {
-      return;
-    }
+    if (!allMapItems.length) return;
 
     const region = calculateMapRegion(
       allMapItems.map((item) => ({
@@ -246,10 +208,12 @@ export function SharedMap() {
 
     setCurrentDelta(region.latitudeDelta);
 
-    mapRef.current?.animateToRegion(
-      region,
-      350
-    );
+    mapRef.current?.animateToRegion(region, 350);
+  }
+
+  function handleClusterItemPress(item: MapDisplayItem) {
+    setSelectedCluster(null);
+    animateToItem(item, 1.5);
   }
 
   return (
@@ -260,20 +224,14 @@ export function SharedMap() {
         mapType={mapType}
         initialRegion={initialRegion}
         onPress={handleMapPress}
-        onRegionChangeComplete={(region) => {
-          setCurrentRegion(region);
-          setCurrentDelta(region.latitudeDelta);
-        }}
+        onRegionChangeComplete={handleRegionChangeComplete}
       >
-      
         {markerGroups.map((group) => {
-          const primaryItem =
-            getPrimaryItem(group);
+          const primaryItem = getPrimaryItem(group);
 
           const isSelected =
             selectedItem?.id === primaryItem.id &&
-            selectedItem?.type ===
-              primaryItem.type;
+            selectedItem?.type === primaryItem.type;
 
           return (
             <Marker
@@ -302,30 +260,31 @@ export function SharedMap() {
         <MapSearchOverlay
           searchQuery={searchQuery}
           items={searchedMapItems}
-          onChangeSearchQuery={
-            setSearchQuery
-          }
+          onChangeSearchQuery={setSearchQuery}
           onClose={() => {
             setIsSearchOpen(false);
             setSearchQuery('');
           }}
-          onSelectItem={
-            handleSearchResultPress
-          }
+          onSelectItem={handleSearchResultPress}
         />
       )}
 
       <MapFloatingControls
-        onSearchPress={handleSearchPress}
-        onMapTypePress={
-          handleMapTypePress
-        }
+        onSearchPress={() => setIsSearchOpen(true)}
+        onMapTypePress={handleMapTypePress}
         onZoomInPress={handleZoomIn}
         onZoomOutPress={handleZoomOut}
         onFitPress={handleFitAll}
       />
 
-      {selectedItem && (
+      {selectedCluster && (
+        <MapClusterPreviewCard
+          items={selectedCluster.items}
+          onSelectItem={handleClusterItemPress}
+        />
+      )}
+
+      {selectedItem && !selectedCluster && (
         <MapPreviewCard
           item={selectedItem}
           onPress={handlePreviewPress}

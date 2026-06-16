@@ -4,7 +4,7 @@ import MapView, { Callout, Marker } from 'react-native-maps';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 
-import { circleMapStyles as styles } from '@/styles/circleMapStyles';
+import { circleMapStyles as styles } from '@/styles/circles/circleMapStyles';
 
 import type { MapMemory, MapTrip } from '@/types/map';
 
