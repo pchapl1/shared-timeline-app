@@ -27,11 +27,17 @@ export default function TabsLayout() {
         headerShown: false,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="timeline/index" options={{ title: 'Timeline' }} />
-      <Tabs.Screen name="circles/index" options={{ title: 'Create' }} />
+      <Tabs.Screen name="circles/index" options={{ title: 'Circles' }} />
       <Tabs.Screen name="map/index" options={{ title: 'Map' }} />
       <Tabs.Screen name="profile/index" options={{ title: 'Profile' }} />
+
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
 
       <Tabs.Screen
         name="notifications/index"

@@ -36,6 +36,8 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="create-circle" />
+            <Stack.Screen name="create-memory" />
+            <Stack.Screen name="create-trip" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
             <Stack.Screen name="circles/[id]" />
