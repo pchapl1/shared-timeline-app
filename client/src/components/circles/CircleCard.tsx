@@ -1,32 +1,75 @@
+import { Image, TouchableOpacity, View } from 'react-native';
 import {
-  TouchableOpacity,
-  View,
-} from 'react-native';
+  Briefcase,
+  Clock,
+  Ellipsis,
+  Image as ImageIcon,
+  ShieldCheck,
+  Users,
+} from 'lucide-react-native';
 
-import { AppCard } from '@/components/ui/AppCard';
 import { AppText } from '@/components/ui/AppText';
+import { AvatarStack } from '@/components/ui/AvatarStack';
+import { IconCircleButton } from '@/components/ui/IconCircleButton';
+import { CircleMetric } from '@/components/circles/CircleMetric';
 
 import { colors } from '@/theme/colors';
 import { circleCardStyles as styles } from '@/styles/circles/circleCardStyles';
 
+import type { Circle } from '@/types/circle';
+
 type Props = {
-  name: string;
-  circleType: string;
+  circle: Circle;
   onPress: () => void;
+  onOptionsPress?: () => void;
 };
 
-function formatCircleType(circleType: string) {
-  return circleType
-    .replace('_', ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+function getCircleDescription(circle: Circle) {
+  if (circle.circle_type === 'family') {
+    return 'Where life begins and love never ends.';
+  }
+
+  if (circle.circle_type === 'travel_group') {
+    return 'Adventures are better together.';
+  }
+
+  if (circle.circle_type === 'friends') {
+    return 'Good friends, good food, good times.';
+  }
+
+  if (circle.circle_type === 'couple') {
+    return 'Your favorite memories, together.';
+  }
+
+  return 'The people and memories that matter most.';
+}
+
+function getLastActivityText(circle: Circle) {
+  return circle.memory_count > 0
+    ? 'Last memory'
+    : 'no memories yet';
+}
+
+function getTripLabel(count: number) {
+  return count === 1 ? 'Trip' : 'Trips';
 }
 
 export function CircleCard({
-  name,
-  circleType,
+  circle,
   onPress,
+  onOptionsPress,
 }: Props) {
-  const initial = name.charAt(0).toUpperCase();
+  const memberCount =
+    circle.member_count ?? circle.members?.length ?? 0;
+
+  const memoryCount = circle.memory_count ?? 0;
+  const tripCount = circle.trip_count ?? 0;
+
+  const avatarItems =
+    circle.members?.map((member) => ({
+      id: member.id,
+      label: member.username,
+    })) ?? [];
 
   return (
     <TouchableOpacity
@@ -34,34 +77,124 @@ export function CircleCard({
       onPress={onPress}
       style={styles.pressable}
     >
-      <AppCard style={styles.card}>
-        <View style={styles.row}>
-          <View style={styles.avatar}>
-            <AppText variant="h3" color={colors.textInverse}>
-              {initial}
-            </AppText>
-          </View>
+      <View style={styles.card}>
+        <View style={styles.coverWrap}>
+          {circle.cover_photo ? (
+            <Image
+              source={{ uri: circle.cover_photo }}
+              style={styles.coverImage}
+            />
+          ) : (
+            <View style={styles.coverPlaceholder}>
+              <AppText
+                variant="h1"
+                color={colors.textInverse}
+              >
+                {circle.name.charAt(0).toUpperCase()}
+              </AppText>
+            </View>
+          )}
 
-          <View style={styles.content}>
+          <View style={styles.memberBadge}>
+            <Users size={14} color={colors.text} />
+            <AppText variant="bodyStrong">{memberCount}</AppText>
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.titleRow}>
             <AppText
-              variant="h3"
+              variant="bodyStrong"
               numberOfLines={1}
               style={styles.title}
             >
-              {name}
+              {circle.name}
             </AppText>
 
-            <View style={styles.badge}>
+            {circle.circle_type === 'travel_group' && (
+              <View style={styles.featureBadge}>
+                <ShieldCheck size={17} color={colors.primary} />
+              </View>
+            )}
+          </View>
+
+          <AppText
+            variant="bodySmall"
+            color={colors.textMuted}
+            numberOfLines={1}
+            style={styles.description}
+          >
+            {getCircleDescription(circle)}
+          </AppText>
+
+          <View style={styles.metricsRow}>
+            <CircleMetric
+              icon={
+                <ImageIcon
+                  size={12}
+                  color={colors.primary}
+                />
+              }
+              value={memoryCount}
+              label="Memories"
+              featured
+            />
+
+            <CircleMetric
+              icon={
+                <Briefcase
+                  size={12}
+                  color={colors.primary}
+                />
+              }
+              value={tripCount}
+              label={getTripLabel(tripCount)}
+            />
+
+            <CircleMetric
+              icon={
+                <Users
+                  size={12}
+                  color={colors.primary}
+                />
+              }
+              value={memberCount}
+              label="Members"
+            />
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.footerRow}>
+            <View style={styles.activityRow}>
+              <Clock size={14} color={colors.primary} />
+
               <AppText
                 variant="caption"
-                color={colors.primary}
+                color={colors.textMuted}
+                numberOfLines={1}
+                style={styles.activityText}
               >
-                {formatCircleType(circleType)}
+                {getLastActivityText(circle)}
               </AppText>
+            </View>
+
+            <View style={styles.footerRight}>
+              <AvatarStack items={avatarItems} size={22} max={3} />
+
+              <IconCircleButton
+                icon={
+                  <Ellipsis
+                    size={18}
+                    color={colors.text}
+                  />
+                }
+                onPress={onOptionsPress}
+              />
             </View>
           </View>
         </View>
-      </AppCard>
+      </View>
     </TouchableOpacity>
   );
 }

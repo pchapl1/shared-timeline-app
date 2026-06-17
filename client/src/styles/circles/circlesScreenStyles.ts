@@ -10,20 +10,44 @@ export const circlesScreenStyles = StyleSheet.create({
   },
 
   contentContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: 80,
-    paddingBottom: 120,
+    paddingHorizontal: 10,
+    paddingTop: 56,
+    paddingBottom: 130,
   },
 
   headerContent: {
-    marginBottom: spacing.md,
+    marginBottom: 0,
   },
 
-  createButton: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.lg,
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+
+  },
+
+  headerCopy: {
+    flex: 1,
+  },
+
+  title: {
+    fontSize: 30,
+    lineHeight: 40,
+    fontWeight: 600
+  },
+
+  subtitle: {
+    marginTop: spacing.xs,
+    fontSize: 14,
+    lineHeight: 21,
+  },
+
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingTop: spacing.sm,
   },
 
   emptyCard: {
@@ -32,22 +56,5 @@ export const circlesScreenStyles = StyleSheet.create({
 
   emptyText: {
     textAlign: 'center',
-  },
-
-  archivedSection: {
-    marginTop: spacing.lg,
-  },
-
-  archivedTitle: {
-    marginBottom: spacing.md,
-  },
-
-  archivedCard: {
-    marginBottom: spacing.md,
-    backgroundColor: colors.surfaceMuted,
-  },
-
-  archivedSubtitle: {
-    marginTop: spacing.xs,
   },
 });
