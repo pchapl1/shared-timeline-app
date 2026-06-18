@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   RefreshControl,
   ScrollView,
   Text,
@@ -9,25 +11,26 @@ import {
 
 import { useLocalSearchParams } from 'expo-router';
 
-import { CircleAboutTab } from '@/components/circles/CircleAboutTab';
 import { CircleAlbumsTab } from '@/components/circles/CircleAlbumsTab';
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { CircleMembersTab } from '@/components/circles/CircleMembersTab';
-import { CircleStatsTab } from '@/components/circles/CircleStatsTab';
+import { CircleTimelineTab } from '@/components/circles/CircleTimelineTab';
 
 import type { CircleTab } from '@/components/circles/CircleTabs';
 
 import { useAuth } from '@/context/AuthContext';
 import { useCircle } from '@/hooks/circles/useCircle';
+import { useCircleMemories } from '@/hooks/useCircleMemories';
 
 import { colors } from '@/theme/colors';
 import { circleTimelineStyles as styles } from '@/styles/circles/circleTimelineStyles';
 
 export default function CircleDetailScreen() {
   const [activeTab, setActiveTab] =
-    useState<CircleTab>('about');
+    useState<CircleTab>('timeline');
 
   const { id } = useLocalSearchParams<{ id: string }>();
+  const circleId = Number(id);
 
   const { isLoading: authLoading, tokens } = useAuth();
 
@@ -36,6 +39,49 @@ export default function CircleDetailScreen() {
     isLoading: isCircleLoading,
     refetch: refetchCircle,
   } = useCircle(id);
+
+  const {
+    data: memoriesData,
+    isLoading: isMemoriesLoading,
+    refetch: refetchMemories,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useCircleMemories(circleId);
+
+  const memories = useMemo(
+    () =>
+      memoriesData?.pages.flatMap((page) => page.results) ?? [],
+    [memoriesData]
+  );
+
+  function handleRefresh() {
+    refetchCircle();
+    refetchMemories();
+  }
+
+  function handleScroll(
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) {
+    if (activeTab !== 'timeline') {
+      return;
+    }
+
+    const { layoutMeasurement, contentOffset, contentSize } =
+      event.nativeEvent;
+
+    const distanceFromBottom =
+      contentSize.height -
+      (layoutMeasurement.height + contentOffset.y);
+
+    if (
+      distanceFromBottom < 320 &&
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }
 
   if (authLoading || isCircleLoading || !tokens || !circle) {
     return (
@@ -55,10 +101,12 @@ export default function CircleDetailScreen() {
         refreshControl={
           <RefreshControl
             refreshing={false}
-            onRefresh={refetchCircle}
+            onRefresh={handleRefresh}
             tintColor={colors.primary}
           />
         }
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
         <CircleHeader
@@ -67,15 +115,26 @@ export default function CircleDetailScreen() {
           onChangeTab={setActiveTab}
         />
 
-        {activeTab === 'about' && (
-          <CircleAboutTab circle={circle} />
+        {activeTab === 'timeline' && (
+          <CircleTimelineTab
+            circle={circle}
+            memories={memories}
+            isLoading={isMemoriesLoading}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         )}
 
-        {activeTab === 'members' && <CircleMembersTab circle={circle} />}
+        {activeTab === 'trips' && (
+          <Text style={styles.loading}>Trips Coming Next</Text>
+        )}
 
-        {activeTab === 'albums' && <CircleAlbumsTab circle={circle} />}
+        {activeTab === 'members' && (
+          <CircleMembersTab circle={circle} />
+        )}
 
-        {activeTab === 'stats' && <CircleStatsTab circle={circle} />}
+        {activeTab === 'albums' && (
+          <CircleAlbumsTab circle={circle} />
+        )}
       </ScrollView>
     </View>
   );

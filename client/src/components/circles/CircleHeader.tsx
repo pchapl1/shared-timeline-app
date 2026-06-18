@@ -1,12 +1,14 @@
-import { Alert, Image, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 import {
-  Camera,
-  MessageCircle,
+  Clock,
+  Image as ImageIcon,
+  MoreHorizontal,
   Plane,
   Settings,
-  UserPlus,
+  Shield,
+  Users,
 } from 'lucide-react-native';
 
 import { CircleTabs, type CircleTab } from '@/components/circles/CircleTabs';
@@ -44,10 +46,6 @@ export function CircleHeader({
     });
   }
 
-  function goToTrips() {
-    router.push(`/circles/${circle.id}/trips`);
-  }
-
   function goToSettings() {
     router.push({
       pathname: '/circles/[id]/edit',
@@ -59,7 +57,11 @@ export function CircleHeader({
     return (
       <View style={styles.compactContainer}>
         <View style={styles.compactTopRow}>
-          <BackButton onPress={goBackToCircles} showLabel={false} color={colors.surface} />
+          <BackButton
+            onPress={goBackToCircles}
+            showLabel={false}
+            color={colors.surface}
+          />
 
           <AppText
             variant="h3"
@@ -91,19 +93,37 @@ export function CircleHeader({
 
         <View style={styles.coverOverlay}>
           <View style={styles.topActions}>
-            <BackButton onPress={goBackToCircles} showLabel={false} color={colors.surface} />
+            <BackButton
+              onPress={goBackToCircles}
+              showLabel={false}
+              color={colors.surface}
+            />
 
-            <TouchableOpacity
-              style={styles.topIconButton}
-              activeOpacity={0.85}
-              onPress={goToSettings}
-            >
-              <Settings
-                size={19}
-                strokeWidth={2.2}
-                color={colors.text}
-              />
-            </TouchableOpacity>
+            <View style={styles.topRightActions}>
+              <TouchableOpacity
+                style={styles.topIconButton}
+                activeOpacity={0.85}
+                onPress={goToSettings}
+              >
+                <Settings
+                  size={18}
+                  strokeWidth={2.2}
+                  color={colors.text}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.topIconButton}
+                activeOpacity={0.85}
+                onPress={goToSettings}
+              >
+                <MoreHorizontal
+                  size={20}
+                  strokeWidth={2.2}
+                  color={colors.text}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
@@ -119,116 +139,120 @@ export function CircleHeader({
           ) : (
             <Avatar
               label={circle.name}
-              size={88}
+              size={86}
               style={styles.mainAvatar}
             />
           )}
 
-          <TouchableOpacity
-            style={styles.cameraButton}
-            activeOpacity={0.85}
-            onPress={goToSettings}
-          >
-            <Camera
-              size={15}
+          <View style={styles.shieldBadge}>
+            <Shield
+              size={16}
               strokeWidth={2.4}
-              color={colors.text}
+              color={colors.surface}
             />
-          </TouchableOpacity>
+          </View>
         </View>
 
-        <AppText
-          variant="h1"
-          numberOfLines={2}
-          style={styles.title}
-        >
-          {circle.name}
-        </AppText>
+        <View style={styles.titleRow}>
+          <AppText
+            variant="h1"
+            numberOfLines={2}
+            style={styles.title}
+          >
+            {circle.name}
+          </AppText>
+
+          <Shield
+            size={25}
+            strokeWidth={2.4}
+            color={colors.primary}
+          />
+        </View>
 
         <AppText
           variant="bodySmall"
           color={colors.textMuted}
-          style={styles.memberCount}
+          style={styles.subtitle}
         >
-          {circle.member_count}{' '}
-          {circle.member_count === 1 ? 'member' : 'members'}
+          Adventures are better together.
         </AppText>
 
-        <View style={styles.actionsRow}>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <View style={styles.statTopRow}>
+              <ImageIcon
+                size={16}
+                strokeWidth={2.1}
+                color={colors.primary}
+              />
+
+              <AppText style={styles.statValue}>
+                {circle.memory_count ?? 0}
+              </AppText>
+            </View>
+
+            <AppText style={styles.statLabel}>
+              Memories
+            </AppText>
+          </View>
+
+          <View style={styles.statItem}>
+            <View style={styles.statTopRow}>
+              <Plane
+                size={16}
+                strokeWidth={2.1}
+                color={colors.primary}
+              />
+
+              <AppText style={styles.statValue}>
+                {circle.trip_count ?? 0}
+              </AppText>
+            </View>
+
+            <AppText style={styles.statLabel}>
+              Trips
+            </AppText>
+          </View>
+
+          <View style={styles.statItem}>
+            <View style={styles.statTopRow}>
+              <Users
+                size={16}
+                strokeWidth={2.1}
+                color={colors.primary}
+              />
+
+              <AppText style={styles.statValue}>
+                {circle.member_count ?? 0}
+              </AppText>
+            </View>
+
+            <AppText style={styles.statLabel}>
+              Members
+            </AppText>
+          </View>
+        </View>
+
+        <View style={styles.activityRow}>
+          <View style={styles.activityLeft}>
+            <Clock
+              size={15}
+              strokeWidth={2.2}
+              color={colors.primary}
+            />
+
+            <AppText style={styles.activityText}>
+              Last activity recently
+            </AppText>
+          </View>
+
           <TouchableOpacity
-            style={styles.actionItem}
+            style={styles.inviteButton}
             activeOpacity={0.85}
             onPress={goToInvite}
           >
-            <View style={styles.actionIcon}>
-              <UserPlus
-                size={22}
-                strokeWidth={2.2}
-                color={colors.primary}
-              />
-            </View>
-
-            <AppText variant="caption" color={colors.textMuted}>
+            <AppText style={styles.inviteText}>
               Invite
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionItem}
-            activeOpacity={0.85}
-            onPress={() =>
-              Alert.alert(
-                'Coming Soon',
-                'Group chat is currently under development.'
-              )
-            }
-          >
-            <View style={styles.actionIcon}>
-              <MessageCircle
-                size={22}
-                strokeWidth={2.2}
-                color={colors.primary}
-              />
-            </View>
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Chat
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionItem}
-            activeOpacity={0.85}
-            onPress={goToTrips}
-          >
-            <View style={styles.actionIcon}>
-              <Plane
-                size={22}
-                strokeWidth={2.2}
-                color={colors.primary}
-              />
-            </View>
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Trips
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionItem}
-            activeOpacity={0.85}
-            onPress={goToSettings}
-          >
-            <View style={styles.actionIcon}>
-              <Settings
-                size={22}
-                strokeWidth={2.2}
-                color={colors.primary}
-              />
-            </View>
-
-            <AppText variant="caption" color={colors.textMuted}>
-              Settings
             </AppText>
           </TouchableOpacity>
         </View>

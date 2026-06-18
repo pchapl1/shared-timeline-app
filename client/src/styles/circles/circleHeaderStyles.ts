@@ -11,7 +11,7 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   cover: {
-    height: 220,
+    height: 248,
     marginHorizontal: -24,
     overflow: 'hidden',
     backgroundColor: colors.primary,
@@ -35,9 +35,14 @@ export const circleHeaderStyles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  topRightActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+
   topIconButton: {
-    width: 38,
-    height: 38,
+    width: 44,
+    height: 44,
     borderRadius: radius.full,
     backgroundColor: colors.surface,
     alignItems: 'center',
@@ -46,21 +51,20 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   profileCard: {
-    marginTop: -36,
+    marginTop: -40,
     marginHorizontal: 0,
-    alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingTop: 34,
+    paddingTop: 58,
     paddingBottom: 0,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
 
   avatarWrap: {
     position: 'absolute',
-    top: -44,
-    alignSelf: 'center',
+    top: -46,
+    left: spacing.xl,
   },
 
   mainAvatar: {
@@ -70,48 +74,134 @@ export const circleHeaderStyles = StyleSheet.create({
   mainAvatarImage: {
     width: 88,
     height: 88,
-    borderRadius: 44,
+    borderRadius: 24,
     borderWidth: 4,
     borderColor: colors.surface,
   },
 
-  title: {
-    textAlign: 'center',
-    marginTop: spacing.xs,
+  shieldBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.surface,
+  },
+
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: 2,
-    fontSize: 26,
+  },
+
+  title: {
+    flexShrink: 1,
+    textAlign: 'left',
+    fontSize: 27,
     lineHeight: 32,
+    letterSpacing: -0.3,
+  },
+
+  subtitle: {
+    marginBottom: spacing.lg,
+    fontSize: 13,
+    lineHeight: 17,
+    fontWeight: '600',
   },
 
   memberCount: {
     marginBottom: spacing.lg,
   },
 
-  actionsRow: {
-    width: '100%',
+  statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.lg,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+
+    gap: 56,
+
+    marginBottom: spacing.md,
   },
 
-  actionItem: {
+  statItem: {
+    // flex: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+
+  statTopRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
-    minWidth: 58,
+    justifyContent: 'flex-start',
+    gap: 6,
+    marginBottom: 2,
   },
 
-  actionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primarySoft,
+  statValue: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '600',
+    color: colors.text,
+  },
+
+
+  statLabel: {
+    paddingLeft: 0, // remove this completely
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '500', // was 700
+    color: colors.textMuted,
+  },
+
+  activityRow: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 13,
+    paddingBottom: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  activityLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
+
+  activityText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+
+  inviteButton: {
+    minWidth: 88,
+    height: 34,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  inviteText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+
   tabs: {
-    width: '100%',
+    alignSelf: 'stretch',
+    marginHorizontal: -spacing.xl,
     backgroundColor: colors.surface,
   },
 
