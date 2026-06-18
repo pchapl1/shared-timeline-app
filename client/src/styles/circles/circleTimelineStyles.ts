@@ -32,7 +32,8 @@ export const circleTimelineStyles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-    aboutIcon: {
+
+  aboutIcon: {
     width: 18,
     alignItems: 'center',
   },
@@ -68,12 +69,6 @@ export const circleTimelineStyles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.textMuted,
   },
-  timelineTab: {
-  backgroundColor: colors.surface,
-  paddingHorizontal: spacing.lg,
-  paddingTop: spacing.lg,
-  paddingBottom: spacing.xl,
-},
 
 monthHeading: {
   ...typography.bodyStrong,
@@ -83,22 +78,6 @@ monthHeading: {
 timelineList: {
   position: 'relative',
   marginBottom: spacing.lg,
-},
-
-timelineSpine: {
-  position: 'absolute',
-  top: 12,
-  bottom: 28,
-  left: 12,
-  width: 2,
-  backgroundColor: colors.primarySoft,
-},
-
-timelineItem: {
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  minHeight: 96,
-  marginBottom: 0,
 },
 
 timelineDotColumn: {
@@ -122,37 +101,42 @@ timelineDotActive: {
 },
 
 timelineImage: {
-  width: 78,
-  height: 60,
+  width: 82,
+  height: 70,
   borderRadius: 10,
   backgroundColor: colors.border,
+  marginLeft: 10,
 },
 
 timelineImagePlaceholder: {
-  width: 78,
-  height: 60,
+  width: 82,
+  height: 70,
   borderRadius: 10,
   backgroundColor: colors.primarySoft,
   alignItems: 'center',
   justifyContent: 'center',
+  marginLeft: 10,
 },
 
 timelineContent: {
   flex: 1,
   marginLeft: 10,
+  justifyContent: "center",
+  paddingTop: 6,
 },
 
 timelineDate: {
-  fontSize: 11,
+  fontSize: 10,
   fontWeight: '600',
   color: colors.primary,
-  marginBottom: 3,
+  marginBottom: 5,
+  marginTop: 4,
 },
 
 timelineTitle: {
-  fontSize: 14,
+  fontSize: 13,
   lineHeight: 18,
-  fontWeight: '700',
+  fontWeight: '500',
   color: colors.text,
   marginBottom: 4,
 },
@@ -165,9 +149,9 @@ timelineLocationRow: {
 
 timelineLocation: {
   flex: 1,
-  fontSize: 11,
+  fontSize: 10,
   lineHeight: 17,
-  fontWeight: '600',
+  fontWeight: '400',
   color: colors.textMuted,
 },
 
@@ -217,11 +201,56 @@ addMemorySubtitle: {
   color: colors.surface,
 },
 
+memoryMenuButton: {
+  width: 22,
+  height: 22,
+  borderRadius: 16,
+  borderWidth: 1,
+  borderColor: colors.border,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginLeft: spacing.xs,
+},
+
 loadingMoreText: {
   fontSize: 13,
   fontWeight: '600',
   color: colors.textMuted,
   textAlign: 'center',
+  marginTop: spacing.sm,
   marginBottom: spacing.md,
+},
+
+
+timelineTab: {
+  backgroundColor: colors.surface,
+  paddingHorizontal: spacing.lg,
+  paddingTop: spacing.lg,
+},
+
+timelineRowWrapper: {
+  position: 'relative',
+  backgroundColor: colors.surface,
+  paddingHorizontal: spacing.lg,
+},
+
+timelineSpine: {
+  position: 'absolute',
+  top: 8,
+  bottom: 0,
+  left: spacing.lg + 11,
+  width: 2,
+  backgroundColor: colors.primarySoft,
+},
+
+timelineItem: {
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  minHeight: 96,
+  marginBottom: 0,
+},
+
+timelineFooterSpacer: {
+  height: 0,
 },
 });

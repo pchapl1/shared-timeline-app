@@ -40,10 +40,6 @@ export default function RootLayout() {
             <Stack.Screen name="create-trip" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
-            <Stack.Screen name="circles/[id]" />
-            {/* <Stack.Screen name="circles/[id]/invite" />
-            <Stack.Screen name="circles/[id]/add-memory" />
-            <Stack.Screen name="circles/[id]/memories/[memoryId]"/> */}
           </Stack>
         </InviteProvider>
       </AuthProvider>

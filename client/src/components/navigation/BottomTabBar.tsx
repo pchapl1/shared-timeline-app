@@ -1,6 +1,6 @@
 // src/components/navigation/BottomTabBar.tsx
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Modal, Pressable, View } from 'react-native';
 
@@ -13,39 +13,18 @@ import {
   Plus,
   UsersRound,
 } from 'lucide-react-native';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 
 import { AppText } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 import { bottomTabBarStyles as styles } from '@/styles/bottomTabBarStyles';
 
 const tabs = [
-  {
-    routeName: 'timeline/index',
-    label: 'Timeline',
-    icon: List,
-  },
-  {
-    routeName: 'circles/index',
-    label: 'Circles',
-    icon: UsersRound,
-  },
-  {
-    routeName: 'create',
-    label: '',
-    icon: Plus,
-    isCreate: true,
-  },
-  {
-    routeName: 'map/index',
-    label: 'Map',
-    icon: MapPin,
-  },
-  {
-    routeName: 'profile/index',
-    label: 'Profile',
-    icon: CircleUserRound,
-  },
+  { routeName: 'timeline/index', label: 'Timeline', icon: List },
+  { routeName: 'circles/index', label: 'Circles', icon: UsersRound },
+  { routeName: 'create', label: '', icon: Plus, isCreate: true },
+  { routeName: 'map/index', label: 'Map', icon: MapPin },
+  { routeName: 'profile/index', label: 'Profile', icon: CircleUserRound },
 ];
 
 type Props = {
@@ -55,6 +34,12 @@ type Props = {
 
 export function BottomTabBar({ state, navigation }: Props) {
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const activeCircleId = useMemo(() => {
+    const match = pathname.match(/^\/circles\/(\d+)/);
+    return match?.[1] ?? null;
+  }, [pathname]);
 
   function closeCreateMenu() {
     setIsCreateMenuOpen(false);
@@ -64,15 +49,37 @@ export function BottomTabBar({ state, navigation }: Props) {
     closeCreateMenu();
     router.push('/create-circle');
   }
+
   function goToChooseCircleForMemory() {
     closeCreateMenu();
+
+    if (activeCircleId) {
+      router.push({
+        pathname: '/circles/[id]/add-memory',
+        params: { id: activeCircleId },
+      });
+
+      return;
+    }
+
     router.push('/create-memory');
   }
 
   function goToChooseCircleForTrip() {
     closeCreateMenu();
+
+    if (activeCircleId) {
+      router.push({
+        pathname: '/circles/[id]/add-trip',
+        params: { id: activeCircleId },
+      });
+
+      return;
+    }
+
     router.push('/create-trip');
   }
+
   return (
     <>
       <View pointerEvents="box-none" style={styles.wrapper}>
@@ -165,7 +172,9 @@ export function BottomTabBar({ state, navigation }: Props) {
                   Memory
                 </AppText>
                 <AppText style={styles.createMenuItemSubtitle}>
-                  Capture a moment
+                  {activeCircleId
+                    ? 'Add to this circle'
+                    : 'Capture a moment'}
                 </AppText>
               </View>
             </Pressable>
@@ -183,7 +192,9 @@ export function BottomTabBar({ state, navigation }: Props) {
                   Trip
                 </AppText>
                 <AppText style={styles.createMenuItemSubtitle}>
-                  Plan or save a shared trip
+                  {activeCircleId
+                    ? 'Add to this circle'
+                    : 'Plan or save a shared trip'}
                 </AppText>
               </View>
             </Pressable>

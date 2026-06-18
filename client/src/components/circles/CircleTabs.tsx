@@ -38,7 +38,7 @@ export function CircleTabs({ activeTab, onChangeTab }: Props) {
             activeOpacity={0.85}
           >
             <Icon
-              size={14}
+              size={13}
               strokeWidth={2}
               color={isActive ? colors.primary : colors.textMuted}
             />

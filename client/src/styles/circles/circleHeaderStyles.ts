@@ -11,7 +11,7 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   cover: {
-    height: 248,
+    height: 220,
     marginHorizontal: -24,
     overflow: 'hidden',
     backgroundColor: colors.primary,
@@ -54,7 +54,7 @@ export const circleHeaderStyles = StyleSheet.create({
     marginTop: -40,
     marginHorizontal: 0,
     paddingHorizontal: spacing.lg,
-    paddingTop: 58,
+    paddingTop: 40,
     paddingBottom: 0,
     backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
@@ -63,7 +63,7 @@ export const circleHeaderStyles = StyleSheet.create({
 
   avatarWrap: {
     position: 'absolute',
-    top: -46,
+    top: -56,
     left: spacing.xl,
   },
 
@@ -98,12 +98,13 @@ export const circleHeaderStyles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginBottom: 2,
+
   },
 
   title: {
     flexShrink: 1,
     textAlign: 'left',
-    fontSize: 27,
+    fontSize: 26,
     lineHeight: 32,
     letterSpacing: -0.3,
   },
@@ -184,7 +185,7 @@ export const circleHeaderStyles = StyleSheet.create({
 
   inviteButton: {
     minWidth: 88,
-    height: 34,
+    height: 30,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
     borderWidth: 1,
@@ -194,14 +195,14 @@ export const circleHeaderStyles = StyleSheet.create({
   },
 
   inviteText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
     color: colors.primary,
   },
 
   tabs: {
     alignSelf: 'stretch',
-    marginHorizontal: -spacing.xl,
+    marginHorizontal: -spacing.md,
     backgroundColor: colors.surface,
   },
 

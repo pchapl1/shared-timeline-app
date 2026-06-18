@@ -27,12 +27,14 @@ type Props = {
   activeTab: CircleTab;
   onChangeTab: (tab: CircleTab) => void;
   variant?: 'full' | 'compact';
+  lastActivityText?: string;
 };
 
 export function CircleHeader({
   circle,
   activeTab,
   onChangeTab,
+  lastActivityText,
   variant = 'full',
 }: Props) {
   function goBackToCircles() {
@@ -242,7 +244,7 @@ export function CircleHeader({
             />
 
             <AppText style={styles.activityText}>
-              Last activity recently
+              {lastActivityText}
             </AppText>
           </View>
 
