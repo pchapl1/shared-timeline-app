@@ -10,7 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 import { useLocalSearchParams } from 'expo-router';
 
-import { CircleAlbumsTab } from '@/components/circles/CircleAlbumsTab';
+import { CircleTripsTab } from '@/components/circles/CircleTripsTab';
 import { CircleHeader } from '@/components/circles/CircleHeader';
 import { CircleMembersTab } from '@/components/circles/CircleMembersTab';
 import {
@@ -105,18 +105,14 @@ export default function CircleDetailScreen() {
           keyExtractor={(item) => item}
           renderItem={() => {
             if (activeTab === 'trips') {
-              return (
-                <Text style={styles.loading}>
-                  Trips Coming Next
-                </Text>
-              );
+              return <CircleTripsTab circle={circle} />;
             }
 
             if (activeTab === 'members') {
               return <CircleMembersTab circle={circle} />;
             }
 
-            return <CircleAlbumsTab circle={circle} />;
+            return null;
           }}
           ListHeaderComponent={
             <CircleHeader

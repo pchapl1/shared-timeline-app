@@ -8,7 +8,7 @@ import { AppText } from '@/components/ui/AppText';
 import { useTrips } from '@/hooks/trips/useTrips';
 
 import { colors } from '@/theme/colors';
-import { circleAlbumsTabStyles as styles } from '@/styles/circles/circleAlbumsTabStyles';
+import { circleAlbumsTabStyles as styles } from '@/styles/circles/circleTripsTabStyles';
 
 import type { Circle } from '@/types/circle';
 import type { Trip } from '@/types/trip';
@@ -89,7 +89,7 @@ function AlbumCard({ trip }: { trip: Trip }) {
   );
 }
 
-export function CircleAlbumsTab({ circle }: Props) {
+export function CircleTripsTab({ circle }: Props) {
   const {
     data: trips = [],
     isLoading,
